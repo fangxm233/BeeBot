@@ -58,30 +58,6 @@ interface ToColumnOpts {
 }
 
 /**
- * Create column-aligned text array from object with string key/values
- */
-export function toColumns(obj: { [key: string]: string }, opts = {} as ToColumnOpts): string[] {
-	_.defaults(opts, {
-		justify: false, 	// Right align values column?
-		padChar: ' ',	// Character to pad with, e.g. "." would be key........val
-	});
-
-	const ret: string[] = [];
-	const keyPadding = _.max(_.map(_.keys(obj), str => str.length)) + 1;
-	const valPadding = _.max(_.mapValues(obj, str => str.length));
-
-	for (const key in obj) {
-		if (opts.justify) {
-			ret.push(key.padRight(keyPadding, opts.padChar) + obj[key].padLeft(valPadding, opts.padChar));
-		} else {
-			ret.push(key.padRight(keyPadding, opts.padChar) + obj[key]);
-		}
-	}
-
-	return ret;
-}
-
-/**
  * Merges a list of store-like objects, summing overlapping keys. Useful for calculating assets from multiple sources
  */
 export function mergeSum(objects: { [key: string]: number | undefined }[]): { [key: string]: number } {

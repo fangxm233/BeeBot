@@ -1,3 +1,12 @@
+import './prototypes/ConstructionSite';
+import './prototypes/Creep';
+import './prototypes/Room';
+import './prototypes/RoomObject';
+import './prototypes/RoomPosition';
+import './prototypes/RoomStructures';
+import './prototypes/RoomVisual';
+import './prototypes/Structures';
+
 import actionsCounter from './profiler/actionCounter';
 import stats from './profiler/stats';
 
