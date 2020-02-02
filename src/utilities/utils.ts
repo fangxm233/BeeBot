@@ -52,11 +52,6 @@ export function getUsername(): string {
 	return 'ERROR: Could not determine username.';
 }
 
-interface ToColumnOpts {
-	padChar: string;
-	justify: boolean;
-}
-
 /**
  * Merges a list of store-like objects, summing overlapping keys. Useful for calculating assets from multiple sources
  */
