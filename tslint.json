@@ -17,6 +17,10 @@
       "allow-pascal-case",
       "allow-leading-underscore"
     ],
-    "curly": false
+    "curly": false,
+    "triple-equals": false,
+    "array-type": false,
+    "no-shadowed-variable": false,
+    "object-literal-sort-keys": false
   }
 }
