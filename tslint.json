@@ -21,6 +21,7 @@
     "triple-equals": false,
     "array-type": false,
     "no-shadowed-variable": false,
-    "object-literal-sort-keys": false
+    "object-literal-sort-keys": false,
+    "no-unnecessary-initializer": false
   }
 }
