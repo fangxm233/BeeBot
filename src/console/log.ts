@@ -46,7 +46,6 @@ export const LOG_VSC = {repo: 'https://github.com/fangxm233/BeeBot', revision: '
  * URL template for VSC links, this one works for github and gitlab.
  */
 export const LOG_VSC_URL_TEMPLATE = (path: string, line: string) => {
-	console.log(`${LOG_VSC.repo}/blob/${LOG_VSC.revision}/${path}#${line}`);
 	return `${LOG_VSC.repo}/blob/${LOG_VSC.revision}/${path}#${line}`;
 };
 
@@ -125,7 +124,6 @@ export class Log {
 
 	public static loadSourceMap() {
 		try {
-			// tslint:disable-next-line
 			const map = require('main.js.map');
 			if (map) {
 				Log.sourceMap = new SourceMapConsumer(map);
