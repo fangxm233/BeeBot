@@ -143,3 +143,27 @@ interface ITask extends protoTask {
 
 	finish(): void;
 }
+
+interface TypeToStructure{
+    extension: StructureExtension;
+    rampart: StructureRampart;
+    road: StructureRoad;
+    spawn: StructureSpawn;
+    link: StructureLink;
+    constructedWall: StructureWall;
+    storage: StructureStorage;
+    tower: StructureTower;
+    observer: StructureObserver;
+    powerSpawn: StructurePowerSpawn;
+    extractor: StructureExtractor;
+    lab: StructureLab;
+    terminal: StructureTerminal;
+    container: StructureContainer;
+    nuker: StructureNuker;
+    factory: StructureFactory;
+    invaderCore: StructureInvaderCore;
+    keeperLair: StructureKeeperLair;
+    controller: StructureController;
+    powerBank: StructurePowerBank;
+    portal: StructurePortal;
+}

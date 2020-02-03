@@ -152,7 +152,7 @@ RoomPosition.prototype.getPositionsAtRange = function(range: number,
 	return adjPos;
 };
 
-RoomPosition.prototype.lookForStructure = function(structureType: StructureConstant): Structure | undefined {
+RoomPosition.prototype.lookForStructure = function<T extends StructureConstant>(structureType: T): TypeToStructure[T] | undefined {
 	return _.find(this.lookFor(LOOK_STRUCTURES), s => s.structureType === structureType);
 };
 
@@ -175,7 +175,7 @@ RoomPosition.prototype.getOffsetPos = function(dx: number, dy: number): RoomPosi
 
 RoomPosition.prototype.isWalkable = function(ignoreCreeps = false, ignoreStructures = false): boolean {
 	// Is terrain passable?
-	if (Game.map.getRoomTerrain(this.roomName).get(this.x, this.y) == TERRAIN_MASK_WALL) return false;
+	if (this.lookFor(LOOK_TERRAIN)[0] == 'wall') return false;
 	if (this.isVisible) {
 		// Are there creeps?
 		if (ignoreCreeps == false && (this.lookFor(LOOK_CREEPS).length > 0 || this.lookFor(LOOK_POWER_CREEPS).length > 0)) return false;
