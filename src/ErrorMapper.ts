@@ -78,8 +78,8 @@ export class ErrorMapper {
     return () => {
       try {
         if(reseted){
-          if(USE_PROFILE) { profiler.enable(); }
           if(USE_ACTION_COUNTER) { actionsCounter.warpActions(); }
+          if(USE_PROFILE) { profiler.enable(); }
           
         }
         if(USE_PROFILE) { profiler.wrap(loop); }

@@ -14,6 +14,10 @@ export function isStructure(obj: RoomObject): obj is Structure {
 	return (obj as Structure).structureType !== undefined && ((obj as ConstructionSite).progress === undefined || (obj as StructureController).unclaim !== undefined);
 }
 
+export function isCommonStore(store: Store<any, false>): store is StoreDefinition{
+	return store.getCapacity() !== null;
+}
+
 export function isOwnedStructure(structure: Structure): structure is OwnedStructure {
 	return (structure as OwnedStructure).owner !== undefined;
 }
