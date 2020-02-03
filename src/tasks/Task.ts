@@ -230,7 +230,10 @@ export abstract class Task implements ITask {
 
 	// Execute this task each tick. Returns nothing unless work is done.
 	public run(): number | undefined {
-		if (this.creep.pos.inRangeTo(this.targetPos, this.settings.targetRange) && !this.creep.pos.isEdge) {
+		if (this.creep.pos.inRangeTo(this.targetPos, this.settings.targetRange)) {
+			if(this.creep.pos.isEdge) {
+				this.creep.moveOffExit();
+			}
 			if (this.settings.workOffRoad) {
 				// Move to somewhere nearby that isn't on a road
 				this.parkCreep(this.creep, this.targetPos, true);

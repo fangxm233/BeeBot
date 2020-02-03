@@ -9,10 +9,12 @@ interface Creep {
 
 	run(): number | void;
 	travelTo(destination: HasPos|RoomPosition, ops?: TravelToOptions): number;
+	moveOffExit(): void;
 }
 
 interface PowerCreep {
-    travelTo(destination: HasPos|RoomPosition, ops?: TravelToOptions): number;
+	travelTo(destination: HasPos|RoomPosition, ops?: TravelToOptions): number;
+	moveOffExit(): void;
 }
 
 interface ConstructionSite {
