@@ -39,13 +39,14 @@ export const LOG_MAX_PAD: number = 100;
  * VSC location, used to create links back to source.
  * Repo and revision are filled in at build time for git repositories.
  */
-export const LOG_VSC = {repo: '@@_repo_@@', revision: '@@_revision_@@', valid: false};
+export const LOG_VSC = {repo: 'https://github.com/fangxm233/BeeBot', revision: 'master', valid: true};
 // export const LOG_VSC = { repo: "@@_repo_@@", revision: __REVISION__, valid: false };
 
 /**
  * URL template for VSC links, this one works for github and gitlab.
  */
 export const LOG_VSC_URL_TEMPLATE = (path: string, line: string) => {
+	console.log(`${LOG_VSC.repo}/blob/${LOG_VSC.revision}/${path}#${line}`);
 	return `${LOG_VSC.repo}/blob/${LOG_VSC.revision}/${path}#${line}`;
 };
 
@@ -79,7 +80,7 @@ export function resolve(fileLine: string): SourcePos {
 		final   : line,
 		line    : original.line,
 		original: line,
-		path    : original.source,
+		path    : original.source ? original.source.slice(3, original.source.length) : original.source,
 	};
 
 	return out;
