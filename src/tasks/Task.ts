@@ -169,7 +169,9 @@ export abstract class Task implements ITask {
 		return _.map(targetPositions, protoPos => derefRoomPosition(protoPos));
 	}
 
-	// Fork the task, assigning a new task to the creep with this task as its parent
+	/**
+	 * Fork the task, assigning a new task to the creep with this task as its parent
+	 */
 	public fork(newTask: Task): Task {
 		newTask.parent = this;
 		if (this.creep) {
@@ -178,13 +180,20 @@ export abstract class Task implements ITask {
 		return newTask;
 	}
 
-	// Test every tick to see if task is still valid
+	/**
+	 * Test every tick to see if task is still valid
+	 */
 	public abstract isValidTask(): boolean;
 
-	// Test every tick to see if target is still valid
+	/**
+	 * Test every tick to see if target is still valid
+	 */
 	public abstract isValidTarget(): boolean;
 
 
+	/**
+	 * Test every tick to see if task and target is still valid
+	 */
 	public isValid(): boolean {
 		let validTask = false;
 		if (this.creep) {
@@ -251,18 +260,23 @@ export abstract class Task implements ITask {
 
 	/* Bundled form of Zerg.park(); adapted from BonzAI codebase*/
 	protected parkCreep(creep: Creep, pos: RoomPosition = creep.pos, maintainDistance = false): number {
-		const road = _.find(creep.pos.lookFor(LOOK_STRUCTURES), s => s.structureType == STRUCTURE_ROAD);
+		const road = creep.pos.lookForStructure(STRUCTURE_ROAD);
 		if (!road) return OK;
 
-		let positions = _.sortBy(creep.pos.availableNeighbors(), (p: RoomPosition) => p.getRangeTo(pos));
-		if (maintainDistance) {
+		let rawPositions = creep.pos.availableNeighbors();
+		if(maintainDistance) {
 			const currentRange = creep.pos.getRangeTo(pos);
-			positions = _.filter(positions, (p: RoomPosition) => p.getRangeTo(pos) <= currentRange);
+			rawPositions = rawPositions.filter(p => p.getRangeTo(pos) <= currentRange);
 		}
+		const positions = _.sortBy(rawPositions, p => p.getRangeTo(pos));
 
+		let roadPosition;
 		let swampPosition;
 		for (const position of positions) {
-			if (_.find(position.lookFor(LOOK_STRUCTURES), s => s.structureType == STRUCTURE_ROAD)) continue;
+			if (position.lookForStructure(STRUCTURE_ROAD)) {
+				roadPosition = position;
+				continue;
+			}
 			const terrain = position.lookFor(LOOK_TERRAIN)[0];
 			if (terrain === 'swamp') {
 				swampPosition = position;
@@ -273,9 +287,11 @@ export abstract class Task implements ITask {
 
 		if (swampPosition) {
 			return creep.move(creep.pos.getDirectionTo(swampPosition));
+		} else if(roadPosition) {
+			return creep.move(creep.pos.getDirectionTo(roadPosition));
 		}
 
-		return creep.travelTo(pos);
+		return -1;
 	}
 
 	// Task to perform when at the target
