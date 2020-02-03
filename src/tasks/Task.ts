@@ -12,8 +12,8 @@
  * If you use Traveler, change all occurrences of creep.moveTo() to creep.travelTo()
  */
 
-import {deref, derefRoomPosition} from './utilities/helpers';
-import {initializeTask} from './utilities/initializer';
+import {deref, derefRoomPosition} from '../utilities/helpers';
+import {initializeTask} from './initializer';
 
 export interface TargetType { ref: string, pos: RoomPosition } // overwrite this variable in derived classes to specify more precise typing
 
@@ -32,7 +32,7 @@ export abstract class Task implements ITask {
 	};
 	public _target: { 					// Data for the target the task is directed to:
 		ref: string; 				// Target id or name
-		_pos: protoPos; 			// Target position's coordinates in case vision is lost
+		_pos: ProtoPos; 			// Target position's coordinates in case vision is lost
 	};
 	public _parent: protoTask | null; 	// The parent of this task, if any. Task is changed to parent upon completion
 	public tick: number;
@@ -160,7 +160,7 @@ export abstract class Task implements ITask {
 
 	// Return a list of [this.target, this.parent.target, ...] without fully instantiating the list of tasks
 	get targetPosManifest(): RoomPosition[] {
-		const targetPositions: protoPos[] = [this._target._pos];
+		const targetPositions: ProtoPos[] = [this._target._pos];
 		let parent = this._parent;
 		while (parent) {
 			targetPositions.push(parent._target._pos);
@@ -211,26 +211,21 @@ export abstract class Task implements ITask {
 		if (this.options.moveOptions && !this.options.moveOptions.range) {
 			this.options.moveOptions.range = range;
 		}
-		return this.creep.moveTo(this.targetPos, this.options.moveOptions);
-		// return this.creep.travelTo(this.targetPos, this.options.moveOptions); // <- switch if you use Traveler
+		return this.creep.travelTo(this.targetPos, this.options.moveOptions);
 	}
 
 	/* Moves to the next position on the agenda if specified - call this in some tasks after work() is completed */
 	public moveToNextPos(): number | undefined {
 		if (this.options.nextPos) {
 			const nextPos = derefRoomPosition(this.options.nextPos);
-			return this.creep.moveTo(nextPos);
-			// return this.creep.travelTo(nextPos); // <- switch if you use Traveler
+			return this.creep.travelTo(nextPos);
 		}
 		return;
 	}
 
 	// Return expected number of ticks until creep arrives at its first destination; this requires Traveler to work!
 	get eta(): number | undefined {
-		if (this.creep && (this.creep.memory as any)._trav) {
-			return (this.creep.memory as any)._trav.path.length;
-		}
-		return;
+		return _.get(this.creep.memory, ['_trav', 'path', 'path', 'length']);
 	}
 
 	// Execute this task each tick. Returns nothing unless work is done.
@@ -277,8 +272,7 @@ export abstract class Task implements ITask {
 			return creep.move(creep.pos.getDirectionTo(swampPosition));
 		}
 
-		return creep.moveTo(pos);
-		// return creep.travelTo(pos); // <-- Switch if you use Traveler
+		return creep.travelTo(pos);
 	}
 
 	// Task to perform when at the target

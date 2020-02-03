@@ -3,6 +3,16 @@ interface Creep {
 	boosts: _ResourceConstantSansEnergy[];
 	boostCounts: { [boostType: string]: number };
 	inRampart: boolean;
+	task: ITask | null;
+	hasValidTask: boolean;
+	isIdle: boolean;
+
+	run(): number | void;
+	travelTo(destination: HasPos|RoomPosition, ops?: TravelToOptions): number;
+}
+
+interface PowerCreep {
+    travelTo(destination: HasPos|RoomPosition, ops?: TravelToOptions): number;
 }
 
 interface ConstructionSite {
