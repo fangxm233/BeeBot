@@ -1,6 +1,7 @@
 import {Task} from '../Task';
 
-import { isCommonStore, isStoreStructure, StoreStructure } from 'declarations/typeGuards';
+import { isStoreStructure, StoreStructure } from 'declarations/typeGuards';
+import { getFreeCapacity } from 'utilities/helpers';
 
 export type transferTargetType =
 	| StoreStructure
@@ -41,10 +42,7 @@ export class TaskTransfer extends Task {
 		const target = this.target;
 		if (isStoreStructure(target)) {
 			const store = target.store;
-			if(isCommonStore(store)) {
-				return store.getFreeCapacity() >= amount;
-			}
-			return (store as Store<any, false>).getFreeCapacity(this.data.resourceType) >= amount;
+			return getFreeCapacity(store, this.data.resourceType) >= amount;
 		}
 		return false;
 	}
