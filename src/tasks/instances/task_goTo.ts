@@ -21,7 +21,7 @@ export class TaskGoTo extends Task {
 	}
 
 	public isValidTask() {
-		return !this.creep.pos.inRangeTo(this.targetPos, this.settings.targetRange);
+		return !this.bee.pos.inRangeTo(this.targetPos, this.settings.targetRange);
 	}
 
 	public isValidTarget() {
@@ -31,7 +31,7 @@ export class TaskGoTo extends Task {
 	public isValid(): boolean {
 		// It's necessary to override task.isValid() for tasks which do not have a RoomObject target
 		let validTask = false;
-		if (this.creep) {
+		if (this.bee) {
 			validTask = this.isValidTask();
 		}
 		// Return if the task is valid; if not, finalize/delete the task and return false

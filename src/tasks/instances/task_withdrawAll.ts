@@ -13,7 +13,7 @@ export class TaskWithdrawAll extends Task {
 	}
 
 	public isValidTask() {
-		return this.creep.store.getFreeCapacity() > 0;
+		return this.bee.store.getFreeCapacity() > 0;
 	}
 
 	public isValidTarget() {
@@ -24,7 +24,7 @@ export class TaskWithdrawAll extends Task {
 		for (const resourceType in this.target.store) {
 			const amountInStore = this.target.store[resourceType as ResourceConstant] || 0;
 			if (amountInStore > 0) {
-				return this.creep.withdraw(this.target, resourceType as ResourceConstant);
+				return this.bee.withdraw(this.target, resourceType as ResourceConstant);
 			}
 		}
 		return -1;

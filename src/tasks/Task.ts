@@ -12,6 +12,8 @@
  * If you use Traveler, change all occurrences of creep.moveTo() to creep.travelTo()
  */
 
+import { Bee, toBee } from 'Bee/Bee';
+import { ITask } from 'tasks';
 import {deref, derefRoomPosition} from '../utilities/helpers';
 import {initializeTask} from './initializer';
 
@@ -101,11 +103,11 @@ export abstract class Task implements ITask {
 	}
 
 	// Getter/setter for task.creep
-	get creep(): Creep { // Get task's own creep by its name
-		return Game.creeps[this._creep.name];
+	get bee(): Bee { // Get task's own creep by its name
+		return toBee(this._creep.name)!; // 因为一定要Bee来执行task，所以Bee一定不是undefined
 	}
 
-	set creep(creep: Creep) {
+	set bee(creep: Bee) {
 		this._creep.name = creep.name;
 	}
 
@@ -131,8 +133,8 @@ export abstract class Task implements ITask {
 	set parent(parentTask: Task | null) {
 		this._parent = parentTask ? parentTask.proto : null;
 		// If the task is already assigned to a creep, update their memory
-		if (this.creep) {
-			this.creep.task = this;
+		if (this.bee) {
+			this.bee.task = this;
 		}
 	}
 
@@ -174,8 +176,8 @@ export abstract class Task implements ITask {
 	 */
 	public fork(newTask: Task): Task {
 		newTask.parent = this;
-		if (this.creep) {
-			this.creep.task = newTask;
+		if (this.bee) {
+			this.bee.task = newTask;
 		}
 		return newTask;
 	}
@@ -196,7 +198,7 @@ export abstract class Task implements ITask {
 	 */
 	public isValid(): boolean {
 		let validTask = false;
-		if (this.creep) {
+		if (this.bee) {
 			validTask = this.isValidTask();
 		}
 		let validTarget = false;
@@ -220,32 +222,32 @@ export abstract class Task implements ITask {
 		if (this.options.moveOptions && !this.options.moveOptions.range) {
 			this.options.moveOptions.range = range;
 		}
-		return this.creep.travelTo(this.targetPos, this.options.moveOptions);
+		return this.bee.travelTo(this.targetPos, this.options.moveOptions);
 	}
 
 	/* Moves to the next position on the agenda if specified - call this in some tasks after work() is completed */
 	public moveToNextPos(): number | undefined {
 		if (this.options.nextPos) {
 			const nextPos = derefRoomPosition(this.options.nextPos);
-			return this.creep.travelTo(nextPos);
+			return this.bee.travelTo(nextPos);
 		}
 		return;
 	}
 
 	// Return expected number of ticks until creep arrives at its first destination; this requires Traveler to work!
 	get eta(): number | undefined {
-		return _.get(this.creep.memory, ['_trav', 'path', 'path', 'length']);
+		return _.get(this.bee.memory, ['_trav', 'path', 'path', 'length']);
 	}
 
 	// Execute this task each tick. Returns nothing unless work is done.
 	public run(): number | undefined {
-		if (this.creep.pos.inRangeTo(this.targetPos, this.settings.targetRange)) {
-			if(this.creep.pos.isEdge) {
-				this.creep.moveOffExit();
+		if (this.bee.pos.inRangeTo(this.targetPos, this.settings.targetRange)) {
+			if(this.bee.pos.isEdge) {
+				this.bee.moveOffExit();
 			}
 			if (this.settings.workOffRoad) {
 				// Move to somewhere nearby that isn't on a road
-				this.parkCreep(this.creep, this.targetPos, true);
+				this.parkCreep(this.bee, this.targetPos, true);
 			}
 			const result = this.work();
 			if (this.settings.oneShot && result == OK) {
@@ -259,13 +261,13 @@ export abstract class Task implements ITask {
 	}
 
 	/* Bundled form of Zerg.park(); adapted from BonzAI codebase*/
-	protected parkCreep(creep: Creep, pos: RoomPosition = creep.pos, maintainDistance = false): number {
-		const road = creep.pos.lookForStructure(STRUCTURE_ROAD);
+	protected parkCreep(bee: Bee, pos: RoomPosition = bee.pos, maintainDistance = false): number {
+		const road = bee.pos.lookForStructure(STRUCTURE_ROAD);
 		if (!road) return OK;
 
-		let rawPositions = creep.pos.availableNeighbors();
+		let rawPositions = bee.pos.availableNeighbors();
 		if(maintainDistance) {
-			const currentRange = creep.pos.getRangeTo(pos);
+			const currentRange = bee.pos.getRangeTo(pos);
 			rawPositions = rawPositions.filter(p => p.getRangeTo(pos) <= currentRange);
 		}
 		const positions = _.sortBy(rawPositions, p => p.getRangeTo(pos));
@@ -281,14 +283,14 @@ export abstract class Task implements ITask {
 			if (terrain === 'swamp') {
 				swampPosition = position;
 			} else {
-				return creep.move(creep.pos.getDirectionTo(position));
+				return bee.move(bee.pos.getDirectionTo(position));
 			}
 		}
 
 		if (swampPosition) {
-			return creep.move(creep.pos.getDirectionTo(swampPosition));
+			return bee.move(bee.pos.getDirectionTo(swampPosition));
 		} else if(roadPosition) {
-			return creep.move(creep.pos.getDirectionTo(roadPosition));
+			return bee.move(bee.pos.getDirectionTo(roadPosition));
 		}
 
 		return -1;
@@ -300,8 +302,8 @@ export abstract class Task implements ITask {
 	// Finalize the task and switch to parent task (or null if there is none)
 	public finish(): void {
 		this.moveToNextPos();
-		if (this.creep) {
-			this.creep.task = this.parent;
+		if (this.bee) {
+			this.bee.task = this.parent;
 		} else {
 			console.log(`No creep executing ${this.name}!`);
 		}

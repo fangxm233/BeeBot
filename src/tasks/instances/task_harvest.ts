@@ -16,7 +16,7 @@ export class TaskHarvest extends Task {
 	}
 
 	public isValidTask() {
-		return this.creep.store.getFreeCapacity() > 0;
+		return this.bee.store.getFreeCapacity() > 0;
 	}
 
 	public isValidTarget() {
@@ -33,7 +33,7 @@ export class TaskHarvest extends Task {
 	}
 
 	public work() {
-		return this.creep.harvest(this.target);
+		return this.bee.harvest(this.target);
 	}
 }
 

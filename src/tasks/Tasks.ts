@@ -1,3 +1,4 @@
+import { ITask } from 'tasks';
 import {attackTargetType, TaskAttack} from './instances/task_attack';
 import {buildTargetType, TaskBuild} from './instances/task_build';
 import {claimTargetType, TaskClaim} from './instances/task_claim';

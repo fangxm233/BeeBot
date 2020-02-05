@@ -12,7 +12,7 @@ export class TaskReserve extends Task {
 	}
 
 	public isValidTask() {
-		return (this.creep.getActiveBodyparts(CLAIM) > 0);
+		return (this.bee.getActiveBodyparts(CLAIM) > 0);
 	}
 
 	public isValidTarget() {
@@ -21,6 +21,6 @@ export class TaskReserve extends Task {
 	}
 
 	public work() {
-		return this.creep.reserveController(this.target);
+		return this.bee.reserveController(this.target);
 	}
 }

@@ -14,7 +14,7 @@ export class TaskHeal extends Task {
 	}
 
 	public isValidTask() {
-		return (this.creep.getActiveBodyparts(HEAL) > 0);
+		return (this.bee.getActiveBodyparts(HEAL) > 0);
 	}
 
 	public isValidTarget() {
@@ -22,11 +22,11 @@ export class TaskHeal extends Task {
 	}
 
 	public work() {
-		if (this.creep.pos.isNearTo(this.target)) {
-			return this.creep.heal(this.target);
+		if (this.bee.pos.isNearTo(this.target)) {
+			return this.bee.heal(this.target);
 		} else {
 			this.moveToTarget(1);
 		}
-		return this.creep.rangedHeal(this.target);
+		return this.bee.rangedHeal(this.target);
 	}
 }

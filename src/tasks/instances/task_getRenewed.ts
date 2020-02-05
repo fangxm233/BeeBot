@@ -11,9 +11,9 @@ export class TaskGetRenewed extends Task {
 	}
 
 	public isValidTask() {
-		const hasClaimPart = _.filter(this.creep.body, (part: BodyPartDefinition) => part.type == CLAIM).length > 0;
+		const hasClaimPart = _.filter(this.bee.body, (part: BodyPartDefinition) => part.type == CLAIM).length > 0;
 		const lifetime = hasClaimPart ? CREEP_CLAIM_LIFE_TIME : CREEP_LIFE_TIME;
-		return this.creep.ticksToLive != undefined && this.creep.ticksToLive < 0.9 * lifetime;
+		return this.bee.ticksToLive != undefined && this.bee.ticksToLive < 0.9 * lifetime;
 	}
 
 	public isValidTarget() {
@@ -21,6 +21,6 @@ export class TaskGetRenewed extends Task {
 	}
 
 	public work() {
-		return this.target.renewCreep(this.creep);
+		return this.target.renewCreep(this.bee.creep);
 	}
 }

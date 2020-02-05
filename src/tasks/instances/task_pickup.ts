@@ -13,7 +13,7 @@ export class TaskPickup extends Task {
 	}
 
 	public isValidTask() {
-		return this.creep.store.getFreeCapacity() > 0;
+		return this.bee.store.getFreeCapacity() > 0;
 	}
 
 	public isValidTarget() {
@@ -21,6 +21,6 @@ export class TaskPickup extends Task {
 	}
 
 	public work() {
-		return this.creep.pickup(this.target);
+		return this.bee.pickup(this.target);
 	}
 }

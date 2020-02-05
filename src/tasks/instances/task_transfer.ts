@@ -33,7 +33,7 @@ export class TaskTransfer extends Task {
 
 	public isValidTask() {
 		const amount = this.data.amount || 1;
-		const resourcesInStore = this.creep.store[this.data.resourceType] || 0;
+		const resourcesInStore = this.bee.store[this.data.resourceType] || 0;
 		return resourcesInStore >= amount;
 	}
 
@@ -48,6 +48,6 @@ export class TaskTransfer extends Task {
 	}
 
 	public work() {
-		return this.creep.transfer(this.target, this.data.resourceType, this.data.amount);
+		return this.bee.transfer(this.target, this.data.resourceType, this.data.amount);
 	}
 }

@@ -32,7 +32,7 @@ export class TaskDrop extends Task {
 
 	public isValidTask() {
 		const amount = this.data.amount || 1;
-		const resourcesInStore = this.creep.store[this.data.resourceType] || 0;
+		const resourcesInStore = this.bee.store[this.data.resourceType] || 0;
 		return resourcesInStore >= amount;
 	}
 
@@ -43,7 +43,7 @@ export class TaskDrop extends Task {
 	public isValid(): boolean {
 		// It's necessary to override task.isValid() for tasks which do not have a RoomObject target
 		let validTask = false;
-		if (this.creep) {
+		if (this.bee) {
 			validTask = this.isValidTask();
 		}
 		// Return if the task is valid; if not, finalize/delete the task and return false
@@ -61,6 +61,6 @@ export class TaskDrop extends Task {
 	}
 
 	public work() {
-		return this.creep.drop(this.data.resourceType, this.data.amount);
+		return this.bee.drop(this.data.resourceType, this.data.amount);
 	}
 }

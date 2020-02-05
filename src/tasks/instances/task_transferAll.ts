@@ -18,11 +18,11 @@ export class TaskTransferAll extends Task {
 	}
 
 	public isValidTask() {
-		for (const resourceType in this.creep.store) {
+		for (const resourceType in this.bee.store) {
 			if (this.data.skipEnergy && resourceType == RESOURCE_ENERGY) {
 				continue;
 			}
-			const amountInStore = this.creep.store.getUsedCapacity(resourceType as ResourceConstant);
+			const amountInStore = this.bee.store.getUsedCapacity(resourceType as ResourceConstant);
 			if (amountInStore > 0) {
 				return true;
 			}
@@ -35,13 +35,13 @@ export class TaskTransferAll extends Task {
 	}
 
 	public work() {
-		for (const resourceType in this.creep.store) {
+		for (const resourceType in this.bee.store) {
 			if (this.data.skipEnergy && resourceType == RESOURCE_ENERGY) {
 				continue;
 			}
-			const amountInStore = this.creep.store.getUsedCapacity(resourceType as ResourceConstant);
+			const amountInStore = this.bee.store.getUsedCapacity(resourceType as ResourceConstant);
 			if (amountInStore > 0) {
-				return this.creep.transfer(this.target, resourceType as ResourceConstant);
+				return this.bee.transfer(this.target, resourceType as ResourceConstant);
 			}
 		}
 		return -1;

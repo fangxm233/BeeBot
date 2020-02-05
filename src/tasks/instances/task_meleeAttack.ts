@@ -14,7 +14,7 @@ export class TaskMeleeAttack extends Task {
 	}
 
 	public isValidTask() {
-		return this.creep.getActiveBodyparts(ATTACK) > 0;
+		return this.bee.getActiveBodyparts(ATTACK) > 0;
 	}
 
 	public isValidTarget() {
@@ -22,7 +22,7 @@ export class TaskMeleeAttack extends Task {
 	}
 
 	public work() {
-		return this.creep.attack(this.target);
+		return this.bee.attack(this.target);
 	}
 }
 

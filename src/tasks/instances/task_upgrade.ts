@@ -15,7 +15,7 @@ export class TaskUpgrade extends Task {
 	}
 
 	public isValidTask() {
-		return (this.creep.store.energy > 0);
+		return (this.bee.store.energy > 0);
 	}
 
 	public isValidTarget() {
@@ -23,7 +23,7 @@ export class TaskUpgrade extends Task {
 	}
 
 	public work() {
-		return this.creep.upgradeController(this.target);
+		return this.bee.upgradeController(this.target);
 	}
 }
 

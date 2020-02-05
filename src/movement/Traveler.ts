@@ -165,10 +165,11 @@ export class Traveler {
         return this.move(creep, nextDirection as DirectionConstant);
     }
 
-    public static moveOffExit(creep: Creep) {
+    public static moveOffExit(creep: Creep): ScreepsReturnCode {
         if(creep.pos.isEdge) {
-            Traveler.move(creep, creep.pos.getDirectionTo(creep.pos.availableNeighbors().filter(pos => !pos.isEdge)[0]));
+            return Traveler.move(creep, creep.pos.getDirectionTo(creep.pos.availableNeighbors().filter(pos => !pos.isEdge)[0]));
         }
+        return OK;
     }
 
     private static pushCreeps(creep: Creep, nextDir: number){
@@ -754,12 +755,6 @@ const STATE_DEST_Y = 5;
 const STATE_DEST_ROOMNAME = 6;
 
 // assigns a function to Creep.prototype: creep.travelTo(destination)
-Creep.prototype.travelTo = function(destination: RoomPosition|{pos: RoomPosition}, options?: TravelToOptions) {
-    return Traveler.travelTo(this, destination, options);
-};
-Creep.prototype.moveOffExit = function() {
-    Traveler.moveOffExit(this);
-}
 PowerCreep.prototype.travelTo = function(destination: RoomPosition|{pos: RoomPosition}, options?: TravelToOptions) {
     return Traveler.travelTo(this, destination, options);
 };

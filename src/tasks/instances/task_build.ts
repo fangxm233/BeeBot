@@ -17,7 +17,7 @@ export class TaskBuild extends Task {
 	}
 
 	public isValidTask() {
-		return this.creep.store.energy > 0;
+		return this.bee.store.energy > 0;
 	}
 
 	public isValidTarget() {
@@ -25,6 +25,6 @@ export class TaskBuild extends Task {
 	}
 
 	public work() {
-		return this.creep.build(this.target);
+		return this.bee.build(this.target);
 	}
 }

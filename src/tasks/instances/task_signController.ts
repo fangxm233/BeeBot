@@ -26,6 +26,6 @@ export class TaskSignController extends Task {
 	}
 
 	public work() {
-		return this.creep.signController(this.target, this.data.signature);
+		return this.bee.signController(this.target, this.data.signature);
 	}
 }

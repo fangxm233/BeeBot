@@ -33,7 +33,7 @@ export class TaskWithdraw extends Task {
 
 	public isValidTask() {
 		const amount = this.data.amount || 1;
-		return this.creep.store.getFreeCapacity() >= amount;
+		return this.bee.store.getFreeCapacity() >= amount;
 	}
 
 	public isValidTarget() {
@@ -46,7 +46,7 @@ export class TaskWithdraw extends Task {
 	}
 
 	public work() {
-		return this.creep.withdraw(this.target, this.data.resourceType, this.data.amount);
+		return this.bee.withdraw(this.target, this.data.resourceType, this.data.amount);
 	}
 
 }

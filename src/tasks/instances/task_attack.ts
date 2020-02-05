@@ -17,7 +17,7 @@ export class TaskAttack extends Task {
 	}
 
 	public isValidTask() {
-		return (this.creep.getActiveBodyparts(ATTACK) > 0 || this.creep.getActiveBodyparts(RANGED_ATTACK) > 0);
+		return (this.bee.getActiveBodyparts(ATTACK) > 0 || this.bee.getActiveBodyparts(RANGED_ATTACK) > 0);
 	}
 
 	public isValidTarget(): boolean {
@@ -25,7 +25,7 @@ export class TaskAttack extends Task {
 	}
 
 	public work() {
-		const creep = this.creep;
+		const creep = this.bee;
 		const target = this.target;
 		let attackReturn = 0;
 		let rangedAttackReturn = 0;

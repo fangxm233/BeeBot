@@ -14,7 +14,7 @@ export class TaskClaim extends Task {
 	}
 
 	public isValidTask() {
-		return (this.creep.getActiveBodyparts(CLAIM) > 0);
+		return (this.bee.getActiveBodyparts(CLAIM) > 0);
 	}
 
 	public isValidTarget() {
@@ -22,6 +22,6 @@ export class TaskClaim extends Task {
 	}
 
 	public work() {
-		return this.creep.claimController(this.target);
+		return this.bee.claimController(this.target);
 	}
 }

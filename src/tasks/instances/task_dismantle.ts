@@ -13,7 +13,7 @@ export class TaskDismantle extends Task {
 	}
 
 	public isValidTask() {
-		return (this.creep.getActiveBodyparts(WORK) > 0);
+		return (this.bee.getActiveBodyparts(WORK) > 0);
 	}
 
 	public isValidTarget() {
@@ -21,6 +21,6 @@ export class TaskDismantle extends Task {
 	}
 
 	public work() {
-		return this.creep.dismantle(this.target);
+		return this.bee.dismantle(this.target);
 	}
 }

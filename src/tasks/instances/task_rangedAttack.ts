@@ -14,7 +14,7 @@ export class TaskRangedAttack extends Task {
 	}
 
 	public isValidTask() {
-		return this.creep.getActiveBodyparts(RANGED_ATTACK) > 0;
+		return this.bee.getActiveBodyparts(RANGED_ATTACK) > 0;
 	}
 
 	public isValidTarget() {
@@ -22,7 +22,7 @@ export class TaskRangedAttack extends Task {
 	}
 
 	public work() {
-		return this.creep.rangedAttack(this.target);
+		return this.bee.rangedAttack(this.target);
 	}
 }
 
