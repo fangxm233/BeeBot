@@ -4,10 +4,10 @@ interface Coord {
 }
 
 interface RoomCoord {
-	x: number;
-	y: number;
-	xDir: string;
-	yDir: string;
+    x: number;
+    y: number;
+    xDir: string;
+    yDir: string;
 }
 
 interface HasPos {
@@ -15,14 +15,14 @@ interface HasPos {
 }
 
 interface ProtoRoomObject {
-	ref: string;
-	pos: ProtoPos;
+    ref: string;
+    pos: ProtoPos;
 }
 
 interface ProtoPos {
-	x: number;
-	y: number;
-	roomName: string;
+    x: number;
+    y: number;
+    roomName: string;
 }
 
 interface TravelToReturnData {
@@ -41,7 +41,7 @@ interface TravelToOptions {
     allowHostile?: boolean;
     allowSK?: boolean;
     range?: number;
-    obstacles?: {pos: RoomPosition}[];
+    obstacles?: { pos: RoomPosition }[];
     roomCallback?: (roomName: string, matrix: CostMatrix) => CostMatrix | boolean;
     routeCallback?: (roomName: string) => number;
     matrix?: CostMatrix;
@@ -55,7 +55,7 @@ interface TravelToOptions {
     stuckValue?: number;
     maxRooms?: number;
     repath?: number;
-    route?: {[roomName: string]: boolean};
+    route?: { [roomName: string]: boolean };
     ensurePath?: boolean;
     pushCreep?: boolean;
 }
@@ -80,42 +80,42 @@ interface PathfinderReturn {
 }
 
 interface TaskSettings {
-	oneShot: boolean;
-	targetRange: number;
-	workOffRoad: boolean;
+    oneShot: boolean;
+    targetRange: number;
+    workOffRoad: boolean;
 }
 
 interface TaskOptions {
-	blind?: boolean;
-	nextPos?: ProtoPos;
-	moveOptions?: MoveToOpts;
-	// moveOptions: TravelToOptions; // <- uncomment this line if you use Traveler
+    blind?: boolean;
+    nextPos?: ProtoPos;
+    moveOptions?: MoveToOpts;
+    // moveOptions: TravelToOptions; // <- uncomment this line if you use Traveler
 }
 
 interface TaskData {
-	quiet?: boolean;
-	resourceType?: string;
-	amount?: number;
-	signature?: string;
-	skipEnergy?: boolean;
+    quiet?: boolean;
+    resourceType?: string;
+    amount?: number;
+    signature?: string;
+    skipEnergy?: boolean;
 }
 
 interface protoTask {
-	name: string;
-	_creep: {
-		name: string;
-	};
-	_target: {
-		ref: string;
-		_pos: ProtoPos;
-	};
-	_parent: protoTask | null;
-	options: TaskOptions;
-	data: TaskData;
-	tick: number;
+    name: string;
+    _creep: {
+        name: string;
+    };
+    _target: {
+        ref: string;
+        _pos: ProtoPos;
+    };
+    _parent: protoTask | null;
+    options: TaskOptions;
+    data: TaskData;
+    tick: number;
 }
 
-interface TypeToStructure{
+interface TypeToStructure {
     extension: StructureExtension;
     rampart: StructureRampart;
     road: StructureRoad;
