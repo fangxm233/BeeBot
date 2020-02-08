@@ -1,3 +1,4 @@
+import { log } from "console/log";
 import { profile } from "profiler/decorator";
 
 /**
@@ -23,7 +24,10 @@ export class Timer {
      * 添加一个回调，将会在目标tick以指定this发起回调
      */
     public callBackAtTick(funcThis: any, targetTick: number,  func: () => any) {
-        if(!funcThis || !func) return;
+        if(!funcThis){
+            log.error(`callBackAtTick参数funcThis为空`);
+            return;
+        }
         if(!this.timers[targetTick]) this.timers[targetTick] = [];
         this.timers[targetTick].push({func, funcThis});
     }
