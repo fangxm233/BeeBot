@@ -32,3 +32,5 @@ export class Timer {
         this.timers[targetTick].push({func, funcThis});
     }
 }
+
+export const timer = new Timer();
