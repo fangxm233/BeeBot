@@ -22,6 +22,7 @@
     "array-type": false,
     "no-shadowed-variable": false,
     "object-literal-sort-keys": false,
-    "no-unnecessary-initializer": false
+    "no-unnecessary-initializer": false,
+    "unified-signatures": false
   }
 }
