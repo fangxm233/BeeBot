@@ -28,6 +28,10 @@ export class Timer {
             log.error(`callBackAtTick参数funcThis为空`);
             return;
         }
+        if(targetTick <= Game.time) {
+            func.apply(funcThis);
+            return;
+        }
         if(!this.timers[targetTick]) this.timers[targetTick] = [];
         this.timers[targetTick].push({func, funcThis});
     }
