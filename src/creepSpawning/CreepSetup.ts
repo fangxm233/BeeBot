@@ -18,12 +18,17 @@ export class CreepSetup {
     public role: string;
     public bodySetup: BodySetup;
 
+    private bodyCache: { [budget: number]: BodyPartConstant[] } = {}
+
     constructor(role: string, setup: BodySetup) {
         this.role = role;
         this.bodySetup = setup;
     }
 
     public generateCreepBody(budget: number): BodyPartConstant[] {
+        // 检查缓存
+        if(this.bodyCache[budget]) return this.bodyCache[budget];
+
         // 计算一个单元的价格和数目
         let costPreUnit = 0;
         let countPreUnit = 0;
@@ -77,6 +82,7 @@ export class CreepSetup {
             }
         }
 
-        return body;
+        // 更新缓存并返回
+        return this.bodyCache[budget] = body;
     }
 }
