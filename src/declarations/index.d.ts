@@ -115,6 +115,14 @@ interface protoTask {
     tick: number;
 }
 
+interface protoAllotUnit {
+    available: boolean;
+	roomName: string;
+	typeId: number;
+	id: number;
+	data: any;
+}
+
 interface TypeToStructure {
     extension: StructureExtension;
     rampart: StructureRampart;

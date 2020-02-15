@@ -53,6 +53,16 @@ export function getUsername(): string {
 }
 
 /**
+ * Get free key of a object
+ */
+export function getFreeKey(obj: any, prefix: string = '', suffix: string = ''): number{
+	for (let i = 0; i < 999; i++) {
+		if(!obj[prefix + i + suffix]) return i;
+	}
+	return -1;
+}
+
+/**
  * Merges a list of store-like objects, summing overlapping keys. Useful for calculating assets from multiple sources
  */
 export function mergeSum(objects: { [key: string]: number | undefined }[]): { [key: string]: number } {
