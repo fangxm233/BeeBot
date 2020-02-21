@@ -14,7 +14,7 @@ interface CreepMemory {
     _trav: TravelData;
     task: protoTask | null;
 
-
+    allotedId: string;
 }
 
 interface PowerCreepMemory {

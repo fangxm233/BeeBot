@@ -7,6 +7,7 @@ export interface BodySetup {
     suffix?: BodyPartConstant[];
     scaleWithBodySize?: boolean;
     padding?: BodyRatio;
+    boost?: MineralBoostConstant[];
 }
 
 export interface BodyRatio {
@@ -27,18 +28,18 @@ export class CreepSetup {
 
     public generateCreepBody(budget: number): BodyPartConstant[] {
         // 检查缓存
-        if(this.bodyCache[budget]) return this.bodyCache[budget];
+        if (this.bodyCache[budget]) return this.bodyCache[budget];
 
         // 计算一个单元的价格和数目
         let costPreUnit = 0;
         let countPreUnit = 0;
         // 计算前置后置
-        if(this.bodySetup.scaleWithBodySize) {
-            if(this.bodySetup.prefix) {
+        if (this.bodySetup.scaleWithBodySize) {
+            if (this.bodySetup.prefix) {
                 countPreUnit += this.bodySetup.prefix.length;
                 costPreUnit += _.sum(this.bodySetup.prefix, part => BODYPART_COST[part]);
             }
-            if(this.bodySetup.suffix) {
+            if (this.bodySetup.suffix) {
                 countPreUnit += this.bodySetup.suffix.length;
                 costPreUnit += _.sum(this.bodySetup.suffix, part => BODYPART_COST[part]);
             }
@@ -48,20 +49,20 @@ export class CreepSetup {
 
         // 计算用于缩放的最大数目
         let maxSize = MAX_CREEP_SIZE;
-        if(!this.bodySetup.scaleWithBodySize) {
-            if(this.bodySetup.prefix) maxSize -= this.bodySetup.prefix.length;
-            if(this.bodySetup.suffix) maxSize -= this.bodySetup.suffix.length;
+        if (!this.bodySetup.scaleWithBodySize) {
+            if (this.bodySetup.prefix) maxSize -= this.bodySetup.prefix.length;
+            if (this.bodySetup.suffix) maxSize -= this.bodySetup.suffix.length;
         }
         maxSize = Math.min(maxSize, this.bodySetup.maxSize * countPreUnit);
 
         // 计算缩放倍数
         let multiple = Math.floor(budget / costPreUnit);
-        if(multiple * countPreUnit > maxSize) multiple = Math.floor(maxSize / countPreUnit);
+        if (multiple * countPreUnit > maxSize) multiple = Math.floor(maxSize / countPreUnit);
 
         // 生成creep身体
         const body: BodyPartConstant[] = [];
         // 添加前缀
-        if(this.bodySetup.prefix) {
+        if (this.bodySetup.prefix) {
             for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
                 body.concat(this.bodySetup.prefix);
             }
@@ -69,14 +70,13 @@ export class CreepSetup {
 
         // 添加主体
         _.forEach(this.bodySetup.ratio, (ratio, part) => {
-            if(!part) return;
             for (let i = 0; i < multiple * ratio; i++) {
                 body.push(part as BodyPartConstant);
             }
         });
 
         // 添加后缀
-        if(this.bodySetup.suffix) {
+        if (this.bodySetup.suffix) {
             for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
                 body.concat(this.bodySetup.suffix);
             }

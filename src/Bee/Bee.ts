@@ -1,14 +1,19 @@
 import { TargetCache } from "caching/caching";
 import { USER_NAME } from "config";
 import { isStoreStructure } from "declarations/typeGuards";
+import { timer } from "event/Timer";
 import { Traveler } from "movement/Traveler";
+import { Process } from "process/Process";
 import { profile } from "profiler/decorator";
 import { ITask } from "tasks";
 import { initializeTask } from "tasks/initializer";
-import { getFreeCapacity } from "utilities/helpers";
+import { getFreeCapacity, timeAfterTick } from "utilities/helpers";
+
+export const bees: { [creepName: string]: Bee } = {};
 
 export function toBee(creep: Creep | string): Bee | undefined {
-    return; // todo
+    if (typeof creep == 'string') return bees[creep];
+    return bees[creep.name];
 }
 
 /**
@@ -16,17 +21,24 @@ export function toBee(creep: Creep | string): Bee | undefined {
  */
 @profile
 export class Bee {
+    public role: string; // bee的角色
+    public process: Process; // 管理他的process
     public creep: Creep; // 管理的creep
     private newCreep: Creep; // 接班的creep
 
     public notify: boolean;
     public preSpawn: boolean;
 
+    public locked: boolean = false;
+    public slept: boolean = false;
+
     private settedNotify: boolean = true;
     private aheadTick: number;
 
-    constructor(creep: Creep, preSpawn: boolean = true, notify: boolean = true) {
+    constructor(creep: Creep, role: string, process: Process, preSpawn: boolean = true, notify: boolean = true) {
+        this.role = role;
         this.creep = creep;
+        this.process = process;
         this.notify = notify;
         this.preSpawn = preSpawn;
     }
@@ -151,6 +163,10 @@ export class Bee {
         return !this.hasValidTask;
     }
 
+    public get allotedId() {
+        return this.creep.memory.allotedId;
+    }
+
     // creep的动作
 
     public attack(target: AnyCreep | Structure) {
@@ -265,6 +281,10 @@ export class Bee {
     }
 
     public suicide() {
+        if (this.spawning) {
+            timer.callBackAtTick(this, timeAfterTick(10), this.suicide);
+            return ERR_BUSY;
+        }
         return this.creep.suicide();
     }
 
@@ -301,7 +321,25 @@ export class Bee {
         Traveler.moveOffExit(this.creep);
     }
 
+    public lock() {
+        this.locked = true;
+    }
+
+    public unlock() {
+        this.locked = false;
+    }
+
+    public sleep(tick: number) {
+        timer.callBackAtTick(this, timeAfterTick(tick), this.activate);
+        this.slept = true;
+    }
+
+    public activate() {
+        this.slept = false;
+    }
+
     public run(): number | void {
+        if (this.locked || this.slept) return;
         return this.runCore();
     }
 
