@@ -1,4 +1,5 @@
 import { profile } from "profiler/decorator";
+import { getFreeKey } from "utilities/utils";
 
 @profile
 export class Repeater {
@@ -16,7 +17,7 @@ export class Repeater {
                 const code = action.apply(actionThis);
                 if(code !== OK) {
                     fallBack.apply(actionThis, actionThis);
-                    actions.splice(i--);
+                    actions[i] = undefined as any;
                 }
             }
         });
@@ -24,8 +25,17 @@ export class Repeater {
 
     public addAction(interval: number, actionThis: any, 
         action: (...arg: any) => ScreepsReturnCode,
-        fallBack: (actionThis?: any) => any) {
+        fallBack: (actionThis?: any) => any): number {
         if(!this.actions[interval]) this.actions[interval] = [];
-        this.actions[interval].push({actionThis, action, fallBack});
+        const free = getFreeKey(this.actions[interval]);
+        this.actions[interval][free] = {actionThis, action, fallBack};
+        return free;
+    }
+
+    public removeAction(interval: number, id: number) {
+        if(!this.actions[interval]) return;
+        this.actions[interval][id] = undefined as any;
     }
 }
+
+export const repeater = new Repeater();
