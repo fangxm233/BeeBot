@@ -56,7 +56,7 @@ export function getUsername(): string {
  * Get free key of a object
  */
 export function getFreeKey(obj: any, prefix: string = '', suffix: string = ''): number{
-	for (let i = 0; i < 999; i++) {
+	for (let i = 0; i < 9999; i++) {
 		if(!obj[prefix + i + suffix]) return i;
 	}
 	return -1;
