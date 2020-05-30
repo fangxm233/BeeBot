@@ -1,18 +1,17 @@
 import { Bee } from "Bee/Bee";
 import { Process } from "process/Process";
-import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 type BoostType = 'single' | 'lasting';
 
 @profile
-export class ProcessBoost extends Process{
+export class ProcessBoost extends Process {
     public memory: protoProcessBoost;
 
     public type: BoostType;
 
     constructor(roomName: string, type: BoostType) {
-        super(roomName, PROCESS_FILLING);
+        super(roomName, PROCESS_BOOST);
         this.type = type;
     }
 

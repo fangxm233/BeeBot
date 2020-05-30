@@ -1,9 +1,8 @@
 import { Process } from "process/Process";
-import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile
-export class ProcessFilling extends Process{
+export class ProcessFilling extends Process {
     constructor(roomName: string) {
         super(roomName, PROCESS_FILLING);
     }
@@ -14,7 +13,7 @@ export class ProcessFilling extends Process{
 
     public check() {
         const room = Game.rooms[this.roomName];
-        if(room) return room.energyAvailable < room.energyCapacityAvailable;
+        if (room) return room.energyAvailable < room.energyCapacityAvailable;
         else {
             this.close();
             return false;

@@ -1,7 +1,9 @@
 interface Memory {
     processes: {
-        [roomName: string]: protoProcess[];
-	}
+        [processName: string]: {
+            [roomName: string]: protoProcess[];
+        };
+    }
 }
 
 interface RoomMemory {

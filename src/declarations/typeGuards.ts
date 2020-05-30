@@ -3,18 +3,17 @@
 
 export interface StoreStructure extends Structure {
 	store: StoreDefinition;
-	storeCapacity: number;
 }
 
 export function isStoreStructure(obj: RoomObject): obj is StoreStructure {
-	return (obj as StoreStructure).store !== undefined && (obj as StoreStructure).storeCapacity !== undefined;
+	return (obj as StoreStructure).store !== undefined;
 }
 
 export function isStructure(obj: RoomObject): obj is Structure {
 	return (obj as Structure).structureType !== undefined && ((obj as ConstructionSite).progress === undefined || (obj as StructureController).unclaim !== undefined);
 }
 
-export function isCommonStore(store: Store<any, false>): store is StoreDefinition {
+export function isCommonStore(store: Store<ResourceConstant, any>): store is StoreDefinition {
 	return store.getCapacity() !== null;
 }
 
