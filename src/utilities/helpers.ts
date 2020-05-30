@@ -10,14 +10,14 @@ export function derefRoomPosition(protoPos: ProtoPos): RoomPosition {
 	return new RoomPosition(protoPos.x, protoPos.y, protoPos.roomName);
 }
 
-export function getFreeCapacity(store: Store<any, any>, resourceType?: ResourceConstant): number {
+export function getFreeCapacity(store: Store<ResourceConstant, any>, resourceType?: ResourceConstant): number {
 	if (isCommonStore(store)) return store.getFreeCapacity();
-	else return store.getFreeCapacity(resourceType);
+	else return (store as StoreDefinition).getFreeCapacity(resourceType);
 }
 
-export function getCapacity(store: Store<any, any>, resourceType?: ResourceConstant): number {
+export function getCapacity(store: Store<ResourceConstant, any>, resourceType?: ResourceConstant): number {
 	if (isCommonStore(store)) return store.getCapacity();
-	return store.getCapacity(resourceType) || 0;
+	return (store as StoreDefinition).getCapacity(resourceType) || 0;
 }
 
 export function timeAfterTick(tick: number): number {
