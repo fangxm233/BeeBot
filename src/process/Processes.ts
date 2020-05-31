@@ -1,35 +1,18 @@
-import { Bee, toBee } from "Bee/Bee";
 import { BeeFactorty } from "Bee/BeeFactory";
 import { log } from "console/log";
 import { profile } from "../profiler/decorator";
 import { Visualizer } from "../visuals/Visualizer";
-import { ProcessFilling } from "./instances/filling";
 import { Process, stateToFull } from "./process";
-
-const processSuspendBucket: { [processName: string]: number } = {
-    [PROCESS_FILLING]: 500,
-    [PROCESS_BOOST]: 1000,
-    [PROCESS_MINE_SOURCE]: 5000,
-}
 
 @profile
 export class Processes {
-    public static processFilling(roomName: string): ProcessFilling {
-        const process = new ProcessFilling(roomName);
-        Process.startProcess(process);
-        return process;
-    }
-
     public static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
-        let process: Process | undefined = undefined;
-
-        switch (processName) {
-            case 'filling':
-                process = ProcessFilling.getInstance(proto, roomName);
-                break;
-            default:
-                throw new Error(`The process ${processName} didn't complete the restore code.`);
+        const registration = Process.processRegistry[processName];
+        if(!registration) {
+            throw new Error(`This process ${processName} has not been registered.`)
         }
+        const process = registration.constructor.getInstance(proto, roomName);
+
         process.id = id;
         Process.addProcess(process);
         process.memory = proto;
@@ -70,9 +53,10 @@ export class Processes {
     }
 
     public static runAllProcesses() {
-        for (const processName in processSuspendBucket) {
-            if (Game.cpu.bucket < processSuspendBucket[processName]) continue;
-            const processes = Process.processesByType[processName];
+        for (const processRegistration of Process.processRegistry) {
+            if(!processRegistration) continue;
+            if (Game.cpu.bucket < processRegistration.suspendBucket) continue;
+            const processes = Process.processesByType[processRegistration.processName];
             _.forEach(processes, process => {
                 if (!process) return;
                 process.memory = Memory.processes[process.processName][process.roomName][process.id];
@@ -87,7 +71,7 @@ export class Processes {
                         }
                         return;
                 }
-            })
+            });
         }
     }
 
