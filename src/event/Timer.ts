@@ -14,6 +14,7 @@ export class Timer {
         const timer = this.timers[Game.time];
         if(timer) {
             timer.forEach(({func, funcThis}) => func.apply(funcThis));
+            this.timers[Game.time] = undefined as any;
         }
     }
 
