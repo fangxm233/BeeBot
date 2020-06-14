@@ -48,7 +48,7 @@ export const setups = {
                 maxSize: 2
             }),
 
-            fast: new CreepSetup(ROLE_MINER, {
+            heavy: new CreepSetup(ROLE_MINER, {
                 ratio: {
                     [WORK]: 20,
                     [CARRY]: 4,

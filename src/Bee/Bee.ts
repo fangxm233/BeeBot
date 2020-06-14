@@ -330,11 +330,11 @@ export class Bee {
     }
 
     public sleep(tick: number) {
-        timer.callBackAtTick(this, timeAfterTick(tick), this.activate);
+        timer.callBackAtTick(this, timeAfterTick(tick), this.awake);
         this.slept = true;
     }
 
-    public activate() {
+    public awake() {
         this.slept = false;
     }
 
