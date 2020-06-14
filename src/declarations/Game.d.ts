@@ -5,3 +5,14 @@ interface Game {
 		build(): void;
 	}
 }
+
+const enum Bucket{
+	bottom = 1000,
+	level1 = 1500,
+	level2 = 2000,
+	level3 = 2500,
+	level4 = 3000,
+	level5 = 3500,
+	level6 = 4000,
+	top    = 4500,
+}
