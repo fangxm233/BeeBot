@@ -15,16 +15,16 @@ export function stateToFull(state: ShortProcessState): ProcessState {
 export class Process {
 
     public static processRegistry: {
-            processName: string,
-            priotiry: number,
-            suspendBucket: number,
-            constructor: typeof Process,
+        processName: string,
+        priotiry: number,
+        suspendBucket: number,
+        constructor: typeof Process,
     }[];
 
     public static registerProcess(processName: string, priotiry: number, suspendBucket: number, constructor: typeof Process) {
-        if(this.processRegistry[priotiry]) throw new Error(`Process resgration conflict: process ${
+        if (this.processRegistry[priotiry]) throw new Error(`Process resgration conflict: process ${
             this.processRegistry[priotiry].processName} and process ${processName} has the same priotrity: ${priotiry}`);
-        this.processRegistry[priotiry] = {processName, priotiry, suspendBucket, constructor};
+        this.processRegistry[priotiry] = { processName, priotiry, suspendBucket, constructor };
     }
 
     /** 使用短ID */
@@ -120,7 +120,7 @@ export class Process {
     }
 
     public getFullId(): string {
-        return `${this.roomName}_${this.id}`;
+        return `${this.processName}_${this.roomName}_${this.id}`;
     }
 
     protected getProto(): any {

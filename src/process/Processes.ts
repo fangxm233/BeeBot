@@ -7,7 +7,7 @@ import { Process, stateToFull } from "./process";
 @profile
 export class Processes {
     public static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
-        const registration = Process.processRegistry[processName];
+        const registration = Process.processRegistry.find(registration => registration.processName == processName);
         if(!registration) {
             throw new Error(`This process ${processName} has not been registered.`)
         }
