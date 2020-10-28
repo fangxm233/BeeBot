@@ -1,4 +1,5 @@
 interface Memory {
+    MemVer: number;
     processes: {
         [processName: string]: {
             [roomName: string]: protoProcess[];
@@ -17,6 +18,10 @@ interface CreepMemory {
     task: protoTask | null;
 
     allotedId: string;
+    /**
+     * arriveTick
+     */
+    AT?: number;
 }
 
 interface PowerCreepMemory {

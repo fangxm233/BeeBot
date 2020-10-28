@@ -4,14 +4,10 @@
  * @constant waiting 等待直到check函数返回true
  * @constant suspended 挂起直到唤醒
  */
-type ProcessState = 'sleeping' | 'active' | 'waiting' | 'suspended';
-type ShortProcessState = 'sp' | 'a' | 'w' | 'sd';
+
+type ProcessState = 'sp' | 'a' | 'w' | 'sd';
 
 type ProcessTypes = 'filling' | 'mineSource' | 'boost';
-
-const PROCESS_FILLING = 'filling';
-const PROCESS_MINE_SOURCE = 'mineSource';
-const PROCESS_BOOST = 'boost';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -22,6 +18,10 @@ interface protoProcess {
 }
 
 type protoProcessFilling = protoProcess & {
+
+};
+
+type protoProcessMineSource = protoProcess & {
 
 };
 
