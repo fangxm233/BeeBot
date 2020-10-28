@@ -23,3 +23,7 @@ export function getCapacity(store: Store<ResourceConstant, any>, resourceType?: 
 export function timeAfterTick(tick: number): number {
 	return Game.time + tick;
 }
+
+export function calBodyCost(body: BodyPartConstant[]) {
+	return _.sum(body, b => BODYPART_COST[b]);
+}

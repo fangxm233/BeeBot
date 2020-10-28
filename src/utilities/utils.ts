@@ -39,7 +39,7 @@ export function getUsername(): string {
 	for (const i in Game.rooms) {
 		const room = Game.rooms[i];
 		if (room.controller && room.controller.my) {
-			return room.controller.owner.username;
+			return room.controller.owner!.username;
 		}
 	}
 	for (const i in Game.creeps) {
@@ -53,11 +53,11 @@ export function getUsername(): string {
 }
 
 /**
- * Get free key of a object
+ * Get free key of an object
  */
-export function getFreeKey(obj: any, prefix: string = '', suffix: string = ''): number{
+export function getFreeKey(obj: any, prefix: string = '', suffix: string = ''): number {
 	for (let i = 0; i < 9999; i++) {
-		if(!obj[prefix + i + suffix]) return i;
+		if (!obj[prefix + i + suffix]) return i;
 	}
 	return -1;
 }
@@ -160,7 +160,7 @@ export function logHeapStats(): void {
 	if (typeof Game.cpu.getHeapStatistics === 'function') {
 		const heapStats = Game.cpu.getHeapStatistics();
 		const heapPercent = Math.round(100 * (heapStats.total_heap_size + heapStats.externally_allocated_size)
-									   / heapStats.heap_size_limit);
+			/ heapStats.heap_size_limit);
 		const heapSize = Math.round((heapStats.total_heap_size) / 1048576);
 		const externalHeapSize = Math.round((heapStats.externally_allocated_size) / 1048576);
 		const heapLimit = Math.round(heapStats.heap_size_limit / 1048576);
