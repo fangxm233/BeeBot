@@ -8,8 +8,9 @@ import { profile } from "profiler/decorator";
 import { ITask } from "tasks";
 import { initializeTask } from "tasks/initializer";
 import { getFreeCapacity, timeAfterTick } from "utilities/helpers";
+import { BeeFactorty } from "./BeeFactory";
 
-export const bees: { [creepName: string]: Bee } = {};
+export const bees: { [beeName: string]: Bee } = {};
 
 export function toBee(creep: Creep | string): Bee | undefined {
     if (typeof creep == 'string') return bees[creep];
@@ -21,26 +22,23 @@ export function toBee(creep: Creep | string): Bee | undefined {
  */
 @profile
 export class Bee {
-    public role: string; // bee的角色
+    public role: ALL_ROLES; // bee的角色
     public process: Process; // 管理他的process
     public creep: Creep; // 管理的creep
-    private newCreep: Creep; // 接班的creep
 
     public notify: boolean;
-    public preSpawn: boolean;
 
     public locked: boolean = false;
     public slept: boolean = false;
+    public arrangedCycle: boolean;
 
     private settedNotify: boolean = true;
-    private aheadTick: number;
 
-    constructor(creep: Creep, role: string, process: Process, preSpawn: boolean = true, notify: boolean = true) {
+    constructor(role: ALL_ROLES, process: Process, creep?: Creep, notify: boolean = true) {
         this.role = role;
-        this.creep = creep;
+        this.creep = creep as Creep;
         this.process = process;
         this.notify = notify;
-        this.preSpawn = preSpawn;
     }
 
     // creep的属性
@@ -106,6 +104,13 @@ export class Bee {
     }
 
     // 另外添加的属性
+
+    public get arriveTick(): number {
+        return this.memory.AT || 0;
+    }
+    public set arriveTick(tick: number) {
+        this.memory.AT = tick;
+    }
 
     private _lifeTime: number;
     public get lifeTime(): number {
