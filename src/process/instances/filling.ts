@@ -1,10 +1,15 @@
+import { BeeFactorty, ROLE_FILLER } from "Bee/BeeFactory";
+import { setups } from "beeSpawning/setups";
+import { WishManager } from "beeSpawning/WishManager";
 import { Process } from "process/Process";
+import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile
 export class ProcessFilling extends Process {
     constructor(roomName: string) {
         super(roomName, PROCESS_FILLING);
+        this.wishManager = new WishManager(roomName, roomName, this);
     }
 
     public static getInstance(proto: protoProcessFilling, roomName: string): ProcessFilling {
@@ -18,5 +23,15 @@ export class ProcessFilling extends Process {
             this.close();
             return false;
         }
+    }
+
+    public run() {
+        this.foreachBee(ROLE_FILLER, bee => bee.run());
+    }
+
+    public wishCreeps() {
+        this.wishManager.arrangeCyclingBees(ROLE_FILLER, setups[ROLE_FILLER].early, Infinity, ['allotedId']);
+        if (this.getCreepAndWishCount(ROLE_FILLER) == 0)
+            this.wishManager.wishBee(BeeFactorty.getInstance(ROLE_FILLER, this), setups[ROLE_FILLER].early, Infinity);
     }
 }
