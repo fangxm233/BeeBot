@@ -4,7 +4,7 @@ import { USE_ACTION_COUNTER, USE_PROFILE } from "./config";
 import actionsCounter from './profiler/actionCounter';
 import profiler from './profiler/screeps-profiler';
 
-export let reseted = true;
+export let reset = true;
 
 export class ErrorMapper {
   // Cache consumer
@@ -77,16 +77,16 @@ export class ErrorMapper {
   public static wrapLoop(loop: () => void): () => void {
     return () => {
       try {
-        if(reseted){
-          if(USE_ACTION_COUNTER) { actionsCounter.warpActions(); }
-          if(USE_PROFILE) { profiler.enable(); }
-          
+        if (reset) {
+          if (USE_ACTION_COUNTER) { actionsCounter.warpActions(); }
+          if (USE_PROFILE) { profiler.enable(); }
+
         }
-        if(USE_PROFILE) { profiler.wrap(loop); }
+        if (USE_PROFILE) { profiler.wrap(loop); }
         else { loop(); }
-        reseted = false;
+        reset = false;
       } catch (e) {
-        reseted = false;
+        reset = false;
         if (e.stack) {
           if ("sim" in Game.rooms) {
             const message = `Source maps don't work in the simulator - displaying original error`;
