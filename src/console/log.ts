@@ -1,6 +1,6 @@
 import { SourceMapConsumer } from 'source-map';
-import {profile} from '../profiler/decorator';
-import {color} from '../utilities/utils';
+import { profile } from '../profiler/decorator';
+import { color } from '../utilities/utils';
 
 export enum LogLevels {
 	ERROR,		// log.level = 0
@@ -13,7 +13,7 @@ export enum LogLevels {
 /**
  * Default debug level for log output
  */
-export const LOG_LEVEL: number = LogLevels.INFO;
+export const LOG_LEVEL: number = LogLevels.DEBUG;
 
 /**
  * Prepend log output with current tick number.
@@ -39,7 +39,7 @@ export const LOG_MAX_PAD: number = 100;
  * VSC location, used to create links back to source.
  * Repo and revision are filled in at build time for git repositories.
  */
-export const LOG_VSC = {repo: 'https://github.com/fangxm233/BeeBot', revision: 'master', valid: true};
+export const LOG_VSC = { repo: 'https://github.com/fangxm233/BeeBot', revision: 'master', valid: true };
 // export const LOG_VSC = { repo: "@@_repo_@@", revision: __REVISION__, valid: false };
 
 /**
@@ -66,20 +66,20 @@ interface SourcePos {
 export function resolve(fileLine: string): SourcePos {
 	const split = _.trim(fileLine).match(stackLineRe);
 	if (!split || !Log.sourceMap) {
-		return {compiled: fileLine, final: fileLine} as SourcePos;
+		return { compiled: fileLine, final: fileLine } as SourcePos;
 	}
 
-	const pos = {column: parseInt(split[4], 10), line: parseInt(split[3], 10)};
+	const pos = { column: parseInt(split[4], 10), line: parseInt(split[3], 10) };
 
 	const original = Log.sourceMap.originalPositionFor(pos);
 	const line = `${split[1]} (${original.source}:${original.line})`;
 	const out = {
-		caller  : split[1],
+		caller: split[1],
 		compiled: fileLine,
-		final   : line,
-		line    : original.line,
+		final: line,
+		line: original.line,
 		original: line,
-		path    : original.source ? original.source.slice(3, original.source.length) : original.source,
+		path: original.source ? original.source.slice(3, original.source.length) : original.source,
 	};
 
 	return out;
@@ -157,7 +157,7 @@ export class Log {
 				break;
 			default:
 				console.log(`Invalid input: ${value}. Loging level can be set to integers between `
-							+ LogLevels.ERROR + ' and ' + LogLevels.DEBUG + ', inclusive.');
+					+ LogLevels.ERROR + ' and ' + LogLevels.DEBUG + ', inclusive.');
 				changeValue = false;
 				break;
 		}
@@ -188,9 +188,9 @@ export class Log {
 		_.defaultsDeep(Memory, {
 			settings: {
 				log: {
-					level     : LOG_LEVEL,
+					level: LOG_LEVEL,
 					showSource: LOG_PRINT_LINES,
-					showTick  : LOG_PRINT_TICK,
+					showTick: LOG_PRINT_TICK,
 				}
 			}
 		});
