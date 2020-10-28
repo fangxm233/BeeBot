@@ -1,0 +1,3 @@
+# WishManager
+## 概述
+WishManager负责接收来自process的生成请求，自己保存一份后提交给BeeManager，可以用来辅助新建循环Bee的生成。每个process都会有一个WishManager的实例来方便process管理自己的生成请求。
