@@ -1,27 +1,36 @@
+import { bees } from "Bee/Bee";
 import { BeeFactorty } from "Bee/BeeFactory";
 import { log } from "console/log";
 import { profile } from "../profiler/decorator";
 import { Visualizer } from "../visuals/Visualizer";
-import { Process, stateToFull } from "./process";
+import { Process, STATE_ACTIVE, STATE_WAITING } from "./Process";
+
+export const PROCESS_FILLING = 'filling';
+export const PROCESS_MINE_SOURCE = 'mineSource';
+export const PROCESS_BOOST = 'boost';
 
 @profile
 export class Processes {
-    public static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
-        const registration = Process.processRegistry.find(registration => registration.processName == processName);
-        if(!registration) {
-            throw new Error(`This process ${processName} has not been registered.`)
+    private static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
+        const registration = Process.getProcessRegistration(processName);
+        if (!registration) {
+            throw new Error(`The process ${processName} has not been registered.`);
         }
         const process = registration.constructor.getInstance(proto, roomName);
 
         process.id = id;
-        Process.addProcess(process);
         process.memory = proto;
-        process.state = stateToFull(proto.st);
+        process.state = proto.st;
         process.parent = proto.p;
         process.bees = !proto.bees ? {} : _.mapValues(proto.bees, (creepNames, role) => {
             if (!role) return [];
-            return creepNames.map(creepName => BeeFactorty.getInstance(creepName, role as any, process!));
+            return creepNames.map(creepName => {
+                const bee = BeeFactorty.getInstance(role as any, process, creepName);
+                bees[creepName] = bee;
+                return bee;
+            });
         });
+        Process.addProcess(process);
         if (proto.slt) process.sleep(proto.slt);
     }
 
@@ -43,7 +52,7 @@ export class Processes {
                 for (const id in roomProcesses) {
                     const protoProcess = roomProcesses[id];
                     try {
-                        this.restoreProcess(protoProcess, processName, roomName, id as any);
+                        this.restoreProcess(protoProcess, processName, roomName, Number(id));
                     } catch (error) {
                         log.error(`An error occured when restoring processes:\n${error.message}`);
                     }
@@ -54,17 +63,16 @@ export class Processes {
 
     public static runAllProcesses() {
         for (const processRegistration of Process.processRegistry) {
-            if(!processRegistration) continue;
+            if (!processRegistration) continue;
             if (Game.cpu.bucket < processRegistration.suspendBucket) continue;
             const processes = Process.processesByType[processRegistration.processName];
             _.forEach(processes, process => {
                 if (!process) return;
-                process.memory = Memory.processes[process.processName][process.roomName][process.id];
                 switch (process.state) {
-                    case 'active':
+                    case STATE_ACTIVE:
                         process.run();
                         return;
-                    case 'waiting':
+                    case STATE_WAITING:
                         if (process.check()) {
                             process.awake();
                             process.run();

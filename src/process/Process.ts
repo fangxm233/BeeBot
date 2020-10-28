@@ -1,30 +1,36 @@
 import { Bee } from "Bee/Bee";
 import { log } from "console/log";
+import { BeeManager } from "beeSpawning/BeeManager";
+import { WishManager } from "beeSpawning/WishManager";
 import { timer } from "event/Timer";
 import { getFreeKey } from "utilities/utils";
 import { profile } from "../profiler/decorator";
 
-export function stateToShort(state: ProcessState): ShortProcessState {
-    return ({ sleeping: 'sp', active: 'a', waiting: 'w', suspended: 'sd' } as { [state: string]: ShortProcessState })[state];
-}
-export function stateToFull(state: ShortProcessState): ProcessState {
-    return ({ sp: 'sleeping', a: 'active', w: 'waiting', sd: 'suspended' } as { [state: string]: ProcessState })[state];
+export const STATE_ACTIVE = 'a';
+export const STATE_SLEEPING = 'sp';
+export const STATE_WAITING = 'w';
+export const STATE_SUSPENDED = 'sd'
+
+interface ProcessRegistration {
+    processName: string,
+    priotiry: number,
+    suspendBucket: number,
+    wishListInterval: number,
+    requiredRoles: string[],
+    constructor: typeof Process,
 }
 
 @profile
 export class Process {
 
-    public static processRegistry: {
-        processName: string,
-        priotiry: number,
-        suspendBucket: number,
-        constructor: typeof Process,
-    }[];
+    public static processRegistry: ProcessRegistration[] = [];
 
-    public static registerProcess(processName: string, priotiry: number, suspendBucket: number, constructor: typeof Process) {
-        if (this.processRegistry[priotiry]) throw new Error(`Process resgration conflict: process ${
-            this.processRegistry[priotiry].processName} and process ${processName} has the same priotrity: ${priotiry}`);
-        this.processRegistry[priotiry] = { processName, priotiry, suspendBucket, constructor };
+    public static registerProcess(processName: string, suspendBucket: number, constructor: typeof Process, wishListInterval: number = -1, requiredRoles: string[] = []) {
+        this.processRegistry.push({ processName, priotiry: this.processRegistry.length, suspendBucket, constructor, wishListInterval, requiredRoles });
+    }
+
+    public static getProcessRegistration(processName: string) {
+        return Process.processRegistry.find(registration => registration.processName == processName);
     }
 
     /** 使用短ID */
@@ -52,11 +58,12 @@ export class Process {
     public subProccesses: string[];
     public bees: { [role: string]: Bee[] };
     public id: number;
+    public closed: boolean;
 
     private _state: ProcessState;
     public set state(v: ProcessState) {
         this._state = v;
-        this.memory.st = stateToShort(v);
+        this.memory.st = v;
     }
     public get state(): ProcessState {
         return this._state;
@@ -64,7 +71,7 @@ export class Process {
 
     /** 唤醒的目标tick */
     public get sleepTime(): number {
-        return this.memory.slt || 0;
+        return this.memory?.slt || 0;
     }
 
     private _fullId: string;
@@ -75,7 +82,7 @@ export class Process {
     public get protoProcess(): protoProcess {
         const bees = _.mapValues(this.bees, bees => bees.map(bee => bee.name));
         return _.extend({
-            st: stateToShort(this.state),
+            st: this.state,
             slt: this.sleepTime ? this.sleepTime : undefined,
             p: this.parent,
             sp: this.subProccesses.length ? this.subProccesses : undefined,
@@ -84,13 +91,20 @@ export class Process {
     }
 
     public memory: protoProcess;
+    public wishManager: WishManager;
 
     constructor(roomName: string, processName: ProcessTypes) {
         this.roomName = roomName;
         this.processName = processName;
         this.subProccesses = [];
         this.bees = {};
-        this._state = 'active';
+        const registration = Process.getProcessRegistration(processName);
+        if (registration && registration.requiredRoles.length) {
+            for (const role of registration.requiredRoles) {
+                this.bees[role] = [];
+            }
+        }
+        this._state = STATE_ACTIVE;
     }
 
     public registerBee(bee: Bee, role: string) {
@@ -104,11 +118,13 @@ export class Process {
         });
         _.forEach(this.memory.bees, bees => {
             _.pull(bees, beeName);
-        })
+        });
+
+        this.wishCreeps();
         log.debug(this.roomName, this.processName, this.id, 'remove', beeName);
     }
 
-    public addSubProcess(processId: string) {
+    private addSubProcess(processId: string) {
         if (!Process.getProcess(processId)) return;
         this.subProccesses.push(processId);
         if (!this.memory.sp) this.memory.sp = [];
@@ -143,22 +159,22 @@ export class Process {
     }
 
     public awake() {
-        this.state = 'active';
+        this.state = STATE_ACTIVE;
         this.memory.slt = undefined;
         log.debug(this.roomName, this.processName, this.id, 'activated');
     }
     public sleep(targetTime: number) {
-        this.state = 'sleeping';
+        this.state = STATE_SLEEPING;
         this.memory.slt = targetTime;
         timer.callBackAtTick(this, targetTime, this.awake);
         log.debug(this.roomName, this.processName, this.id, 'slept until', targetTime);
     }
     public wait() {
-        this.state = 'waiting';
+        this.state = STATE_WAITING;
         log.debug(this.roomName, this.processName, this.id, 'waiting');
     }
     public suspend() {
-        this.state = 'suspended';
+        this.state = STATE_SUSPENDED;
         if (this.subProccesses.length) this.subProccesses.map(id => Process.getProcess<Process>(id)).forEach(p => p && p.suspend());
         log.debug(this.roomName, this.processName, this.id, 'suspended');
     }
@@ -169,6 +185,7 @@ export class Process {
         Process.processes[this.roomName][this.id] = undefined as any;
         Process.processesById[this.fullId] = undefined as any;
         Process.processesByType[this.processName][this.fullId] = undefined as any;
+        this.closed = true;
 
         if (killAllCreep) _.forEach(this.bees, (bees, role) => this.foreachBee(role!, bee => bee.suicide()));
         if (this.subProccesses.length) this.subProccesses.map(id => Process.getProcess<Process>(id)).forEach(p => p && p.close(killAllCreep));
@@ -185,12 +202,20 @@ export class Process {
     public run() {
         return;
     }
-    public foreachBee(role: string, callbackfn: (creep: Bee) => void) {
+    public foreachBee(role: string, callbackfn: (bee: Bee) => void) {
         _.forEach(this.bees[role], callbackfn)
     }
 
     public boostedCreep(creepName: string, compoundTypes: ResourceConstant[]) {
         return;
+    }
+
+    public getCreepAndWishCount(role: ALL_ROLES) {
+        return this.bees[role]?.length + this.wishManager?.getCount(role);
+    }
+
+    public wishCreeps() {
+        throw new Error(`There is a process didn't override function 'getWishlist'`);
     }
 
     public static getInstance(proto: protoProcess, roomName: string): Process {
@@ -215,8 +240,8 @@ export class Process {
 
     public static startProcess(process: Process): string {
         if (!this.processes[process.roomName]) this.processes[process.roomName] = {};
-        if (!Memory.processes[process.roomName]) Memory.processes[process.processName] = {};
-        if (!Memory.processes[process.roomName][process.roomName]) Memory.processes[process.processName][process.roomName] = [];
+        if (!Memory.processes[process.processName]) Memory.processes[process.processName] = {};
+        if (!Memory.processes[process.processName][process.roomName]) Memory.processes[process.processName][process.roomName] = [];
         if (!this.processesByType[process.processName]) this.processesByType[process.processName] = {};
 
         const free = getFreeKey(Memory.processes[process.processName][process.roomName]);
@@ -226,6 +251,10 @@ export class Process {
         this.processesByType[process.processName][process.fullId] = process;
         Memory.processes[process.processName][process.roomName][free] = process.protoProcess;
         process.memory = Memory.processes[process.processName][process.roomName][free];
+
+        const registration = this.processRegistry.find(r => r.processName == process.processName);
+        if (registration && registration.wishListInterval != -1) BeeManager.addProcess(process.fullId, registration.wishListInterval);
+
         log.debug(process.roomName, 'process', process.processName, process.id, 'started');
         return process.fullId;
     }
@@ -234,6 +263,11 @@ export class Process {
         this.processes[process.roomName][process.id] = process;
         this.processesById[process.fullId] = process;
         this.processesByType[process.processName][process.fullId] = process;
+
+        const registration = this.processRegistry.find(r => r.processName == process.processName);
+        if (registration && registration.wishListInterval != -1) BeeManager.addProcess(process.fullId, registration.wishListInterval);
+
         log.debug(process.roomName, 'process', process.processName, process.id, 'added');
     }
 }
+(global as any).Process = Process;
