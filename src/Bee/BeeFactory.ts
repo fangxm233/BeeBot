@@ -1,37 +1,36 @@
-import { ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER } from "creepSpawning/setups";
 import { profile } from "profiler/decorator";
 import { Process } from "../Process/Process";
-import { Bee } from "./Bee";
-import { BeeCarrier } from "./instances/carrier";
-import { BeeFiller } from "./instances/filler";
-import { BeeManager } from "./instances/manager";
-import { BeeMiner } from "./instances/miner";
+import { Bee, bees } from "./Bee";
 
-interface RoleToBee {
-    [ROLE_FILLER]: BeeFiller,
-    [ROLE_MINER]: BeeMiner,
-    [ROLE_CARRIER]: BeeCarrier,
-    [ROLE_MANAGER]: BeeManager,
-}
+export const ROLE_FILLER = 'filler';
+export const ROLE_MINER = 'miner';
+export const ROLE_CARRIER = 'carrier';
+export const ROLE_MANAGER = 'manager';
 
 @profile
 export class BeeFactorty {
-    public static getInstance<T extends keyof RoleToBee>(creepName: string, role: T, process: Process): RoleToBee[T] | undefined {
-        // 获取creep实例，不进行空值检查
-        const creep = Game.creeps[creepName];
+    private static beeRegistry: {
+        role: ALL_ROLES,
+        constructor: typeof Bee,
+    }[] = [];
 
-        switch (creepName) {
-            case ROLE_FILLER:
-                return new BeeFiller(creep, role, process);
-            case ROLE_MINER:
-                return new BeeMiner(creep, role, process);
-            case ROLE_CARRIER:
-                return new BeeCarrier(creep, role, process);
-            case ROLE_MINER:
-                return new BeeManager(creep, role, process);
-            default:
-                break;
-        }
-        return;
+    private static role2Priority: { [role: string]: number } = {};
+
+    public static registerBee(role: ALL_ROLES, constructor: typeof Bee) {
+        this.beeRegistry.push({ role, constructor });
+    }
+
+    public static getInstance<T extends Bee>(role: ALL_ROLES, process: Process, creepName?: string): T {
+        // 获取creep实例，不进行空值检查
+        const creep = Game.creeps[creepName!];
+        const registration = this.beeRegistry.find(r => r.role == role);
+
+        if (registration) return new registration.constructor(role, process, creep) as any;
+        throw new Error(`The role ${role} haven't been registered.`);
+    }
+
+    public static getRolePriority(role: ALL_ROLES) {
+        if (this.role2Priority[role] !== undefined) return this.role2Priority[role];
+        return this.role2Priority[role] = this.beeRegistry.findIndex(b => b.role == role);
     }
 }
