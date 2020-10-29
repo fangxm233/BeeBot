@@ -17,11 +17,14 @@ interface CreepMemory {
     _trav: TravelData;
     task: protoTask | null;
 
-    allotedId: string;
     /**
      * arriveTick
      */
     AT?: number;
+}
+
+type CreepMinerMemory = CreepMemory & {
+    s: number;
 }
 
 interface PowerCreepMemory {

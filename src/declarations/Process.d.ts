@@ -22,7 +22,7 @@ type protoProcessFilling = protoProcess & {
 };
 
 type protoProcessMineSource = protoProcess & {
-
+    target: string;
 };
 
 type protoProcessBoost = protoProcess & {

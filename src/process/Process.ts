@@ -20,7 +20,6 @@ interface ProcessRegistration {
     constructor: typeof Process,
 }
 
-@profile
 export class Process {
 
     public static processRegistry: ProcessRegistration[] = [];
@@ -98,11 +97,16 @@ export class Process {
         this.processName = processName;
         this.subProccesses = [];
         this.bees = {};
+        console.log('Process', JSON.stringify(Process, undefined, 4));
         const registration = Process.getProcessRegistration(processName);
+        console.log('pre', JSON.stringify(Process.processRegistry));
+        console.log('re', JSON.stringify(registration));
         if (registration && registration.requiredRoles.length) {
+            console.log(JSON.stringify(registration.requiredRoles));
             for (const role of registration.requiredRoles) {
                 this.bees[role] = [];
             }
+            console.log(JSON.stringify(this, undefined, 4));
         }
         this._state = STATE_ACTIVE;
     }
@@ -120,7 +124,6 @@ export class Process {
             _.pull(bees, beeName);
         });
 
-        this.wishCreeps();
         log.debug(this.roomName, this.processName, this.id, 'remove', beeName);
     }
 
@@ -270,4 +273,4 @@ export class Process {
         log.debug(process.roomName, 'process', process.processName, process.id, 'added');
     }
 }
-(global as any).Process = Process;
+// (global as any).Process = Process;

@@ -17,6 +17,11 @@ export const setups = {
 
     [ROLE_MINER]: {
         source: {
+            early: new BeeSetup(ROLE_MINER, {
+                ratio: ['w2', 'c1', 'm1'],
+                maxSize: 1
+            }),
+
             default: new BeeSetup(ROLE_MINER, {
                 ratio: ['w6', 'c1', 'm3'],
                 maxSize: 1

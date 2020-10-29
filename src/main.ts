@@ -16,7 +16,7 @@ import stats from './profiler/stats';
 
 import { USE_ACTION_COUNTER } from 'config';
 import { ErrorMapper, reset } from "./ErrorMapper";
-import { Processes, PROCESS_FILLING } from 'process/Processes';
+import { Processes, PROCESS_BOOST, PROCESS_FILLING, PROCESS_MINE_SOURCE } from 'process/Processes';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
@@ -24,6 +24,8 @@ import { Process } from 'process/Process';
 import { ProcessFilling } from 'process/instances/filling';
 import { Mem } from 'memory/Memory';
 import { log } from 'console/log';
+import { ProcessMineSource } from 'process/instances/mineSource';
+import { ProcessBoost } from 'process/instances/boost';
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();
@@ -38,6 +40,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
     for (const roomName in Game.rooms) {
         const room = Game.rooms[roomName];
         if (!Process.getProcess(roomName, PROCESS_FILLING)) Process.startProcess(new ProcessFilling(roomName));
+        if (!Process.getProcess(roomName, PROCESS_MINE_SOURCE)) Process.startProcess(new ProcessMineSource(roomName, roomName));
+        if (!Process.getProcess(roomName, PROCESS_BOOST)) Process.startProcess(new ProcessBoost(roomName, 's'))
     }
 
     Processes.runAllProcesses();
