@@ -59,6 +59,9 @@ export class Processes {
                 }
             }
         }
+
+        // 在全局重置后重新生成Bee孵化请求来避免空等待
+        _.forEach(Process.processesById, process => process.wishCreeps());
     }
 
     public static runAllProcesses() {
