@@ -5,29 +5,42 @@ import { profile } from "profiler/decorator";
  */
 @profile
 export class Timer {
-    private timers: {[targetTick: number]: { func: () => any, funcThis: any }[] } = {};
+    private timers: { [targetTick: number]: { func: () => any, funcThis: any }[] } = {};
 
     /**
      * 每tick都调用，检查是否有计时器到时
      */
     public checkForTimesUp() {
         const timer = this.timers[Game.time];
-        if(timer) {
-            timer.forEach(({func, funcThis}) => func.apply(funcThis));
+        if (timer) {
+            timer.forEach(({ func, funcThis }) => func.apply(funcThis));
             this.timers[Game.time] = undefined as any;
         }
     }
 
     /**
      * 添加一个回调，将会在目标tick以指定this发起回调
+     * @returns 返回回调ID
      */
-    public callBackAtTick(funcThis: any, targetTick: number,  func: () => any) {
-        if(targetTick <= Game.time) {
+    public callBackAtTick(funcThis: any, targetTick: number, func: () => any): string {
+        if (targetTick <= Game.time) {
             func.apply(funcThis);
-            return;
+            return '';
         }
-        if(!this.timers[targetTick]) this.timers[targetTick] = [];
-        this.timers[targetTick].push({func, funcThis});
+        if (!this.timers[targetTick]) this.timers[targetTick] = [];
+        const index = this.timers[targetTick].push({ func, funcThis });
+        return targetTick + '_' + index;
+    }
+
+    /**
+     * 取消指定回调
+     * @param id 要取消的回调的ID
+     */
+    public cancelCallBack(id: string) {
+        const result = id.split('_');
+        if (!this.timers[result[0]]) return;
+        if (!this.timers[result[0]][result[1]]) return;
+        this.timers[result[0]][result[1]] = undefined;
     }
 }
 

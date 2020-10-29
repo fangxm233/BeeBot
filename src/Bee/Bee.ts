@@ -30,7 +30,7 @@ export class Bee {
 
     public locked: boolean = false;
     public slept: boolean = false;
-    public arrangedCycle: boolean;
+    public cyclingCallbackId: string;
 
     private settedNotify: boolean = true;
 

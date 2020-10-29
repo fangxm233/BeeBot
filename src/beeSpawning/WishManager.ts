@@ -29,15 +29,14 @@ export class WishManager {
 
     public arrangeCyclingBees(role: ALL_ROLES, setup: BeeSetup, budget: number, extraMemory?: string[]) {
         for (const bee of this.process.bees[role]) {
-            if (bee.arriveTick && !bee.arrangedCycle && bee.ticksToLive > bee.arriveTick) {
+            if (bee.arriveTick && !bee.cyclingCallbackId && bee.ticksToLive > bee.arriveTick) {
                 const memory: any = {};
                 if (extraMemory) {
                     extraMemory.forEach(s => memory[s] = bee.memory[s]);
                 }
 
-                timer.callBackAtTick(this, timeAfterTick(bee.ticksToLive - bee.arriveTick),
+                bee.cyclingCallbackId = timer.callBackAtTick(this, timeAfterTick(bee.ticksToLive - bee.arriveTick),
                     () => this.wishBee(BeeFactorty.getInstance(role, this.process), setup, budget, memory));
-                bee.arrangedCycle = true;
             }
         }
     }
