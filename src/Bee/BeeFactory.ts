@@ -1,5 +1,5 @@
+import { Process } from "process/Process";
 import { profile } from "profiler/decorator";
-import { Process } from "../Process/Process";
 import { Bee, bees } from "./Bee";
 
 export const ROLE_FILLER = 'filler';

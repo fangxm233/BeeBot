@@ -3,7 +3,7 @@ import { BeeFactorty, ROLE_MINER } from "Bee/BeeFactory";
 import { BeeMiner } from "Bee/instances/miner";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
-import { Process } from "Process/Process";
+import { Process } from "process/Process";
 import { PROCESS_MINE_SOURCE } from "process/Processes";
 import { profile } from "profiler/decorator";
 
@@ -39,4 +39,3 @@ export class ProcessMineSource extends Process {
         });
     }
 }
-// (global as any).ProcessMineSource = ProcessMineSource;

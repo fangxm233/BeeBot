@@ -1,7 +1,7 @@
 import { Bee } from "Bee/Bee";
-import { log } from "console/log";
 import { BeeManager } from "beeSpawning/BeeManager";
 import { WishManager } from "beeSpawning/WishManager";
+import { log } from "console/log";
 import { timer } from "event/Timer";
 import { getFreeKey } from "utilities/utils";
 import { profile } from "../profiler/decorator";
