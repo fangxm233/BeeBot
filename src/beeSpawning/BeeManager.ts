@@ -65,17 +65,23 @@ export class BeeManager {
     }
 
     public static clearDiedBees() {
+        const processToResfresh: { [name: string]: Process } = {};
+
         for (const beeName in bees) {
             const bee = bees[beeName];
             if (!bee) continue;
             if (!Game.creeps[beeName]) {
-                bees[beeName] = undefined as any;
                 // 为了防止在Bee意外死亡后重复生成
                 if (bee.cyclingCallbackId) timer.cancelCallBack(bee.cyclingCallbackId);
-                if (!bee.process.closed) bee.process.removeBee(beeName);
+                if (!bee.process.closed) {
+                    bee.process.removeBee(beeName);
+                    processToResfresh[bee.process.fullId] = bee.process;
+                }
+                bees[beeName] = undefined as any;
                 if (Memory.creeps[beeName]) Memory.creeps[beeName] = undefined as any;
             }
         }
+        _.forEach(processToResfresh, process => process.wishCreeps());
 
         // 只是检查下没有漏掉的项
         if (Game.time % 100 == 0) {
