@@ -168,10 +168,6 @@ export class Bee {
         return !this.hasValidTask;
     }
 
-    public get allotedId() {
-        return this.creep.memory.allotedId;
-    }
-
     // creep的动作
 
     public attack(target: AnyCreep | Structure) {
