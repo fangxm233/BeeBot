@@ -1,4 +1,4 @@
-import { bees } from "Bee/Bee";
+import { Bee, bees } from "Bee/Bee";
 import { BeeFactorty } from "Bee/BeeFactory";
 import { log } from "console/log";
 import { profile } from "../profiler/decorator";
@@ -7,6 +7,7 @@ import { Process, STATE_ACTIVE, STATE_WAITING } from "./Process";
 
 export const PROCESS_FILLING = 'filling';
 export const PROCESS_MINE_SOURCE = 'mineSource';
+export const PROCESS_UPGRADE = 'upgrade';
 export const PROCESS_BOOST = 'boost';
 
 @profile
@@ -24,11 +25,13 @@ export class Processes {
         process.parent = proto.p;
         process.bees = !proto.bees ? {} : _.mapValues(proto.bees, (creepNames, role) => {
             if (!role) return [];
-            return creepNames.map(creepName => {
+            return _.compact(creepNames.map(creepName => {
+                // 防止在reset的那个tick刚刚好有bee死亡
+                if (!Game.creeps[creepName]) return undefined as unknown as Bee;
                 const bee = BeeFactorty.getInstance(role as any, process, creepName);
                 bees[creepName] = bee;
                 return bee;
-            });
+            }));
         });
         Process.addProcess(process);
         if (proto.slt) process.sleep(proto.slt);
@@ -54,14 +57,11 @@ export class Processes {
                     try {
                         this.restoreProcess(protoProcess, processName, roomName, Number(id));
                     } catch (error) {
-                        log.error(`An error occured when restoring processes:\n${error.message}`);
+                        log.error(`An error occured when restoring processes:\n${error.message}\n${error.stack}`);
                     }
                 }
             }
         }
-
-        // 在全局重置后重新生成Bee孵化请求来避免空等待
-        _.forEach(Process.processesById, process => process.wishCreeps());
     }
 
     public static runAllProcesses() {

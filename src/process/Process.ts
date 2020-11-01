@@ -97,16 +97,11 @@ export class Process {
         this.processName = processName;
         this.subProccesses = [];
         this.bees = {};
-        console.log('Process', JSON.stringify(Process, undefined, 4));
         const registration = Process.getProcessRegistration(processName);
-        console.log('pre', JSON.stringify(Process.processRegistry));
-        console.log('re', JSON.stringify(registration));
         if (registration && registration.requiredRoles.length) {
-            console.log(JSON.stringify(registration.requiredRoles));
             for (const role of registration.requiredRoles) {
                 this.bees[role] = [];
             }
-            console.log(JSON.stringify(this, undefined, 4));
         }
         this._state = STATE_ACTIVE;
     }
@@ -114,11 +109,12 @@ export class Process {
     public registerBee(bee: Bee, role: string) {
         this.bees[role].push(bee);
         this.memory.bees[role].push(bee.name);
-        log.debug(this.roomName, this.processName, this.id, 'register', bee.name);
     }
     public removeBee(beeName: string) {
-        _.forEach(this.bees, bees => {
-            _.remove(bees, bee => bee.name == beeName)
+        _.forEach(this.bees, (bees, role) => {
+            // 使process中的数组和bees指向同一个对象
+            this.bees[role!] = bees = _.compact(bees);
+            _.remove(bees, bee => bee.name == beeName);
         });
         _.forEach(this.memory.bees, bees => {
             _.pull(bees, beeName);
@@ -214,7 +210,7 @@ export class Process {
     }
 
     public getCreepAndWishCount(role: ALL_ROLES) {
-        return this.bees[role]?.length + this.wishManager?.getCount(role);
+        return (this.bees[role]?.length || 0) + (this.wishManager?.getCount(role) || 0);
     }
 
     public wishCreeps() {
