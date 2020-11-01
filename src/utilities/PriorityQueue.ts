@@ -1,3 +1,5 @@
+import { log } from "console/log";
+
 export class PriorityQueue<T>{
     private queue: { priority: number, value: T }[] = [];
 
@@ -17,7 +19,7 @@ export class PriorityQueue<T>{
 
             if (element.priority == priority) {
                 this.queue.splice(i, 0, { value, priority });
-                return;
+                break;
             }
             if (element.priority > priority) {
                 if (!nextElememt) {
@@ -30,7 +32,8 @@ export class PriorityQueue<T>{
                 }
             }
             if (element.priority < priority) {
-                this.queue.splice(0, 0, { value, priority });
+                this.queue.splice(i, 0, { value, priority });
+                break;
             }
         }
     }
