@@ -21,10 +21,12 @@ export class WishManager {
         this.process = process;
     }
 
-    public wishBee(bee: Bee, setup: BeeSetup, budget: number, extraMemory?: any, name?: string) {
-        const wish = new BeeWish(bee, setup, budget, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
-        this._wishes.push(wish);
-        BeeManager.wishBee(wish);
+    public wishBee(bee: Bee, setup: BeeSetup, budget: number, count: number = 1, extraMemory?: any, name?: string) {
+        for (let i = 0; i < count; i++) {
+            const wish = new BeeWish(bee, setup, budget, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
+            this._wishes.push(wish);
+            BeeManager.wishBee(wish);
+        }
     }
 
     public arrangeCyclingBees(role: ALL_ROLES, setup: BeeSetup, budget: number, extraMemory?: string[]) {
