@@ -10,6 +10,7 @@ import './prototypes/Structures';
 import './Bee/BeeInitializer';
 import './process/ProcessInitializer';
 import './tasks/initializer';
+import './utilities/packrat';
 
 import actionsCounter from './profiler/actionCounter';
 import stats from './profiler/stats';
