@@ -7,7 +7,7 @@ import { ProcessFilling } from "process/instances/filling";
 import { Process, STATE_ACTIVE } from "process/Process";
 import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
-import { calBodyCost } from "utilities/helpers";
+import { calBodyCost, timeAfterTick } from "utilities/helpers";
 import { PriorityQueue } from "utilities/PriorityQueue";
 import { getFreeKey } from "utilities/utils";
 import { BeeWish } from "./BeeWish";
@@ -59,7 +59,7 @@ export class BeeManager {
                 bees[name] = wish.bee;
                 process.registerBee(wish.bee, wish.role);
             } else {
-                log.error(`can't spawn creep! name: ${name} body: ${body}`);
+                log.error(`can't spawn creep! code: ${code} name: ${name} body: ${body}`);
             }
         }
     }
@@ -91,6 +91,14 @@ export class BeeManager {
                     Memory.creeps[creepName] = undefined as any;
                 }
             }
+        }
+    }
+
+    public static refreshBees() {
+        for (const beeName in bees) {
+            const bee = bees[beeName];
+            if (!bee) continue;
+            bee.creep = Game.creeps[beeName];
         }
     }
 
@@ -138,7 +146,8 @@ export class ProcessWishInvoker {
         const process = Process.getProcess<Process>(id);
         if (!process) return;
         this.processId.push(id);
-        process.wishCreeps();
+        // 将请求延后到下一tick来防止初始化未完成
+        timer.callBackAtTick(undefined, timeAfterTick(1), () => process.wishCreeps());
     }
 }
 
