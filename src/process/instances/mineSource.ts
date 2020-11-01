@@ -9,15 +9,21 @@ import { profile } from "profiler/decorator";
 
 @profile
 export class ProcessMineSource extends Process {
-    private sources: Source[];
+    public memory: protoProcessMineSource;
+    public sources: Id<Source>[];
+    public target: string;
 
     constructor(roomName: string, targetRoom: string) {
-        console.log('hello?');
         super(roomName, PROCESS_MINE_SOURCE);
         this.wishManager = new WishManager(roomName, targetRoom, this);
+        this.target = targetRoom;
         const room = Game.rooms[targetRoom];
         if (!room) return; // TODO: 从Intel获取source信息
-        this.sources = room.sources.sort((a, b) => a.id.localeCompare(b.id));
+        this.sources = room.sources.sort((a, b) => a.id.localeCompare(b.id)).map(source => source.id);
+    }
+
+    protected getProto() {
+        return { target: this.target };
     }
 
     public static getInstance(proto: protoProcessMineSource, roomName: string) {
@@ -32,10 +38,11 @@ export class ProcessMineSource extends Process {
         this.wishManager.arrangeCyclingBees(ROLE_MINER, setups[ROLE_MINER].source.early, Infinity, ['s']);
         const beeCount = _.countBy(this.bees[ROLE_MINER], (bee: BeeMiner) => bee.memory.s);
         const wishCount = _.countBy(this.wishManager.wishes, wish => wish.extraMemory.s);
-
-        this.sources.forEach((source, index) => {
-            if (beeCount[index] + wishCount[index] > 0) return;
-            this.wishManager.wishBee(BeeFactorty.getInstance(ROLE_MINER, this), setups[ROLE_MINER].source.early, Infinity, { s: index });
+        this.sources.forEach((id, index) => {
+            const nowCount = (beeCount[index] || 0) + (wishCount[index] || 0);
+            const count = 3;
+            if (nowCount >= count) return;
+            this.wishManager.wishBee(BeeFactorty.getInstance(ROLE_MINER, this), setups[ROLE_MINER].source.early, Infinity, count - nowCount, { s: index });
         });
     }
 }
