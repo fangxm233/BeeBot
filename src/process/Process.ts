@@ -109,6 +109,7 @@ export class Process {
     public registerBee(bee: Bee, role: string) {
         this.bees[role].push(bee);
         this.memory.bees[role].push(bee.name);
+        log.debug(this.roomName, this.processName, this.id, 'register', bee.name);
     }
     public removeBee(beeName: string) {
         _.forEach(this.bees, (bees, role) => {
@@ -269,4 +270,4 @@ export class Process {
         log.debug(process.roomName, 'process', process.processName, process.id, 'added');
     }
 }
-// (global as any).Process = Process;
+(global as any).Process = Process;

@@ -2,7 +2,7 @@ import { bees } from "Bee/Bee";
 import { BeeFactorty, ROLE_MINER } from "Bee/BeeFactory";
 import { BeeMiner } from "Bee/instances/miner";
 import { setups } from "beeSpawning/setups";
-import { WishManager } from "beeSpawning/WishManager";
+import { WishConfig, WishManager } from "beeSpawning/WishManager";
 import { Process } from "process/Process";
 import { PROCESS_MINE_SOURCE } from "process/Processes";
 import { profile } from "profiler/decorator";
@@ -42,7 +42,8 @@ export class ProcessMineSource extends Process {
             const nowCount = (beeCount[index] || 0) + (wishCount[index] || 0);
             const count = 3;
             if (nowCount >= count) return;
-            this.wishManager.wishBee(BeeFactorty.getInstance(ROLE_MINER, this), setups[ROLE_MINER].source.early, Infinity, count - nowCount, { s: index });
+            const config: WishConfig = { role: ROLE_MINER, setup: setups[ROLE_MINER].source.early, budget: Infinity, count: count - nowCount, extraMemory: { s: index } }
+            this.wishManager.wishBee(config);
         });
     }
 }

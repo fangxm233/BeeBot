@@ -8,6 +8,16 @@ import { BeeManager } from "./BeeManager";
 import { BeeSetup } from "./BeeSetup";
 import { BeeWish } from "./BeeWish";
 
+export interface WishConfig {
+    bee?: Bee;
+    role?: ALL_ROLES;
+    setup: BeeSetup;
+    budget: number;
+    count?: number;
+    extraMemory?: any;
+    name?: string;
+}
+
 @profile
 export class WishManager {
     public room: string;
@@ -21,9 +31,18 @@ export class WishManager {
         this.process = process;
     }
 
-    public wishBee(bee: Bee, setup: BeeSetup, budget: number, count: number = 1, extraMemory?: any, name?: string) {
-        for (let i = 0; i < count; i++) {
-            const wish = new BeeWish(bee, setup, budget, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
+    public wishBee(config: WishConfig) {
+        const { setup, budget, extraMemory, name } = config;
+        if (config.role) {
+            const { count, role } = config;
+            for (let i = 0; i < (count || 1); i++) {
+                const bee = BeeFactorty.getInstance(role, this.process);
+                const wish = new BeeWish(bee, setup, budget, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
+                this._wishes.push(wish);
+                BeeManager.wishBee(wish);
+            }
+        } else {
+            const wish = new BeeWish(config.bee!, setup, budget, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
             this._wishes.push(wish);
             BeeManager.wishBee(wish);
         }
@@ -38,7 +57,7 @@ export class WishManager {
                 }
 
                 bee.cyclingCallbackId = timer.callBackAtTick(this, timeAfterTick(bee.ticksToLive - bee.arriveTick),
-                    () => this.wishBee(BeeFactorty.getInstance(role, this.process), setup, budget, memory));
+                    () => this.wishBee({ bee: BeeFactorty.getInstance(role, this.process), setup, budget, extraMemory: memory }));
             }
         }
     }

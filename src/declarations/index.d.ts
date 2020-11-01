@@ -61,7 +61,6 @@ interface TravelToOptions {
 }
 
 interface TravelData {
-    state: any[];
     path: string;
 }
 
@@ -117,10 +116,10 @@ interface protoTask {
 
 interface protoAllotUnit {
     available: boolean;
-	roomName: string;
-	typeId: number;
-	id: number;
-	data: any;
+    roomName: string;
+    typeId: number;
+    id: number;
+    data: any;
 }
 
 interface TypeToStructure {

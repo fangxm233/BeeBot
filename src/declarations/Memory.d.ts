@@ -14,7 +14,7 @@ interface RoomMemory {
 }
 
 interface CreepMemory {
-    _trav: TravelData;
+    _path: string;
     task: protoTask | null;
 
     /**
