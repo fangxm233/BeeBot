@@ -1,3 +1,4 @@
+import { Bee, bees } from "Bee/Bee";
 import { profile } from "../profiler/decorator";
 
 @profile
@@ -12,13 +13,13 @@ export class Traveler {
 
     /**
      * move creep to destination
-     * @param creep
+     * @param bee
      * @param destination
      * @param options
      * @returns {number}
      */
 
-    public static travelTo(creep: Creep, destination: HasPos | RoomPosition, options: TravelToOptions = {}): number {
+    public static travelTo(bee: Bee, destination: HasPos | RoomPosition, options: TravelToOptions = {}): number {
 
         // uncomment if you would like to register hostile rooms entered
         // this.updateRoomStatus(creep.room);
@@ -27,8 +28,8 @@ export class Traveler {
             return ERR_INVALID_ARGS;
         }
 
-        if (creep.fatigue > 0) {
-            Traveler.circle(creep.pos, "aqua", .3);
+        if (bee.fatigue > 0) {
+            Traveler.circle(bee.pos, "aqua", .3);
             return ERR_TIRED;
         }
 
@@ -43,37 +44,33 @@ export class Traveler {
         if (options.pushCreep === undefined) options.pushCreep = true;
 
         // manage case where creep is nearby destination
-        const rangeToDestination = creep.pos.getRangeTo(destination);
+        const rangeToDestination = bee.pos.getRangeTo(destination);
         if (options.range && rangeToDestination <= options.range) {
             return OK;
         } else if (rangeToDestination <= 1) {
             if (rangeToDestination === 1 && !options.range) {
-                const direction = creep.pos.getDirectionTo(destination);
+                const direction = bee.pos.getDirectionTo(destination);
                 // if (options.returnData) {
                 //     options.returnData.nextPos = destination;
                 //     options.returnData.path = direction.toString();
                 // }
-                if (options.pushCreep) this.pushCreeps(creep, direction);
-                return this.move(creep, direction);
+                if (options.pushCreep) this.pushCreeps(bee, direction);
+                return this.move(bee, direction);
             }
             return OK;
         }
 
-        // initialize data object
-        if (!creep.memory._trav) {
-            creep.memory._trav = {} as any;
-        }
-        const travelData = creep.memory._trav;
+        const memory = bee.memory;
 
-        const state = this.deserializeState(travelData, destination);
+        const state = bee.travelState || { cpu: 0, destination } as TravelState;
 
         // uncomment to visualize destination
         // this.circle(destination.pos, "orange");
 
         // check if creep is stuck
-        if (this.isStuck(creep, state)) {
+        if (this.isStuck(bee, state)) {
             state.stuckCount++;
-            Traveler.circle(creep.pos, "magenta", state.stuckCount * .2);
+            Traveler.circle(bee.pos, "magenta", state.stuckCount * .2);
         } else {
             state.stuckCount = 0;
         }
@@ -83,7 +80,7 @@ export class Traveler {
         if (state.stuckCount >= options.stuckValue && Math.random() > .5) {
             options.ignoreCreeps = false;
             options.freshMatrix = true;
-            travelData.path = undefined as any;
+            memory._path = undefined as any;
         }
 
         // TODO:handle case where creep moved by some other function, but destination is still the same
@@ -91,34 +88,34 @@ export class Traveler {
         // delete path cache if destination is different
         if (!this.samePos(state.destination, destination)) {
             if (options.movingTarget && state.destination.isNearTo(destination)) {
-                travelData.path += state.destination.getDirectionTo(destination);
+                memory._path += state.destination.getDirectionTo(destination);
                 state.destination = destination;
             } else {
-                travelData.path = undefined as any;
+                memory._path = undefined as any;
             }
         }
 
         if (options.repath && Math.random() < options.repath) {
             // add some chance that you will find a new path randomly
-            travelData.path = undefined as any;
+            memory._path = undefined as any;
         }
 
         // pathfinding
         let newPath = false;
-        if (!travelData.path) {
+        if (!memory._path) {
             newPath = true;
-            if (creep.spawning) { return ERR_BUSY; }
+            if (bee.spawning) { return ERR_BUSY; }
 
             state.destination = destination;
 
             const cpu = Game.cpu.getUsed();
-            const ret = this.findTravelPath(creep.pos, destination, options);
+            const ret = this.findTravelPath(bee.pos, destination, options);
 
             const cpuUsed = Game.cpu.getUsed() - cpu;
             state.cpu = _.round(cpuUsed + state.cpu);
             if (state.cpu > REPORT_CPU_THRESHOLD) {
                 // see note at end of file for more info on this
-                console.log(`TRAVELER: heavy cpu use: ${creep.name}, cpu: ${state.cpu} origin: ${creep.pos}, dest: ${destination}`);
+                console.log(`TRAVELER: heavy cpu use: ${bee.name}, cpu: ${state.cpu} origin: ${bee.pos}, dest: ${destination}`);
             }
 
             let color = "orange";
@@ -132,26 +129,26 @@ export class Traveler {
             //     options.returnData.pathfinderReturn = ret;
             // }
 
-            travelData.path = Traveler.serializePath(creep.pos, ret.path, color);
+            memory._path = Traveler.serializePath(bee.pos, ret.path, color);
             state.stuckCount = 0;
         }
 
-        this.serializeState(creep, destination, state, travelData);
+        bee.travelState = state;
 
-        if (!travelData.path || travelData.path.length === 0) {
+        if (!memory._path || memory._path.length === 0) {
             return ERR_NO_PATH;
         }
 
         // consume path
         if (state.stuckCount === 0 && !newPath) {
-            travelData.path = travelData.path.substr(1);
+            memory._path = memory._path.substr(1);
         }
 
         // push creeps
-        if (travelData.path[0] !== undefined && options.pushCreep)
-            this.pushCreeps(creep, Number.parseInt(travelData.path[0], 10));
+        if (memory._path[0] !== undefined && options.pushCreep)
+            this.pushCreeps(bee, Number.parseInt(memory._path[0], 10));
 
-        const nextDirection = parseInt(travelData.path[0], 10);
+        const nextDirection = parseInt(memory._path[0], 10);
         // if (options.returnData) {
         //     if (nextDirection) {
         //         let nextPos = Traveler.positionAtDirection(creep.pos, nextDirection);
@@ -160,21 +157,21 @@ export class Traveler {
         //     options.returnData.state = state;
         //     options.returnData.path = travelData.path;
         // }
-        return this.move(creep, nextDirection as DirectionConstant);
+        return this.move(bee, nextDirection as DirectionConstant);
     }
 
-    public static moveOffExit(creep: Creep): ScreepsReturnCode {
-        if (creep.pos.isEdge) {
-            return Traveler.move(creep, creep.pos.getDirectionTo(creep.pos.availableNeighbors().filter(pos => !pos.isEdge)[0]));
+    public static moveOffExit(bee: Bee): ScreepsReturnCode {
+        if (bee.pos.isEdge) {
+            return Traveler.move(bee, bee.pos.getDirectionTo(bee.pos.availableNeighbors().filter(pos => !pos.isEdge)[0]));
         }
         return OK;
     }
 
-    private static pushCreeps(creep: Creep, nextDir: number) {
+    private static pushCreeps(bee: Bee, nextDir: number) {
         // if(creep.memory.role == 'manager') console.log('pushing')
-        const obstructingCreep = this.findBlockingCreep(creep, nextDir);
+        const obstructingCreep = this.findBlockingCreep(bee, nextDir);
         if (obstructingCreep) {
-            const dir = this.getPushDirection(creep, obstructingCreep);
+            const dir = this.getPushDirection(bee, obstructingCreep);
             if (dir !== undefined) {
                 const dirtoarrow = {
                     1: '↑',
@@ -186,20 +183,20 @@ export class Traveler {
                     7: '←',
                     8: '↖'
                 };
-                creep.say('goto ' + dirtoarrow[dir])
+                bee.say('goto ' + dirtoarrow[dir])
                 const outcome = obstructingCreep.move(dir);
                 if (outcome == OK) {
-                    const data = obstructingCreep.memory._trav;
-                    if (data && data.state) data.state[2] = 0;
+                    const state = bees[obstructingCreep.name]?.travelState;
+                    if (state) state.stuckCount = 0;
                 }
-            } else creep.say('no way')
+            } else bee.say('no way')
         }
     }
 
-    private static findBlockingCreep(creep: Creep, nextDir: number): Creep | PowerCreep | undefined {
+    private static findBlockingCreep(bee: Bee, nextDir: number): Creep | PowerCreep | undefined {
         if (nextDir == undefined) return;
 
-        const nextPos = Traveler.positionAtDirection(creep.pos, nextDir);
+        const nextPos = Traveler.positionAtDirection(bee.pos, nextDir);
         if (!nextPos) return;
 
         let blockCreep: Creep | PowerCreep = nextPos.lookFor(LOOK_CREEPS)[0];
@@ -212,12 +209,12 @@ export class Traveler {
         return;
     }
 
-    private static getPushDirection(pusher: Creep, pushee: Creep | PowerCreep) {
+    private static getPushDirection(bee: Bee, pushee: Creep | PowerCreep) {
         const possiblePositions = pushee.pos.availableNeighbors();
-        const dir = pusher.pos.getDirectionTo(pushee.pos);
+        const dir = bee.pos.getDirectionTo(pushee.pos);
 
-        if (pusher.memory._trav != undefined && pusher.memory._trav.path[1] !== undefined) {
-            const nextDir = parseInt(pusher.memory._trav.path[1], 10);
+        if (bee.memory._path != undefined && bee.memory._path[1] !== undefined) {
+            const nextDir = parseInt(bee.memory._path[1], 10);
             if (nextDir != undefined) {
                 const nextPos = Traveler.positionAtDirection(pushee.pos, nextDir);
                 if (nextPos) {
@@ -232,7 +229,7 @@ export class Traveler {
             return this.comDirs(dir, dir2);
         }));
         else if (swamps.length) return pushee.pos.getDirectionTo(swamps[0]);
-        else return pushee.pos.getDirectionTo(pusher.pos);
+        else return pushee.pos.getDirectionTo(bee.pos);
     }
 
     public static getNowDir(creep: Creep): -1 | DirectionConstant {
@@ -697,33 +694,13 @@ export class Traveler {
         }
     }
 
-    private static deserializeState(travelData: TravelData, destination: RoomPosition): TravelState {
-        const state = {} as TravelState;
-        if (travelData.state) {
-            state.lastCoord = { x: travelData.state[STATE_PREV_X], y: travelData.state[STATE_PREV_Y] };
-            state.cpu = travelData.state[STATE_CPU];
-            state.stuckCount = travelData.state[STATE_STUCK];
-            state.destination = new RoomPosition(travelData.state[STATE_DEST_X], travelData.state[STATE_DEST_Y],
-                travelData.state[STATE_DEST_ROOMNAME]);
-        } else {
-            state.cpu = 0;
-            state.destination = destination;
-        }
-        return state;
-    }
-
-    private static serializeState(creep: Creep, destination: RoomPosition, state: TravelState, travelData: TravelData) {
-        travelData.state = [creep.pos.x, creep.pos.y, state.stuckCount, state.cpu, destination.x, destination.y,
-        destination.roomName];
-    }
-
-    private static isStuck(creep: Creep, state: TravelState): boolean {
+    private static isStuck(bee: Bee, state: TravelState): boolean {
         let stuck = false;
         if (state.lastCoord !== undefined) {
-            if (this.sameCoord(creep.pos, state.lastCoord)) {
+            if (this.sameCoord(bee.pos, state.lastCoord)) {
                 // didn't move
                 stuck = true;
-            } else if (this.isExit(creep.pos) && this.isExit(state.lastCoord)) {
+            } else if (this.isExit(bee.pos) && this.isExit(state.lastCoord)) {
                 // moved against exit
                 stuck = true;
             }
@@ -732,9 +709,9 @@ export class Traveler {
         return stuck;
     }
 
-    private static move(creep: Creep, dir: DirectionConstant): ScreepsReturnCode {
-        const code = creep.move(dir);
-        if (code == OK) this.moveRecord[creep.name] = Game.time;
+    private static move(bee: Bee, dir: DirectionConstant): ScreepsReturnCode {
+        const code = bee.move(dir);
+        if (code == OK) this.moveRecord[bee.name] = Game.time;
         return code;
     }
 }
@@ -754,9 +731,9 @@ const STATE_DEST_Y = 5;
 const STATE_DEST_ROOMNAME = 6;
 
 // assigns a function to Creep.prototype: creep.travelTo(destination)
-PowerCreep.prototype.travelTo = function (destination: RoomPosition | { pos: RoomPosition }, options?: TravelToOptions) {
-    return Traveler.travelTo(this, destination, options);
-};
-PowerCreep.prototype.moveOffExit = function () {
-    Traveler.moveOffExit(this);
-}
+// PowerCreep.prototype.travelTo = function (destination: RoomPosition | { pos: RoomPosition }, options?: TravelToOptions) {
+//     return Traveler.travelTo(this, destination, options);
+// };
+// PowerCreep.prototype.moveOffExit = function () {
+//     Traveler.moveOffExit(this);
+// }

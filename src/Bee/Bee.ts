@@ -172,6 +172,8 @@ export class Bee {
         return !this.hasValidTask;
     }
 
+    public travelState?: TravelState;
+
     // creep的动作
 
     public attack(target: AnyCreep | Structure) {
@@ -235,7 +237,7 @@ export class Bee {
     }
 
     public travelTo(destination: HasPos | RoomPosition, ops?: TravelToOptions) {
-        return Traveler.travelTo(this.creep, destination, ops);
+        return Traveler.travelTo(this, destination, ops);
     }
 
     public notifyWhenAttacked(enabled: boolean) {
@@ -323,7 +325,7 @@ export class Bee {
     // 另外添加的方法
 
     public moveOffExit() {
-        Traveler.moveOffExit(this.creep);
+        Traveler.moveOffExit(this);
     }
 
     public lock() {
@@ -352,3 +354,4 @@ export class Bee {
         if (this.task) return this.task.run()
     }
 }
+(global as any).bees = bees;
