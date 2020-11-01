@@ -16,7 +16,7 @@ import stats from './profiler/stats';
 
 import { USE_ACTION_COUNTER } from 'config';
 import { ErrorMapper, reset } from "./ErrorMapper";
-import { Processes, PROCESS_BOOST, PROCESS_FILLING, PROCESS_MINE_SOURCE } from 'process/Processes';
+import { Processes, PROCESS_BOOST, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_UPGRADE } from 'process/Processes';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
@@ -26,6 +26,7 @@ import { Mem } from 'memory/Memory';
 import { log } from 'console/log';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessBoost } from 'process/instances/boost';
+import { ProcessUpgrade } from 'process/instances/upgrade';
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();
@@ -35,13 +36,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (reset) globalReset();
 
     BeeManager.clearDiedBees();
-    BeeManager.run();
+    BeeManager.refreshBees();
 
     for (const roomName in Game.rooms) {
         const room = Game.rooms[roomName];
         if (!Process.getProcess(roomName, PROCESS_FILLING)) Process.startProcess(new ProcessFilling(roomName));
         if (!Process.getProcess(roomName, PROCESS_MINE_SOURCE)) Process.startProcess(new ProcessMineSource(roomName, roomName));
-        if (!Process.getProcess(roomName, PROCESS_BOOST)) Process.startProcess(new ProcessBoost(roomName, 's'))
+        if (!Process.getProcess(roomName, PROCESS_UPGRADE)) Process.startProcess(new ProcessUpgrade(roomName));
     }
 
     Processes.runAllProcesses();
@@ -49,7 +50,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
     repeater.repeatActions();
     timer.checkForTimesUp();
 
+    BeeManager.run();
+
     stats.commit();
+    if (USE_ACTION_COUNTER) actionsCounter.save(3000);
 });
 
 function globalReset() {

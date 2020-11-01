@@ -4,6 +4,7 @@ import { Bee, bees } from "./Bee";
 
 export const ROLE_FILLER = 'filler';
 export const ROLE_MINER = 'miner';
+export const ROLE_UPGRADER = 'upgrader';
 export const ROLE_CARRIER = 'carrier';
 export const ROLE_MANAGER = 'manager';
 
