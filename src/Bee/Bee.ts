@@ -51,6 +51,10 @@ export class Bee {
         return this.creep.pos;
     }
 
+    public get room(): Room {
+        return this.creep.room;
+    }
+
     public get body(): BodyPartDefinition[] {
         return this.creep.body;
     }
