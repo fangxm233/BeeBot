@@ -6,6 +6,7 @@ export const ROLE_FILLER = 'filler';
 export const ROLE_MINER = 'miner';
 export const ROLE_UPGRADER = 'upgrader';
 export const ROLE_CARRIER = 'carrier';
+export const ROLE_WORKER = 'worker';
 export const ROLE_MANAGER = 'manager';
 
 @profile

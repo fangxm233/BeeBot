@@ -1,1 +1,1 @@
-declare type ALL_ROLES = 'filler' | 'miner' | 'carrier' | 'manager' | 'upgrader';
+declare type ALL_ROLES = 'filler' | 'miner' | 'carrier' | 'manager' | 'upgrader' | 'worker';

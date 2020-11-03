@@ -1,4 +1,4 @@
-import { ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER, ROLE_UPGRADER } from "Bee/BeeFactory";
+import { ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER, ROLE_UPGRADER, ROLE_WORKER } from "Bee/BeeFactory";
 import { BeeSetup } from "./BeeSetup";
 
 export const setups = {
@@ -74,6 +74,17 @@ export const setups = {
         final: new BeeSetup(ROLE_UPGRADER, {
             ratio: ['w1', 'c1', 'm1'],
             maxSize: 15
+        }),
+    },
+
+    [ROLE_WORKER]: {
+        early: new BeeSetup(ROLE_WORKER, {
+            ratio: ['w1', 'c1', 'm2'],
+            maxSize: Infinity
+        }),
+        default: new BeeSetup(ROLE_WORKER, {
+            ratio: ['w1', 'c1', 'm1'],
+            maxSize: Infinity
         }),
     },
 

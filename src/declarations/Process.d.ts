@@ -7,7 +7,7 @@
 
 type ProcessState = 'sp' | 'a' | 'w' | 'sd';
 
-type ProcessTypes = 'filling' | 'mineSource' | 'boost' | 'upgrade';
+type ProcessTypes = 'filling' | 'mineSource' | 'boost' | 'upgrade' | 'baseWork';
 
 interface protoProcess {
     st: ShortProcessState;

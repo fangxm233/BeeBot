@@ -17,7 +17,7 @@ import stats from './profiler/stats';
 
 import { USE_ACTION_COUNTER } from 'config';
 import { ErrorMapper, reset } from "./ErrorMapper";
-import { Processes, PROCESS_BOOST, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_UPGRADE } from 'process/Processes';
+import { Processes, PROCESS_BASE_WORK, PROCESS_BOOST, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_UPGRADE } from 'process/Processes';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
@@ -28,6 +28,7 @@ import { log } from 'console/log';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessBoost } from 'process/instances/boost';
 import { ProcessUpgrade } from 'process/instances/upgrade';
+import { ProcessBaseWork } from 'process/instances/baseWork';
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();
@@ -44,6 +45,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
         if (!Process.getProcess(roomName, PROCESS_FILLING)) Process.startProcess(new ProcessFilling(roomName));
         if (!Process.getProcess(roomName, PROCESS_MINE_SOURCE)) Process.startProcess(new ProcessMineSource(roomName, roomName));
         if (!Process.getProcess(roomName, PROCESS_UPGRADE)) Process.startProcess(new ProcessUpgrade(roomName));
+        if (!Process.getProcess(roomName, PROCESS_BASE_WORK)) {
+            const processId = Process.startProcess(new ProcessBaseWork(roomName));
+            const upgrade = Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)!;
+            upgrade.setParent(processId);
+        }
     }
 
     Processes.runAllProcesses();

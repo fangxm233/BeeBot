@@ -8,6 +8,7 @@ import { Process, STATE_ACTIVE, STATE_WAITING } from "./Process";
 export const PROCESS_FILLING = 'filling';
 export const PROCESS_MINE_SOURCE = 'mineSource';
 export const PROCESS_UPGRADE = 'upgrade';
+export const PROCESS_BASE_WORK = 'baseWork';
 export const PROCESS_BOOST = 'boost';
 
 @profile
