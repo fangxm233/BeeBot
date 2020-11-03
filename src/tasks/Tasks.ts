@@ -127,7 +127,7 @@ export class Tasks {
 
 	public static transfer(target: transferTargetType,
 		resourceType: ResourceConstant = RESOURCE_ENERGY,
-		amount: number | undefined,
+		amount?: number,
 		options = {} as TaskOptions): TaskTransfer {
 		return new TaskTransfer(target, resourceType, amount, options);
 	}
