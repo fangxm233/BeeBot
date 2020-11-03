@@ -1,6 +1,6 @@
 /* This is the withdrawal task for non-energy resources. */
 
-import {Task} from '../Task';
+import { Task } from '../Task';
 
 import { isStoreStructure, StoreStructure } from 'declarations/typeGuards';
 
@@ -9,7 +9,8 @@ export type withdrawTargetType =
 	| StructureLab
 	| StructureNuker
 	| StructurePowerSpawn
-	| Tombstone;
+	| Tombstone
+	| Ruin;
 
 export class TaskWithdraw extends Task {
 
@@ -21,9 +22,9 @@ export class TaskWithdraw extends Task {
 	};
 
 	constructor(target: withdrawTargetType,
-				resourceType: ResourceConstant = RESOURCE_ENERGY,
-				amount: number | undefined     = undefined,
-				options                        = {} as TaskOptions) {
+		resourceType: ResourceConstant = RESOURCE_ENERGY,
+		amount: number | undefined = undefined,
+		options = {} as TaskOptions) {
 		super(TaskWithdraw.taskName, target, options);
 		// Settings
 		this.settings.oneShot = true;

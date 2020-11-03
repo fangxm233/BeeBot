@@ -1,27 +1,27 @@
 import { ITask } from 'tasks';
-import {attackTargetType, TaskAttack} from './instances/task_attack';
-import {buildTargetType, TaskBuild} from './instances/task_build';
-import {claimTargetType, TaskClaim} from './instances/task_claim';
-import {dismantleTargetType, TaskDismantle} from './instances/task_dismantle';
-import {dropTargetType, TaskDrop} from './instances/task_drop';
-import {fortifyTargetType, TaskFortify} from './instances/task_fortify';
-import {getBoostedTargetType, TaskGetBoosted} from './instances/task_getBoosted';
-import {getRenewedTargetType, TaskGetRenewed} from './instances/task_getRenewed';
-import {goToTargetType, TaskGoTo} from './instances/task_goTo';
-import {goToRoomTargetType, TaskGoToRoom} from './instances/task_goToRoom';
-import {harvestTargetType, TaskHarvest} from './instances/task_harvest';
-import {healTargetType, TaskHeal} from './instances/task_heal';
-import {meleeAttackTargetType, TaskMeleeAttack} from './instances/task_meleeAttack';
-import {pickupTargetType, TaskPickup} from './instances/task_pickup';
-import {rangedAttackTargetType, TaskRangedAttack} from './instances/task_rangedAttack';
-import {repairTargetType, TaskRepair} from './instances/task_repair';
-import {reserveTargetType, TaskReserve} from './instances/task_reserve';
-import {signControllerTargetType, TaskSignController} from './instances/task_signController';
-import {TaskTransfer, transferTargetType} from './instances/task_transfer';
-import {TaskTransferAll, transferAllTargetType} from './instances/task_transferAll';
-import {TaskUpgrade, upgradeTargetType} from './instances/task_upgrade';
-import {TaskWithdraw, withdrawTargetType} from './instances/task_withdraw';
-import {TaskWithdrawAll, withdrawAllTargetType} from './instances/task_withdrawAll';
+import { attackTargetType, TaskAttack } from './instances/task_attack';
+import { buildTargetType, TaskBuild } from './instances/task_build';
+import { claimTargetType, TaskClaim } from './instances/task_claim';
+import { dismantleTargetType, TaskDismantle } from './instances/task_dismantle';
+import { dropTargetType, TaskDrop } from './instances/task_drop';
+import { fortifyTargetType, TaskFortify } from './instances/task_fortify';
+import { getBoostedTargetType, TaskGetBoosted } from './instances/task_getBoosted';
+import { getRenewedTargetType, TaskGetRenewed } from './instances/task_getRenewed';
+import { goToTargetType, TaskGoTo } from './instances/task_goTo';
+import { goToRoomTargetType, TaskGoToRoom } from './instances/task_goToRoom';
+import { harvestTargetType, TaskHarvest } from './instances/task_harvest';
+import { healTargetType, TaskHeal } from './instances/task_heal';
+import { meleeAttackTargetType, TaskMeleeAttack } from './instances/task_meleeAttack';
+import { pickupTargetType, TaskPickup } from './instances/task_pickup';
+import { rangedAttackTargetType, TaskRangedAttack } from './instances/task_rangedAttack';
+import { repairTargetType, TaskRepair } from './instances/task_repair';
+import { reserveTargetType, TaskReserve } from './instances/task_reserve';
+import { signControllerTargetType, TaskSignController } from './instances/task_signController';
+import { TaskTransfer, transferTargetType } from './instances/task_transfer';
+import { TaskTransferAll, transferAllTargetType } from './instances/task_transferAll';
+import { TaskUpgrade, upgradeTargetType } from './instances/task_upgrade';
+import { TaskWithdraw, withdrawTargetType } from './instances/task_withdraw';
+import { TaskWithdrawAll, withdrawAllTargetType } from './instances/task_withdrawAll';
 
 export class Tasks {
 
@@ -63,9 +63,9 @@ export class Tasks {
 	}
 
 	public static drop(target: dropTargetType,
-				resourceType: ResourceConstant = RESOURCE_ENERGY,
-				amount: number | undefined,
-				options                        = {} as TaskOptions): TaskDrop {
+		resourceType: ResourceConstant = RESOURCE_ENERGY,
+		amount: number | undefined,
+		options = {} as TaskOptions): TaskDrop {
 		return new TaskDrop(target, resourceType, amount, options);
 	}
 
@@ -74,9 +74,9 @@ export class Tasks {
 	}
 
 	public static getBoosted(target: getBoostedTargetType,
-					  boostType: _ResourceConstantSansEnergy,
-					  amount: number | undefined,
-					  options                    = {} as TaskOptions): TaskGetBoosted {
+		boostType: _ResourceConstantSansEnergy,
+		amount: number | undefined,
+		options = {} as TaskOptions): TaskGetBoosted {
 		return new TaskGetBoosted(target, boostType, amount, options);
 	}
 
@@ -121,20 +121,20 @@ export class Tasks {
 	}
 
 	public static signController(target: signControllerTargetType, signature: string,
-						  options = {} as TaskOptions): TaskSignController {
+		options = {} as TaskOptions): TaskSignController {
 		return new TaskSignController(target, signature, options);
 	}
 
 	public static transfer(target: transferTargetType,
-					resourceType: ResourceConstant = RESOURCE_ENERGY,
-					amount: number | undefined,
-					options                        = {} as TaskOptions): TaskTransfer {
+		resourceType: ResourceConstant = RESOURCE_ENERGY,
+		amount: number | undefined,
+		options = {} as TaskOptions): TaskTransfer {
 		return new TaskTransfer(target, resourceType, amount, options);
 	}
 
 	public static transferAll(target: transferAllTargetType,
-					   skipEnergy = false,
-					   options    = {} as TaskOptions): TaskTransferAll {
+		skipEnergy = false,
+		options = {} as TaskOptions): TaskTransferAll {
 		return new TaskTransferAll(target, skipEnergy, options);
 	}
 
@@ -143,9 +143,9 @@ export class Tasks {
 	}
 
 	public static withdraw(target: withdrawTargetType,
-					resourceType: ResourceConstant = RESOURCE_ENERGY,
-					amount: number | undefined,
-					options                        = {} as TaskOptions): TaskWithdraw {
+		resourceType: ResourceConstant = RESOURCE_ENERGY,
+		amount?: number,
+		options = {} as TaskOptions): TaskWithdraw {
 		return new TaskWithdraw(target, resourceType, amount, options);
 	}
 
