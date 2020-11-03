@@ -77,7 +77,7 @@ export class Traveler {
 
         // handle case where creep is stuck
         if (!options.stuckValue) { options.stuckValue = DEFAULT_STUCK_VALUE; }
-        if (state.stuckCount >= options.stuckValue && Math.random() > .5) {
+        if (state.stuckCount >= options.stuckValue + Math.round(Math.random())) {
             options.ignoreCreeps = false;
             options.freshMatrix = true;
             memory._path = undefined as any;
@@ -133,6 +133,7 @@ export class Traveler {
             state.stuckCount = 0;
         }
 
+        state.lastCoord = { x: bee.pos.x, y: bee.pos.y };
         bee.travelState = state;
 
         if (!memory._path || memory._path.length === 0) {
