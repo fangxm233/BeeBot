@@ -1,6 +1,7 @@
 import { BeeFactorty, ROLE_FILLER } from "Bee/BeeFactory";
 import { setups } from "beeSpawning/setups";
 import { WishConfig, WishManager } from "beeSpawning/WishManager";
+import { log } from "console/log";
 import { Process } from "process/Process";
 import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
@@ -31,7 +32,7 @@ export class ProcessFilling extends Process {
 
     public wishCreeps() {
         const config: WishConfig = { role: ROLE_FILLER, setup: setups[ROLE_FILLER].early, budget: Infinity };
-        this.wishManager.arrangeCyclingBees(ROLE_FILLER, setups[ROLE_FILLER].early, Infinity, ['allotedId']);
+        this.wishManager.arrangeCyclingBees(ROLE_FILLER, setups[ROLE_FILLER].early, Infinity);
         if (this.getCreepAndWishCount(ROLE_FILLER) == 0)
             this.wishManager.wishBee(config);
     }

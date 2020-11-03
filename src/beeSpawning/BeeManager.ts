@@ -1,5 +1,5 @@
 import { bees } from "Bee/Bee";
-import { BeeFactorty } from "Bee/BeeFactory";
+import { BeeFactorty, ROLE_FILLER } from "Bee/BeeFactory";
 import { log } from "console/log";
 import { repeater } from "event/Repeater";
 import { timer } from "event/Timer";
@@ -40,7 +40,10 @@ export class BeeManager {
             if (!spawn) continue;
 
             const availableEnergy = room.energyAvailable;
-            const capacity = room.energyCapacityAvailable;
+            let capacity = room.energyCapacityAvailable;
+            const filling = Process.getProcess<ProcessFilling>(roomName, PROCESS_FILLING);
+            if (filling?.bees[ROLE_FILLER].length == 0) capacity = availableEnergy;
+
             const body = wish.setup.generateCreepBody(wish.budget == Infinity ? capacity : wish.budget);
             const cost = calBodyCost(body);
             if (cost > availableEnergy) {
