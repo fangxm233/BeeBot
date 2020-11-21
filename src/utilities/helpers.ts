@@ -10,6 +10,10 @@ export function derefRoomPosition(protoPos: ProtoPos): RoomPosition {
 	return new RoomPosition(protoPos.x, protoPos.y, protoPos.roomName);
 }
 
+export function coordToRoomPosition(coord: Coord, roomName: string) {
+	return new RoomPosition(coord.x, coord.y, roomName);
+}
+
 export function getFreeCapacity(store: Store<ResourceConstant, any>, resourceType?: ResourceConstant): number {
 	if (isCommonStore(store)) return store.getFreeCapacity();
 	else return (store as StoreDefinition).getFreeCapacity(resourceType);

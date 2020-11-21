@@ -97,6 +97,11 @@ export function derefCoords(coordName: string, roomName: string): RoomPosition {
 	return new RoomPosition(parseInt(x, 10), parseInt(y, 10), roomName);
 }
 
+export function isCoordEqual(coord1: Coord, coord2: Coord) {
+	if (!coord1 || !coord2) return false;
+	return coord1.x == coord2.x && coord1.y == coord2.y;
+}
+
 export function getPosFromString(str: string | undefined | null): RoomPosition | undefined {
 	if (!str) return;
 	const posName = _.first(str.match(/(E|W)\d+(N|S)\d+:\d+:\d+/g) || []);
