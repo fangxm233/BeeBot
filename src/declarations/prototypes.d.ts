@@ -74,10 +74,14 @@ interface Room {
 	powerSpawn: StructurePowerSpawn | undefined;
 	extractor: StructureExtractor | undefined;
 	nuker: StructureNuker | undefined;
+	factory: StructureFactory | undefined;
+	invaderCore: StructureInvaderCore | undefined;
+
 	repairables: Structure[];
 	rechargeables: rechargeObjectType[];
 	sources: Source[];
 	mineral: Mineral | undefined;
+	deposits: Deposit[];
 	constructionSites: ConstructionSite[];
 }
 
@@ -114,9 +118,9 @@ interface RoomPosition {
 
 	lookForStructure<T extends StructureConstant>(structureType: T): TypeToStructure[T] | undefined;
 
-	isWalkable(ignoreCreeps?: boolean): boolean;
+	isWalkable(ignoreCreeps?: boolean, ignoreStructures?: boolean): boolean;
 
-	availableNeighbors(ignoreCreeps?: boolean): RoomPosition[];
+	availableNeighbors(ignoreCreeps?: boolean, ignoreStructures?: boolean): RoomPosition[];
 
 	getPositionAtDirection(direction: DirectionConstant, range?: number): RoomPosition;
 

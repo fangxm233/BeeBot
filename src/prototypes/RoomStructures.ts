@@ -1,34 +1,34 @@
 // Intra- and inter-tick structure caching, adapted from semperRabbit's IVM module
 
-import {getCacheExpiration} from '../utilities/utils';
+import { getCacheExpiration } from '../utilities/utils';
 
 const roomStructureIDs: { [roomName: string]: { [structureType: string]: string[] } } = {};
 const roomStructuresExpiration: { [roomName: string]: number } = {};
 
 const multipleList = [
-    STRUCTURE_SPAWN,        STRUCTURE_EXTENSION,    STRUCTURE_ROAD,         STRUCTURE_WALL,
-    STRUCTURE_RAMPART,      STRUCTURE_KEEPER_LAIR,  STRUCTURE_PORTAL,       STRUCTURE_LINK,
-    STRUCTURE_TOWER,        STRUCTURE_LAB,          STRUCTURE_CONTAINER,	STRUCTURE_POWER_BANK,
+	STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_ROAD, STRUCTURE_WALL,
+	STRUCTURE_RAMPART, STRUCTURE_KEEPER_LAIR, STRUCTURE_PORTAL, STRUCTURE_LINK,
+	STRUCTURE_TOWER, STRUCTURE_LAB, STRUCTURE_CONTAINER, STRUCTURE_POWER_BANK,
 ];
 
 const singleList = [
-    STRUCTURE_OBSERVER,     STRUCTURE_POWER_SPAWN,  STRUCTURE_EXTRACTOR,	STRUCTURE_NUKER,
-    STRUCTURE_FACTORY,      STRUCTURE_INVADER_CORE, 
+	STRUCTURE_OBSERVER, STRUCTURE_POWER_SPAWN, STRUCTURE_EXTRACTOR, STRUCTURE_NUKER,
+	STRUCTURE_FACTORY, STRUCTURE_INVADER_CORE,
 ];
 
 const notRepairable: string[] = [STRUCTURE_KEEPER_LAIR, STRUCTURE_PORTAL, STRUCTURE_POWER_BANK, STRUCTURE_INVADER_CORE];
 
 const STRUCTURE_TIMEOUT = 50;
 
-Room.prototype._refreshStructureCache = function() {
+Room.prototype._refreshStructureCache = function () {
 	// if cache is expired or doesn't exist
 	if (!roomStructuresExpiration[this.name]
 		|| !roomStructureIDs[this.name]
 		|| Game.time > roomStructuresExpiration[this.name]) {
 		roomStructuresExpiration[this.name] = getCacheExpiration(STRUCTURE_TIMEOUT);
 		roomStructureIDs[this.name] = _.mapValues(_.groupBy(this.find(FIND_STRUCTURES),
-															(s: Structure) => s.structureType),
-												  (structures: Structure[]) => _.map(structures, s => s.id));
+			(s: Structure) => s.structureType),
+			(structures: Structure[]) => _.map(structures, s => s.id));
 	}
 };
 
@@ -41,7 +41,7 @@ multipleList.forEach(type => {
 				this._refreshStructureCache();
 				if (roomStructureIDs[this.name][type]) {
 					return this['_' + type + 's'] = _.compact(_.map(roomStructureIDs[this.name][type],
-																	Game.getObjectById));
+						Game.getObjectById));
 				} else {
 					return this['_' + type + 's'] = [];
 				}
@@ -85,7 +85,7 @@ Object.defineProperty(Room.prototype, 'sources', {
 		if (!this._sources) {
 			this._sources = this.find(FIND_SOURCES);
 		}
-		return this.find(FIND_SOURCES);
+		return this._sources;
 	},
 	configurable: true,
 });
@@ -100,13 +100,22 @@ Object.defineProperty(Room.prototype, 'mineral', {
 	configurable: true,
 });
 
+Object.defineProperty(Room.prototype, 'deposits', {
+	get() {
+		if (!this._deposits) {
+			this._deposits = this.find(FIND_DEPOSITS);
+		}
+		return this._deposits;
+	}
+})
+
 Object.defineProperty(Room.prototype, 'repairables', {
 	get() {
 		if (!this._repairables) {
 			this._refreshStructureCache();
 			if (roomStructureIDs[this.name].repairables) {
 				return this._repairables = _.compact(_.map(roomStructureIDs[this.name].repairables,
-														   Game.getObjectById));
+					Game.getObjectById));
 			} else {
 				let repairables: Structure[] = [];
 				for (const structureType of singleList) {
@@ -137,10 +146,10 @@ Object.defineProperty(Room.prototype, 'walkableRamparts', {
 			this._refreshStructureCache();
 			if (roomStructureIDs[this.name].walkableRamparts) {
 				return this._walkableRamparts = _.compact(_.map(roomStructureIDs[this.name].walkableRamparts,
-																Game.getObjectById));
+					Game.getObjectById));
 			} else {
 				const walkableRamparts = _.filter(this.ramparts,
-												  (r: StructureRampart) => r.pos.isWalkable(true));
+					(r: StructureRampart) => r.pos.isWalkable(true));
 				roomStructureIDs[this.name].walkableRamparts = _.map(walkableRamparts, r => r.id);
 				return this._walkableRamparts = walkableRamparts;
 			}
@@ -154,9 +163,9 @@ Object.defineProperty(Room.prototype, 'rechargeables', {
 	get() {
 		if (!this._rechargeables) {
 			this._rechargeables = [...this.storageUnits,
-								   ...this.droppedEnergy,
-								   ...this.tombstones,
-								   ...this.ruins];
+			...this.droppedEnergy,
+			...this.tombstones,
+			...this.ruins];
 		}
 		return this._rechargeables;
 	},
