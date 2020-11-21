@@ -10,6 +10,7 @@ export const PROCESS_MINE_SOURCE = 'mineSource';
 export const PROCESS_UPGRADE = 'upgrade';
 export const PROCESS_BASE_WORK = 'baseWork';
 export const PROCESS_BOOST = 'boost';
+export const PROCESS_SCOUTING = 'scouting';
 
 @profile
 export class Processes {
