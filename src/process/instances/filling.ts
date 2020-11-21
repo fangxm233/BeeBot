@@ -8,6 +8,8 @@ import { profile } from "profiler/decorator";
 
 @profile
 export class ProcessFilling extends Process {
+    public energyEnough = true;
+
     constructor(roomName: string) {
         super(roomName, PROCESS_FILLING);
         this.wishManager = new WishManager(roomName, roomName, this);

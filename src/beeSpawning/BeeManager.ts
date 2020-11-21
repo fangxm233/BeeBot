@@ -42,9 +42,10 @@ export class BeeManager {
             const availableEnergy = room.energyAvailable;
             let capacity = room.energyCapacityAvailable;
             const filling = Process.getProcess<ProcessFilling>(roomName, PROCESS_FILLING);
-            if (filling?.bees[ROLE_FILLER].length == 0) capacity = availableEnergy;
+            if (filling?.bees[ROLE_FILLER].length == 0 || !filling?.energyEnough) capacity = availableEnergy;
 
             const body = wish.setup.generateCreepBody(wish.budget == Infinity ? capacity : wish.budget);
+            if (body.length == 0) return; // TODO: 对能量不足做出反应
             const cost = calBodyCost(body);
             if (cost > availableEnergy) {
                 const process = Process.getProcess<ProcessFilling>(roomName, PROCESS_FILLING);
