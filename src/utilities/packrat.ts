@@ -225,7 +225,7 @@ PERMACACHE._unpackedRoomNames = PERMACACHE._unpackedRoomNames || {};
 /**
  * Packs a roomName as a single utf-16 character. Character values are stored on permacache.
  */
-function packRoomName(roomName: string): string {
+export function packRoomName(roomName: string): string {
     if (PERMACACHE._packedRoomNames[roomName] === undefined) {
         const coordinateRegex = /(E|W)(\d+)(N|S)(\d+)/g;
         const match = coordinateRegex.exec(roomName)!;
@@ -263,7 +263,7 @@ function packRoomName(roomName: string): string {
 /**
  * Packs a roomName as a single utf-16 character. Character values are stored on permacache.
  */
-function unpackRoomName(char: string): string {
+export function unpackRoomName(char: string): string {
     if (PERMACACHE._unpackedRoomNames[char] === undefined) {
         const num = char.charCodeAt(0) - 65;
         const { q, x, y } = {
@@ -343,6 +343,26 @@ export function unpackPosList(chars: string): RoomPosition[] {
         posList.push(unpackPos(chars.substr(i, 2)));
     }
     return posList;
+}
+
+export function packNumber(num: string): string {
+    let result = '';
+    // tslint:disable-next-line: no-var-keyword
+    for (var i = 0; i + 3 < num.length; i += 4) {
+        result += String.fromCharCode(Number.parseInt(num.substr(i, 4), 10));
+    }
+    if (i < num.length) {
+        result += String.fromCharCode(Number.parseInt(num.substr(i, num.length - i), 10));
+    }
+    return result;
+}
+
+export function unpackNumber(chars: string): string {
+    let result = '';
+    for (let i = 0; i < chars.length; i++) {
+        result += chars.charCodeAt(i).toString(10);
+    }
+    return result;
 }
 
 
