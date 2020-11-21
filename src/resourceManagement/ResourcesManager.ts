@@ -1,5 +1,6 @@
 import { Bee } from "Bee/Bee";
 import { profile } from "profiler/decorator";
+import { withdrawTargetType } from "tasks/instances/task_withdraw";
 import { Task } from "tasks/Task";
 import { Tasks } from "tasks/Tasks";
 
@@ -7,8 +8,9 @@ import { Tasks } from "tasks/Tasks";
 export class ResourcesManager {
 
     public static getEnergySource(bee: Bee, minAmount?: number): Task | null {
-        const remain = Math.max(bee.store.getFreeCapacity() * 0.5, minAmount || 0);
-        const candidates: (Tombstone | StructureStorage | StructureContainer | StructureLink | StructureTerminal | Resource | Ruin)[] = bee.room.tombstones.filter(tomb => tomb.store.energy >= remain);
+        const remain = minAmount === undefined ? bee.store.getFreeCapacity() * 0.5 : minAmount;
+        const candidates: (withdrawTargetType | Resource)[] =
+            bee.room.tombstones.filter(tomb => tomb.store.energy >= remain);
         candidates.push(...bee.room.droppedEnergy.filter(energy => energy.amount > remain));
         candidates.push(...bee.room.ruins.filter(ruin => ruin.store.energy >= remain));
 
