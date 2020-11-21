@@ -1,4 +1,5 @@
 import { USER_NAME, USE_ACTION_COUNTER } from "../config"
+import { STATS_SEGMENT } from "dataManagement/segmentManager"
 
 // import config from '/etc/stats'
 // import { Logger } from '/log'
@@ -29,7 +30,7 @@ const config = {
   format: 'plain', // Or JSON, only applies to Graphite driver
   types: ['segment'], // memory, segment, console (the agent limits memory and segment to 15 second poll intervals)
   key: '__stats',
-  segment: 0,
+  segment: STATS_SEGMENT,
   baseStats: true,
   measureMemoryParse: false,
   usermap: { // use module.user in console to get userID for mapping. Defaults to username of Spawn1 if not defined
@@ -42,7 +43,7 @@ const CONFIG = {
   types: ['memory'], // memory, segment, console
   key: '__stats',
   ticksToKeep: 20,
-  segmentBase: 0,
+  segmentBase: STATS_SEGMENT,
   baseStats: true,
   measureMemoryParse: false,
   divider: ';', // "\n",
@@ -52,22 +53,22 @@ const CONFIG = {
 }
 
 export class InfluxDB {
-  get mem () {
+  get mem() {
     Memory[this.opts.key] = Memory[this.opts.key] || { index: 0, last: 0 }
     return Memory[this.opts.key]
   }
 
-  register () {}
+  register() { }
 
-  pretick () {
+  pretick() {
     this.reset()
   }
 
-  posttick () {
+  posttick() {
     this.commit()
   }
 
-  constructor (opts = {}) {
+  constructor(opts = {}) {
     this.opts = Object.assign(CONFIG, opts)
     global.influxdb = this
     this.reset()
@@ -76,7 +77,7 @@ export class InfluxDB {
     this.user = USER_NAME // _.find(Game.spawns, v => v).owner.username
   }
 
-  reset () {
+  reset() {
     if (Game.time === this.startTick) return // Don't reset on new tick
     this.stats = []
     this.cpuReset = Game.cpu.getUsed()
@@ -87,7 +88,7 @@ export class InfluxDB {
       delete global.Memory
       global.Memory = global.LastMemory
       RawMemory._parsed = global.LastMemory
-    //   this.log.info('Tick has same GID!')
+      //   this.log.info('Tick has same GID!')
     } else {
       Memory // eslint-disable-line no-unused-expressions
       global.LastMemory = RawMemory._parsed
@@ -104,15 +105,15 @@ export class InfluxDB {
     // this.log.info(`Entry: ${this.cpuReset.toFixed(3)} - Exit: ${(this.endReset - this.cpuReset).toFixed(3)} - Mem: ${this.memoryParseTime.toFixed(3)} (${(RawMemory.get().length / 1024).toFixed(2)}kb)`)
   }
 
-  addSimpleStat (name, value = 0) {
+  addSimpleStat(name, value = 0) {
     this.addStat(name, {}, { value })
   }
 
-  addStat (name, tags = {}, values = {}) {
+  addStat(name, tags = {}, values = {}) {
     this.stats.push({ name, tags, values })
   }
 
-  addBaseStats () {
+  addBaseStats() {
     this.addStat('time', {}, {
       tick: Game.time,
       timestamp: Date.now(),
@@ -177,7 +178,7 @@ export class InfluxDB {
     })
   }
 
-  commit () {
+  commit() {
     const start = Game.cpu.getUsed()
     if (this.opts.baseStats) this.addBaseStats()
     let stats = `text/${this.opts.driver.toLowerCase()}\n`
@@ -200,13 +201,13 @@ export class InfluxDB {
     }
   }
 
-  formatInfluxDB (stat) {
+  formatInfluxDB(stat) {
     const { name, tags, values } = stat
     Object.assign(tags, { user: this.user, shard: this.shard })
     return `${name},${this.kv(tags)} ${this.kv(values)}\n`
   }
 
-  formatGraphite (stat) {
+  formatGraphite(stat) {
     const { name, tags, values } = stat
     if (!this.prefix) {
       this.prefix = `${this.shard}` // .${this.shard}`
@@ -215,7 +216,7 @@ export class InfluxDB {
     return this.kv(values, ' ').map(v => `${pre}.${v}\n`).join('')
   }
 
-  kv (obj, sep = '=') {
+  kv(obj, sep = '=') {
     return _.map(obj, (v, k) => `${k}${sep}${v}`)
   }
 }
