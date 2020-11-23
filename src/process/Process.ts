@@ -166,7 +166,7 @@ export class Process {
     public sleep(targetTime: number) {
         this.state = STATE_SLEEPING;
         this.memory.slt = targetTime;
-        timer.callBackAtTick(this, targetTime, this.awake);
+        timer.callBackAtTick(targetTime, () => this.awake());
         log.debug(this.roomName, this.processName, this.id, 'slept until', targetTime);
     }
     public wait() {

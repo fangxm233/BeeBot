@@ -151,7 +151,7 @@ export class ProcessWishInvoker {
         if (!process) return;
         this.processId.push(id);
         // 将请求延后到下一tick来防止初始化未完成
-        timer.callBackAtTick(undefined, timeAfterTick(1), () => process.wishCreeps());
+        timer.callBackAtTick(timeAfterTick(1), () => process.wishCreeps());
     }
 }
 

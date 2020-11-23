@@ -56,7 +56,7 @@ export class WishManager {
                     extraMemory.forEach(s => memory[s] = bee.memory[s]);
                 }
 
-                bee.cyclingCallbackId = timer.callBackAtTick(this, timeAfterTick(bee.ticksToLive - bee.arriveTick),
+                bee.cyclingCallbackId = timer.callBackAtTick(timeAfterTick(bee.ticksToLive - bee.arriveTick),
                     () => this.wishBee({ bee: BeeFactorty.getInstance(role, this.process), setup, budget, extraMemory: memory }));
             }
         }
