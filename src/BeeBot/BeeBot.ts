@@ -1,4 +1,8 @@
+import { BaseConstructor } from "basePlanner/BaseConstructor";
+import { RoomPlanner } from "basePlanner/RoomPlanner";
+import { event } from "event/Event";
 import { profile } from "profiler/decorator";
+import { getAllColonyRooms } from "utilities/utils";
 
 @profile
 export class BeeBot {
@@ -6,7 +10,12 @@ export class BeeBot {
         return [];
     }
 
-    public static myRooms(): Room[] {
-        return [];
+    public static colonies(): Room[] {
+        return getAllColonyRooms();
+    }
+
+    public static OnGlobalReseted() {
+        this.colonies().forEach(room => BaseConstructor.get(room.name)
+            && event.addEventListener('onRclUpgrade', () => RoomPlanner.replanRoads(room.name)));
     }
 }
