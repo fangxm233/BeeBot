@@ -11,5 +11,5 @@ BeeFactorty.registerBee(ROLE_FILLER, BeeFiller);
 BeeFactorty.registerBee(ROLE_MINER, BeeMiner);
 BeeFactorty.registerBee(ROLE_CARRIER, BeeCarrier);
 BeeFactorty.registerBee(ROLE_MANAGER, BeeManager);
-BeeFactorty.registerBee(ROLE_UPGRADER, BeeUpgrader);
 BeeFactorty.registerBee(ROLE_WORKER, BeeWorker);
+BeeFactorty.registerBee(ROLE_UPGRADER, BeeUpgrader);
