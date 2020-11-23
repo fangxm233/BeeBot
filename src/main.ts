@@ -23,12 +23,15 @@ import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
 import { Process } from 'process/Process';
 import { ProcessFilling } from 'process/instances/filling';
-import { Mem } from 'memory/Memory';
+import { Mem } from 'dataManagement/Memory';
 import { log } from 'console/log';
 import { ProcessMineSource } from 'process/instances/mineSource';
-import { ProcessBoost } from 'process/instances/boost';
 import { ProcessUpgrade } from 'process/instances/upgrade';
 import { ProcessBaseWork } from 'process/instances/baseWork';
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { Intel } from 'dataManagement/Intel';
+import { SegmentManager } from 'dataManagement/segmentManager';
+import { BeeBot } from 'BeeBot/BeeBot';
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();
@@ -50,6 +53,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
             const upgrade = Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)!;
             upgrade.setParent(processId);
         }
+        // RoomPlanner.planRoom(roomName);
     }
 
     Processes.runAllProcesses();
@@ -58,6 +62,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
     timer.checkForTimesUp();
 
     BeeManager.run();
+    Intel.handleRequests();
+    SegmentManager.applySegments();
 
     stats.commit();
     if (USE_ACTION_COUNTER) actionsCounter.save(3000);
@@ -65,5 +71,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
 function globalReset() {
     log.info('global reset');
+    RoomPlanner.deserializeData();
     Processes.restoreProcesses();
+    BeeBot.OnGlobalReseted();
 }
