@@ -192,8 +192,7 @@ export class Bee {
         (target as any)._arrangedCallback = true;
         timer.callBackAtTick(timeAfterTick(1), () => {
             if (Game.getObjectById(target.id)) return;
-            if (!target.room!.lookForAt(LOOK_STRUCTURES, target.pos.x, target.pos.y)
-                .filter(structure => structure.structureType == target.structureType)[0]) return;
+            if (!target.pos.lookForStructure(target.structureType)) return;
             event.invokeEvent('onBuildComplete', { pos: target.pos, type: target.structureType });
         });
         return this.creep.build(target);
