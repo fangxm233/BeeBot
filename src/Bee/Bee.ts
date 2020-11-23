@@ -1,6 +1,7 @@
 import { TargetCache } from "caching/caching";
 import { USER_NAME } from "config";
 import { isStoreStructure } from "declarations/typeGuards";
+import { event } from "event/Event";
 import { timer } from "event/Timer";
 import { Traveler } from "movement/Traveler";
 import { Process } from "process/Process";
@@ -8,7 +9,6 @@ import { profile } from "profiler/decorator";
 import { ITask } from "tasks";
 import { initializeTask } from "tasks/initializer";
 import { getFreeCapacity, timeAfterTick } from "utilities/helpers";
-import { BeeFactorty } from "./BeeFactory";
 
 export const bees: { [beeName: string]: Bee } = {};
 
@@ -188,6 +188,14 @@ export class Bee {
     }
 
     public build(target: ConstructionSite) {
+        if ((target as any)._arrangedCallback) return this.creep.build(target);
+        (target as any)._arrangedCallback = true;
+        timer.callBackAtTick(timeAfterTick(1), () => {
+            if (Game.getObjectById(target.id)) return;
+            if (!target.room!.lookForAt(LOOK_STRUCTURES, target.pos.x, target.pos.y)
+                .filter(structure => structure.structureType == target.structureType)[0]) return;
+            event.invokeEvent('onBuildComplete', { pos: target.pos, type: target.structureType });
+        });
         return this.creep.build(target);
     }
 
@@ -289,7 +297,7 @@ export class Bee {
 
     public suicide() {
         if (this.spawning) {
-            timer.callBackAtTick(this, timeAfterTick(10), this.suicide);
+            timer.callBackAtTick(timeAfterTick(10), () => this.suicide());
             return ERR_BUSY;
         }
         return this.creep.suicide();
@@ -307,6 +315,12 @@ export class Bee {
     }
 
     public upgradeController(target: StructureController) {
+        if ((target as any)._arrangedCallback) return this.creep.upgradeController(target);
+        (target as any)._arrangedCallback = true;
+        timer.callBackAtTick(timeAfterTick(1), () => {
+            if (Game.getObjectById(target.id)!.level > target.level)
+                event.invokeEvent('onRclUpgrade');
+        });
         return this.creep.upgradeController(target);
     }
 
@@ -337,7 +351,7 @@ export class Bee {
     }
 
     public sleep(tick: number) {
-        timer.callBackAtTick(this, timeAfterTick(tick), this.awake);
+        timer.callBackAtTick(timeAfterTick(tick), () => this.awake());
         this.slept = true;
     }
 
