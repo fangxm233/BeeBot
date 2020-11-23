@@ -1,10 +1,11 @@
 import { log } from "console/log";
 import { Intel } from "dataManagement/Intel";
 import { ROOM_DATA_SEGMENT, SegmentManager } from "dataManagement/segmentManager";
+import { timer } from "event/Timer";
 import { profile } from "profiler/decorator";
-import { coordToRoomPosition } from "utilities/helpers";
+import { coordToRoomPosition, timeAfterTick } from "utilities/helpers";
 import { packCoord, packCoordList, packRoomName, unpackCoord, unpackCoordList, unpackRoomName } from "utilities/packrat";
-import { isCoordEqual } from "utilities/utils";
+import { isCoordEqual, printRoomName } from "utilities/utils";
 import { Visualizer } from "visuals/Visualizer";
 import { RoadPlanner } from "./RoadPlanner";
 import { exits, structureLayout } from "./structurePreset";
@@ -42,7 +43,13 @@ for (const rcl in structureLayout) {
 export class RoomPlanner {
     private static roomData: { [roomName: string]: RoomData } = {};
 
-    public static planRoom(baseName: string, to?: string): PlanRoomResult {
+    public static planRoom(baseName: string, to?: string, loop?: boolean) {
+        const result = this.planRoomCore(baseName, to);
+        if (result.intelMissing && loop) timer.callBackAtTick(timeAfterTick(1), () => this.planRoom(baseName, to, true));
+        return result;
+    }
+
+    public static planRoomCore(baseName: string, to?: string): PlanRoomResult {
         const ownedRoom = !to;
         const result: RoomData = { ownedRoom } as any;
 
@@ -155,7 +162,46 @@ export class RoomPlanner {
         }
 
         this.roomData[target] = result;
+        this.serializeData();
         return { result };
+    }
+
+    public static replanRoads(baseName: string) { // TODO: 刷新CostMatrix
+        const data = this.getRoomData(baseName);
+        if (!data) {
+            log.warning(`RoomData of ${printRoomName(baseName)} does not exists! replaning...`);
+            this.planRoom(baseName, undefined, true);
+            return;
+        }
+
+        const generatePath = (coord: Coord) => {
+            const result = roadPlanner.generatePathTo(coordToRoomPosition(coord, baseName));
+            if (!result.path) {
+                log.warning(`Failed to replan roads of ${printRoomName(baseName)}!`);
+                return;
+            }
+            const path = roadPlanner.cutPath(result.path);
+            roadPlanner.updateMatrix(path);
+            return path;
+        }
+
+        const base = data.basePos!;
+        const roadPlanner = new RoadPlanner(baseName, base, true);
+        for (let i = 0; i < data.harvestPos.source.length; i++) {
+            const path = generatePath(data.harvestPos.source[i]);
+            if (!path) return;
+            data.sourcesPath[i] = { path, length: path.length };
+        }
+
+        let path = generatePath(data.containerPos!.controller);
+        if (!path) return;
+        data.controllerPath = { path, length: path.length };
+
+        path = generatePath(data.harvestPos.mineral!);
+        if (!path) return;
+        data.mineralPath = { path, length: path.length };
+
+        this.serializeData();
     }
 
     public static findBasePos(roomName: string): Coord | undefined {

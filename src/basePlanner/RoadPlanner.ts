@@ -11,13 +11,11 @@ export const EXISTING_PATH_COST = PLAIN_COST - 1;
 @profile
 export class RoadPlanner {
     public roomName: string;
-    public room: Room;
     private base: Coord;
     private isColony: boolean;
 
     constructor(roomName: string, base: Coord, isColony: boolean) {
         this.roomName = roomName;
-        this.room = Game.rooms[roomName];
         this.base = base;
         this.isColony = isColony;
     }
@@ -30,7 +28,7 @@ export class RoadPlanner {
             maxOps: 1e4, heuristicWeight: 1, plainCost: PLAIN_COST, swampCost: SWAMP_COST,
             roomCallback: roomName => {
                 if (this.isColony) {
-                    if (roomName == this.room.name) return new PathFinder.CostMatrix();
+                    if (roomName == this.roomName) return new PathFinder.CostMatrix();
                     else return false;
                 }
                 const matrix = Intel.getRoomCostMatrix(roomName);

@@ -1,3 +1,5 @@
+import { log } from "console/log";
+
 // tslint:disable: object-literal-sort-keys
 export const structureLayout: {
     [rcl: number]: {
@@ -37,10 +39,7 @@ export const structureLayout: {
             "spawn": [
                 { "x": 4, "y": 8 }
             ],
-            "road": [
-                { "x": 2, "y": 5 }, { "x": 1, "y": 6 }, { "x": 0, "y": 7 }, { "x": 0, "y": 8 }, { "x": 1, "y": 9 }, { "x": 2, "y": 10 },
-                { "x": 3, "y": 10 }, { "x": 4, "y": 9 }, { "x": 3, "y": 6 }, { "x": 4, "y": 7 }, { "x": 5, "y": 8 }, { "x": 4, "y": 6 }
-            ],
+            "road": [],
             "tower": [],
             "storage": [],
             "terminal": [],
@@ -66,10 +65,7 @@ export const structureLayout: {
             "spawn": [
                 { "x": 4, "y": 8 }
             ],
-            "road": [
-                { "x": 2, "y": 5 }, { "x": 1, "y": 6 }, { "x": 0, "y": 7 }, { "x": 0, "y": 8 }, { "x": 1, "y": 9 }, { "x": 2, "y": 10 },
-                { "x": 3, "y": 10 }, { "x": 4, "y": 9 }, { "x": 3, "y": 6 }, { "x": 4, "y": 7 }, { "x": 5, "y": 8 }, { "x": 4, "y": 6 }
-            ],
+            "road": [],
             "tower": [
                 { "x": 5, "y": 7 }
             ],
@@ -351,3 +347,10 @@ export const exits: Coord[] = [
     { x: -1, y: 1 }, { x: -1, y: 4 }, { x: -1, y: 6 }, { x: -1, y: 9 }, { x: 1, y: -1 }, { x: 4, y: -1 },
     { x: 1, y: 11 }, { x: 4, y: 11 }, { x: 6, y: 11 }, { x: 9, y: 11 }, { x: 11, y: 6 }, { x: 11, y: 9 }
 ]
+
+export const extConstructOrder: Coord[] = [];
+for (const level in structureLayout) {
+    extConstructOrder.push(...structureLayout[level].buildings[STRUCTURE_EXTENSION].filter(
+        coord => !extConstructOrder.find(c => c.x == coord.x && c.y == coord.y)
+    ));
+}
