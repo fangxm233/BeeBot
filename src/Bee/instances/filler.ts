@@ -13,7 +13,7 @@ export class BeeFiller extends Bee {
         this.task?.isValid();
         if (!this.task) {
             if (!this.store.energy) {
-                this.task = ResourcesManager.getEnergySource(this, 0);
+                this.task = ResourcesManager.getEnergySource(this, 1);
                 this.process.energyEnough = !!this.task;
             } else {
                 const targets: (StructureSpawn | StructureExtension)[] = [...this.room.spawns];
