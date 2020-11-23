@@ -1,3 +1,4 @@
+import { USER_NAME } from "config";
 import { isCommonStore } from "declarations/typeGuards";
 
 // Universal reference properties
@@ -30,4 +31,8 @@ export function timeAfterTick(tick: number): number {
 
 export function calBodyCost(body: BodyPartConstant[]) {
 	return _.sum(body, b => BODYPART_COST[b]);
+}
+
+export function isOwner(object: any): boolean {
+	return object.owner && object.owner.username == USER_NAME;
 }
