@@ -15,10 +15,11 @@ export class Repeater {
         _.forEach(this.actions, (actions, interval) => {
             if (Game.time % (interval! as any) !== 0) return;
             for (let i = 0; i < actions.length; i++) {
+                if (!actions[i]) continue;
                 const { actionThis, action, fallBack } = actions[i];
                 const code = action.apply(actionThis);
                 if (code !== OK) {
-                    fallBack.apply(actionThis, actionThis);
+                    fallBack.apply(actionThis, [actionThis]);
                     actions[i] = undefined as any;
                 }
             }
