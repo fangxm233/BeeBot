@@ -20,12 +20,24 @@ interface ProcessRegistration {
     constructor: typeof Process,
 }
 
+@profile
 export class Process {
 
     public static processRegistry: ProcessRegistration[] = [];
 
-    public static registerProcess(processName: string, suspendBucket: number, constructor: typeof Process, wishListInterval: number = -1, requiredRoles: string[] = []) {
-        this.processRegistry.push({ processName, priotiry: this.processRegistry.length, suspendBucket, constructor, wishListInterval, requiredRoles });
+    public static registerProcess(processName: string,
+        suspendBucket: number,
+        constructor: typeof Process,
+        wishListInterval: number = -1,
+        requiredRoles: string[] = []) {
+        this.processRegistry.push({
+            processName,
+            priotiry: this.processRegistry.length,
+            suspendBucket,
+            constructor,
+            wishListInterval,
+            requiredRoles
+        });
     }
 
     public static getProcessRegistration(processName: string) {
@@ -175,7 +187,8 @@ export class Process {
     }
     public suspend() {
         this.state = STATE_SUSPENDED;
-        if (this.subProccesses.length) this.subProccesses.map(id => Process.getProcess<Process>(id)).forEach(p => p && p.suspend());
+        if (this.subProccesses.length) this.subProccesses.map(
+            id => Process.getProcess<Process>(id)).forEach(p => p && p.suspend());
         log.debug(this.roomName, this.processName, this.id, 'suspended');
     }
     public close(killAllCreep: boolean = true) {
@@ -188,7 +201,8 @@ export class Process {
         this.closed = true;
 
         if (killAllCreep) _.forEach(this.bees, (bees, role) => this.foreachBee(role!, bee => bee.suicide()));
-        if (this.subProccesses.length) this.subProccesses.map(id => Process.getProcess<Process>(id)).forEach(p => p && p.close(killAllCreep));
+        if (this.subProccesses.length) this.subProccesses.map(
+            id => Process.getProcess<Process>(id)).forEach(p => p && p.close(killAllCreep));
 
         log.debug(this.roomName, this.processName, this.id, 'closed');
     }
@@ -228,21 +242,27 @@ export class Process {
 
     public static getProcess<T>(a1: string, a2?: string, a3?: string, a4?: any): T | undefined {
         if (a4 !== undefined && a3 !== undefined) {
-            return _.find(this.processes[a1], process => process && process.processName == a2 && process[a3] === a4) as unknown as T;
+            return _.find(this.processes[a1],
+                process => process && process.processName == a2 && process[a3] === a4) as unknown as T;
         }
 
         if (a2 !== undefined) {
-            return _.find(this.processesByType[a2], process => process && process.roomName == a1) as unknown as T;
+            return _.find(this.processesByType[a2],
+                process => process && process.roomName == a1) as unknown as T;
         }
 
         return this.processesById[a1] as unknown as T;
     }
 
     public static startProcess(process: Process): string {
-        if (!this.processes[process.roomName]) this.processes[process.roomName] = {};
-        if (!Memory.processes[process.processName]) Memory.processes[process.processName] = {};
-        if (!Memory.processes[process.processName][process.roomName]) Memory.processes[process.processName][process.roomName] = [];
-        if (!this.processesByType[process.processName]) this.processesByType[process.processName] = {};
+        if (!this.processes[process.roomName])
+            this.processes[process.roomName] = {};
+        if (!Memory.processes[process.processName])
+            Memory.processes[process.processName] = {};
+        if (!Memory.processes[process.processName][process.roomName])
+            Memory.processes[process.processName][process.roomName] = [];
+        if (!this.processesByType[process.processName])
+            this.processesByType[process.processName] = {};
 
         const free = getFreeKey(Memory.processes[process.processName][process.roomName]);
         process.id = free;
@@ -253,7 +273,8 @@ export class Process {
         process.memory = Memory.processes[process.processName][process.roomName][free];
 
         const registration = this.processRegistry.find(r => r.processName == process.processName);
-        if (registration && registration.wishListInterval != -1) BeeManager.addProcess(process.fullId, registration.wishListInterval);
+        if (registration && registration.wishListInterval != -1)
+            BeeManager.addProcess(process.fullId, registration.wishListInterval);
 
         log.debug(process.roomName, 'process', process.processName, process.id, 'started');
         return process.fullId;
@@ -265,7 +286,8 @@ export class Process {
         this.processesByType[process.processName][process.fullId] = process;
 
         const registration = this.processRegistry.find(r => r.processName == process.processName);
-        if (registration && registration.wishListInterval != -1) BeeManager.addProcess(process.fullId, registration.wishListInterval);
+        if (registration && registration.wishListInterval != -1)
+            BeeManager.addProcess(process.fullId, registration.wishListInterval);
 
         log.debug(process.roomName, 'process', process.processName, process.id, 'added');
     }
