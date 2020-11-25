@@ -6,7 +6,7 @@ import { BeeMiner } from "./instances/miner";
 import { BeeUpgrader } from "./instances/upgrader";
 import { BeeWorker } from "./instances/worker";
 
-// 注册顺序将会决定role的优先级 先注册的优先级高
+// 注册顺序将会决定role的优先级 先注册的初始优先级高
 BeeFactorty.registerBee(ROLE_FILLER, BeeFiller);
 BeeFactorty.registerBee(ROLE_MINER, BeeMiner);
 BeeFactorty.registerBee(ROLE_CARRIER, BeeCarrier);

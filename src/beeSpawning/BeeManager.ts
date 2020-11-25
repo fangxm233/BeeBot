@@ -1,5 +1,5 @@
 import { bees } from "Bee/Bee";
-import { BeeFactorty, ROLE_FILLER } from "Bee/BeeFactory";
+import { ROLE_FILLER } from "Bee/BeeFactory";
 import { log } from "console/log";
 import { repeater } from "event/Repeater";
 import { timer } from "event/Timer";
@@ -8,31 +8,30 @@ import { Process, STATE_ACTIVE } from "process/Process";
 import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { calBodyCost, timeAfterTick } from "utilities/helpers";
-import { PriorityQueue } from "utilities/PriorityQueue";
 import { getFreeKey } from "utilities/utils";
 import { BeeWish } from "./BeeWish";
+import { PriorityManager } from "./PriorityManager";
 
 @profile
 export class BeeManager {
     public static collectors: ProcessWishInvoker[] = [];
-    public static wishes: { [roomName: string]: PriorityQueue<BeeWish> } = {};
+    public static wishes: { [roomName: string]: { [role in ALL_ROLES]: BeeWish[] } } = {};
 
     public static run() {
         for (const roomName in this.wishes) {
-            const queue = this.wishes[roomName];
-            if (!queue) continue;
             const room = Game.rooms[roomName];
             if (!room) {
                 this.wishes[roomName] = undefined as any;
                 continue;
             }
-            if (!queue.count) continue;
-            const wish = queue.peek();
+
+            if (!this.wishCount(roomName)) continue;
+            const wish = this.peekWish(roomName);
             if (!wish) continue;
 
             const process = Process.getProcess<Process>(wish.processId);
             if (!process) {
-                queue.dequeue();
+                this.dequeueWish(roomName);
                 continue;
             }
 
@@ -44,7 +43,7 @@ export class BeeManager {
             const filling = Process.getProcess<ProcessFilling>(roomName, PROCESS_FILLING);
             if (filling?.bees[ROLE_FILLER].length == 0 || !filling?.energyEnough) capacity = availableEnergy;
 
-            const body = wish.setup.generateCreepBody(wish.budget == Infinity ? capacity : wish.budget);
+            const body = wish.setup.generateCreepBody(wish.budget == Infinity ? Math.max(capacity, 300) : wish.budget);
             if (body.length == 0) return; // TODO: 对能量不足做出反应
             const cost = calBodyCost(body);
             if (cost > availableEnergy) {
@@ -53,7 +52,7 @@ export class BeeManager {
                 continue;
             }
 
-            queue.dequeue();
+            this.dequeueWish(roomName);
             wish.spawned = true;
             let name = wish.name;
             if (!name) name = wish.role + '_' + getFreeKey(bees, wish.role + '_');
@@ -62,6 +61,7 @@ export class BeeManager {
                 wish.bee.creep = Game.creeps[name];
                 bees[name] = wish.bee;
                 process.registerBee(wish.bee, wish.role);
+                PriorityManager.arrangePriority(roomName);
             } else {
                 log.error(`can't spawn creep! code: ${code} name: ${name} body: ${body}`);
             }
@@ -70,6 +70,7 @@ export class BeeManager {
 
     public static clearDiedBees() {
         const processToResfresh: { [name: string]: Process } = {};
+        const roomsToArrange: string[] = [];
 
         for (const beeName in bees) {
             const bee = bees[beeName];
@@ -81,11 +82,13 @@ export class BeeManager {
                     bee.process.removeBee(beeName);
                     processToResfresh[bee.process.fullId] = bee.process;
                 }
+                if (!_.contains(roomsToArrange, bee.process.roomName)) roomsToArrange.push(bee.process.roomName);
                 bees[beeName] = undefined as any;
                 if (Memory.creeps[beeName]) Memory.creeps[beeName] = undefined as any;
             }
         }
         _.forEach(processToResfresh, process => process.wishCreeps());
+        roomsToArrange.forEach(roomName => PriorityManager.arrangePriority(roomName));
 
         // 只是检查下没有漏掉的项
         if (Game.time % 100 == 0) {
@@ -107,8 +110,27 @@ export class BeeManager {
     }
 
     public static wishBee(wish: BeeWish) {
-        if (!this.wishes[wish.spawnRoom]) this.wishes[wish.spawnRoom] = new PriorityQueue();
-        this.wishes[wish.spawnRoom].enqueue(wish, BeeFactorty.getRolePriority(wish.role));
+        if (!this.wishes[wish.spawnRoom]) this.wishes[wish.spawnRoom] = {} as any;
+        if (!this.wishes[wish.spawnRoom][wish.role]) this.wishes[wish.spawnRoom][wish.role] = [];
+        this.wishes[wish.spawnRoom][wish.role].push(wish);
+    }
+
+    private static peekWish(roomName: string): BeeWish | undefined {
+        const roleWishes = this.wishes[roomName];
+        const wishes = _.min(roleWishes,
+            (wishes, role) => wishes.length ? PriorityManager.getPriority(roomName, role! as any) : Infinity);
+        return _.first(wishes);
+    }
+
+    private static dequeueWish(roomName: string): BeeWish | undefined {
+        const roleWishes = this.wishes[roomName];
+        const wishes = _.min(roleWishes,
+            (wishes, role) => wishes.length ? PriorityManager.getPriority(roomName, role! as any) : Infinity);
+        return wishes.shift();
+    }
+
+    private static wishCount(roomName: string) {
+        return _.sum(this.wishes[roomName], wishes => wishes.length);
     }
 
     public static addProcess(id: string, interval: number) {

@@ -1,8 +1,12 @@
 import { BaseConstructor } from "basePlanner/BaseConstructor";
 import { RoomPlanner } from "basePlanner/RoomPlanner";
+import { PriorityManager } from "beeSpawning/PriorityManager";
 import { event } from "event/Event";
 import { profile } from "profiler/decorator";
+import { Cartographer, ROOMTYPE_CONTROLLER } from "utilities/Cartographer";
 import { getAllColonyRooms } from "utilities/utils";
+
+const EARLY_OUTPOST_DEPTH = 1;
 
 @profile
 export class BeeBot {
@@ -15,7 +19,15 @@ export class BeeBot {
     }
 
     public static OnGlobalReseted() {
-        this.colonies().forEach(room => BaseConstructor.get(room.name)
-            && event.addEventListener('onRclUpgrade', () => RoomPlanner.replanRoads(room.name)));
+        this.colonies().forEach(room => {
+            BaseConstructor.get(room.name);
+            PriorityManager.arrangePriority(room.name);
+            event.addEventListener('onRclUpgrade', () => RoomPlanner.replanRoads(room.name));
+        });
+    }
+
+    public static getEarlyOutposts(roomName: string) {
+        return Cartographer.findRoomsInRange(roomName, EARLY_OUTPOST_DEPTH)
+            .filter(roomName => Cartographer.roomType(roomName) == ROOMTYPE_CONTROLLER);
     }
 }

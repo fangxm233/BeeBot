@@ -1,6 +1,7 @@
+import { PriorityManager } from "beeSpawning/PriorityManager";
 import { Process } from "process/Process";
 import { profile } from "profiler/decorator";
-import { Bee, bees } from "./Bee";
+import { Bee } from "./Bee";
 
 export const ROLE_FILLER = 'filler';
 export const ROLE_MINER = 'miner';
@@ -19,6 +20,7 @@ export class BeeFactorty {
     private static role2Priority: { [role: string]: number } = {};
 
     public static registerBee(role: ALL_ROLES, constructor: typeof Bee) {
+        PriorityManager.setDefaultPriority(role, this.beeRegistry.length);
         this.beeRegistry.push({ role, constructor });
     }
 
@@ -29,10 +31,5 @@ export class BeeFactorty {
 
         if (registration) return new registration.constructor(role, process, creep) as any;
         throw new Error(`The role ${role} haven't been registered.`);
-    }
-
-    public static getRolePriority(role: ALL_ROLES) {
-        if (this.role2Priority[role] !== undefined) return this.role2Priority[role];
-        return this.role2Priority[role] = this.beeRegistry.findIndex(b => b.role == role);
     }
 }
