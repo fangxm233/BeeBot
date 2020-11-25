@@ -1,8 +1,7 @@
 import { BeeBot } from "BeeBot/BeeBot";
 import { Traveler } from "movement/Traveler";
-import { ProcessScouting } from "process/instances/scouting";
+import { ProcessScout } from "process/instances/scout";
 import { Process } from "process/Process";
-import { PROCESS_SCOUTING } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { Cartographer, ROOMTYPE_CONTROLLER, ROOMTYPE_CORE, ROOMTYPE_HIGHEAY, ROOMTYPE_SOURCEKEEPER } from "utilities/Cartographer";
 
@@ -71,7 +70,7 @@ export class Intel {
                     this.requestObserve(request.roomName);
                 } else {
                     const room = _.min(BeeBot.colonies(), room => Game.map.getRoomLinearDistance(room.name, request.roomName));
-                    const scouting = Process.getProcess<ProcessScouting>(room.name, PROCESS_SCOUTING);
+                    const scouting = Process.getProcess<ProcessScout>(room.name, PROCESS_SCOUT);
                     // TODO: scouting
                 }
             } else {

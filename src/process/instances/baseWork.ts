@@ -2,7 +2,6 @@ import { ROLE_UPGRADER, ROLE_WORKER } from "Bee/BeeFactory";
 import { setups } from "beeSpawning/setups";
 import { WishConfig, WishManager } from "beeSpawning/WishManager";
 import { Process } from "process/Process"
-import { PROCESS_BASE_WORK } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile
@@ -37,7 +36,7 @@ export class ProcessBaseWork extends Process {
         let numWorkers = Math.ceil(2 * (5 * buildTicks) /
             (bodies.length / 3 * CREEP_LIFE_TIME));
         numWorkers = Math.min(numWorkers, MAX_WORKERS);
-        // if (controller.level < 4) numWorkers = Math.max(numWorkers, MAX_WORKERS);
+        if (controller.level < 4) numWorkers = Math.max(numWorkers, MAX_WORKERS);
 
         const nowCount = this.getCreepAndWishCount(ROLE_WORKER);
         const config: WishConfig = { role: ROLE_WORKER, setup: setups[ROLE_WORKER].default, budget: Infinity, count: numWorkers - nowCount }

@@ -2,7 +2,6 @@ import { BeeFactorty, ROLE_UPGRADER } from "Bee/BeeFactory";
 import { setups } from "beeSpawning/setups";
 import { WishConfig, WishManager } from "beeSpawning/WishManager";
 import { Process } from "process/Process";
-import { PROCESS_UPGRADE } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile
@@ -22,7 +21,7 @@ export class ProcessUpgrade extends Process {
 
     public wishCreeps() {
         const nowCount = this.getCreepAndWishCount(ROLE_UPGRADER);
-        const count = 20;
+        const count = 0;
         const config: WishConfig = { role: ROLE_UPGRADER, setup: setups[ROLE_UPGRADER].default, budget: Infinity, count: count - nowCount }
         if (nowCount < count) {
             this.wishManager.wishBee(config);
