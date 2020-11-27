@@ -54,7 +54,14 @@ export class RoomPlanner {
         const result: RoomData = { ownedRoom } as any;
 
         let base: Coord | undefined;
-        if (ownedRoom) base = this.findBasePos(baseName);
+        if (ownedRoom) {
+            const room = Game.rooms[baseName];
+            const spawn = room?.spawns.filter(spawn => spawn.my)[0];
+            if (spawn) {
+                base = { x: spawn.pos.x - 4, y: spawn.pos.y - 8 };
+            }
+            else base = this.findBasePos(baseName);
+        }
         else base = this.getRoomData(baseName)?.basePos;
         if (!base) {
             Intel.requestRoomIntel(baseName);
