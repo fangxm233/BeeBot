@@ -34,6 +34,6 @@ export class BeeWish {
 
     public cancel() {
         if (this.spawned) return;
-        BeeManager.wishes[this.spawnRoom].remove(w => w.id == this.id);
+        _.remove(BeeManager.wishes[this.spawnRoom][this.role], w => w.id == this.id);
     }
 }

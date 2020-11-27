@@ -5,7 +5,6 @@ import { repeater } from "event/Repeater";
 import { timer } from "event/Timer";
 import { ProcessFilling } from "process/instances/filling";
 import { Process, STATE_ACTIVE } from "process/Process";
-import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { calBodyCost, timeAfterTick } from "utilities/helpers";
 import { getFreeKey } from "utilities/utils";
