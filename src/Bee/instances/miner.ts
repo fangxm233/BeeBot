@@ -4,21 +4,21 @@ import { profile } from "profiler/decorator";
 
 @profile
 export class BeeMiner extends Bee {
-    private sourceId: Id<Source>;
+    private sourcePos: RoomPosition;
     public process: ProcessMineSource;
 
-    public get memory(): CreepMinerMemory {
-        return this.creep.memory as CreepMinerMemory;
+    public get memory(): BeeMinerMemory {
+        return this.creep.memory as BeeMinerMemory;
     }
 
     public runCore() {
-        if (!this.sourceId) this.sourceId = this.process.sources[this.memory.s];
-        const source = Game.getObjectById(this.sourceId)!;
-        if (!this.pos.isNearTo(source)) {
-            this.travelTo(source);
+        if (!this.sourcePos) this.sourcePos = this.process.sources[this.memory.s];
+        if (!this.pos.isNearTo(this.sourcePos)) {
+            this.travelTo(this.sourcePos);
             return;
         }
 
+        const source = this.sourcePos.lookFor(LOOK_SOURCES)[0];
         this.harvest(source);
     }
 }
