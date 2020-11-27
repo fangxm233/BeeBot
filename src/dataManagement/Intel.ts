@@ -44,6 +44,7 @@ export class Intel {
     }
 
     public static requestRoomIntel(roomName: string) {
+        if (this.requests.find(request => request.roomName == roomName)) return;
         this.requests.push({ roomName, requestType: 'intel' });
     }
 
@@ -52,6 +53,7 @@ export class Intel {
     }
 
     public static requestRoomCostMatrix(roomName: string) {
+        if (this.requests.find(request => request.roomName == roomName)) return;
         this.requests.push({ roomName, requestType: 'costMatrix' });
     }
 
@@ -60,8 +62,6 @@ export class Intel {
     }
 
     public static handleRequests() {
-        this.requests = _.uniq(this.requests, request => request.roomName);
-
         for (let i = 0; i < this.requests.length; i++) {
             const request = this.requests[i];
             const room = Game.rooms[request.roomName];
@@ -71,7 +71,7 @@ export class Intel {
                 } else {
                     const room = _.min(BeeBot.colonies(), room => Game.map.getRoomLinearDistance(room.name, request.roomName));
                     const scouting = Process.getProcess<ProcessScout>(room.name, PROCESS_SCOUT);
-                    // TODO: scouting
+                    if (scouting) scouting.requestScout(request.roomName);
                 }
             } else {
                 this.scanRoom(room);

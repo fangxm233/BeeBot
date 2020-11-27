@@ -1,4 +1,5 @@
-// tslint:disable: ordered-imports
+import './Bee/BeeInitializer';
+import './process/ProcessInitializer';
 import './prototypes/ConstructionSite';
 import './prototypes/Creep';
 import './prototypes/Room';
@@ -7,31 +8,29 @@ import './prototypes/RoomPosition';
 import './prototypes/RoomStructures';
 import './prototypes/RoomVisual';
 import './prototypes/Structures';
-import './Bee/BeeInitializer';
-import './process/ProcessInitializer';
 import './tasks/initializer';
 import './utilities/packrat';
 
 import actionsCounter from './profiler/actionCounter';
 import stats from './profiler/stats';
 
-import { USE_ACTION_COUNTER } from 'config';
-import { ErrorMapper, reset } from "./ErrorMapper";
-import { Processes, PROCESS_BASE_WORK, PROCESS_BOOST, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_UPGRADE } from 'process/Processes';
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { BeeBot } from 'BeeBot/BeeBot';
 import { BeeManager } from 'beeSpawning/BeeManager';
+import { USE_ACTION_COUNTER } from 'config';
+import { log } from 'console/log';
+import { Intel } from 'dataManagement/Intel';
+import { Mem } from 'dataManagement/Memory';
+import { SegmentManager } from 'dataManagement/segmentManager';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
-import { Process } from 'process/Process';
+import { ProcessBaseWork } from 'process/instances/baseWork';
 import { ProcessFilling } from 'process/instances/filling';
-import { Mem } from 'dataManagement/Memory';
-import { log } from 'console/log';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessUpgrade } from 'process/instances/upgrade';
-import { ProcessBaseWork } from 'process/instances/baseWork';
-import { RoomPlanner } from 'basePlanner/RoomPlanner';
-import { Intel } from 'dataManagement/Intel';
-import { SegmentManager } from 'dataManagement/segmentManager';
-import { BeeBot } from 'BeeBot/BeeBot';
+import { Process } from 'process/Process';
+import { Processes } from 'process/Processes';
+import { ErrorMapper, reset } from "./ErrorMapper";
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();

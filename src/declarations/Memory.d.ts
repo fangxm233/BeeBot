@@ -23,8 +23,12 @@ interface CreepMemory {
     AT?: number;
 }
 
-type CreepMinerMemory = CreepMemory & {
+type BeeMinerMemory = CreepMemory & {
     s: number;
+}
+
+type BeeScoutMemory = CreepMemory & {
+    t?: string;
 }
 
 interface PowerCreepMemory {
