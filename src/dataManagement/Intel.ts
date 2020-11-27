@@ -40,6 +40,8 @@ export class Intel {
     private static observeRequests: string[] = [];
 
     public static getRoomIntel(roomName: string): RoomIntel | undefined {
+        const room = Game.rooms[roomName];
+        if (room) return this.scanRoom(room);
         return this.roomIntel[roomName];
     }
 
@@ -49,6 +51,8 @@ export class Intel {
     }
 
     public static getRoomCostMatrix(roomName: string): CostMatrix | undefined {
+        const room = Game.rooms[roomName];
+        if (room) return this.generateCostMatrix(room);
         return this.roomCostMatrix[roomName];
     }
 
@@ -123,11 +127,11 @@ export class Intel {
                 break;
         }
 
-        this.roomIntel[room.name] = intel;
+        return this.roomIntel[room.name] = intel;
     }
 
     private static generateCostMatrix(room: Room) {
-        this.roomCostMatrix[room.name] =
+        return this.roomCostMatrix[room.name] =
             Traveler.addStructuresToMatrix(room, new PathFinder.CostMatrix(), 1);
     }
 }
