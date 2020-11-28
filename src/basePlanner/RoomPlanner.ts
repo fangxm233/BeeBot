@@ -71,10 +71,7 @@ export class RoomPlanner {
 
         const target = ownedRoom ? baseName : to!;
         const intel = Intel.getRoomIntel(target);
-        if (!intel) {
-            Intel.requestRoomIntel(target);
-            return { intelMissing: true };
-        }
+        if (!intel) return { intelMissing: true };
 
         const center = new RoomPosition(base.x + 5, base.y + 5, baseName);
         const roadPlanner = new RoadPlanner(baseName, base, ownedRoom);

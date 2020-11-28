@@ -33,7 +33,6 @@ export class RoadPlanner {
                 }
                 const matrix = Intel.getRoomCostMatrix(roomName);
                 if (matrix) return matrix;
-                Intel.requestRoomCostMatrix(roomName)
                 missing = true;
                 return false;
             }
@@ -42,7 +41,6 @@ export class RoadPlanner {
         if (missing) return { matrixMissing: true };
         if (result.incomplete) return { incomplete: true };
 
-        result.path.unshift(center);
         _.remove(result.path, pos => pos.isEdge);
         return { path: result.path };
     }
