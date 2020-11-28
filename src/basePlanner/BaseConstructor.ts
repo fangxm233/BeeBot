@@ -28,6 +28,9 @@ const constructOrder: StructureConstant[] = [
 ];
 
 export const ROAD_CONSTRUCT_RCL = 4;
+export const CONTAINER_CONSTRUCT_RCL = 4;
+export const LINK_ONE_CONSTRUCT_RCL = 5;
+export const LINK_TWO_CONSTRUCT_RCL = 6;
 
 @profile
 export class BaseConstructor {
@@ -88,15 +91,18 @@ export class BaseConstructor {
             return true;
         }
 
+        const data = RoomPlanner.getRoomData(this.roomName);
+        if (!data) {
+            log.warning(`RoomData of ${printRoomName(this.roomName)} does not exists! replaning...`);
+            RoomPlanner.planRoom(this.roomName, undefined, true);
+            return;
+        }
+
+        const center = new RoomPosition(data.basePos!.x + 5, data.basePos!.y + 5, this.roomName);
+
         const layout = structureLayout[rcl].buildings;
         for (const type of constructOrder) {
             if (type == STRUCTURE_ROAD && rcl >= ROAD_CONSTRUCT_RCL) {
-                const data = RoomPlanner.getRoomData(this.roomName);
-                if (!data) {
-                    log.warning(`RoomData of ${printRoomName(this.roomName)} does not exists! replaning...`);
-                    RoomPlanner.planRoom(this.roomName, undefined, true);
-                    return;
-                }
                 const paths = [...data.sourcesPath, data.controllerPath!, data.mineralPath!];
                 for (const path of paths) {
                     const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
@@ -110,6 +116,19 @@ export class BaseConstructor {
                     STRUCTURE_EXTENSION, false);
                 if (missing) return;
                 continue;
+            }
+
+            if (type == STRUCTURE_CONTAINER && rcl >= CONTAINER_CONSTRUCT_RCL) {
+                const missing = checkAndConstructMissing(data.harvestPos.source, STRUCTURE_CONTAINER, false);
+                if (missing) return;
+            }
+
+            if (type == STRUCTURE_LINK && room.links.length < CONTROLLER_STRUCTURES.link[rcl]) {
+                const coords = [...data.linkPos!.source, data.linkPos!.controller]
+                    .sort((c1, c2) => center.getRangeToXY(c2.x, c2.y) - center.getRangeToXY(c1.x, c1.y))
+                    .slice(0, CONTROLLER_STRUCTURES.link[rcl] - layout[STRUCTURE_LINK].length);
+                const missing = checkAndConstructMissing(coords, STRUCTURE_LINK, false);
+                if (missing) return;
             }
 
             const missing = checkAndConstructMissing(layout[type], type, true);
@@ -158,7 +177,7 @@ export class BaseConstructor {
             if (type == STRUCTURE_EXTENSION) continue;
             const coords = layout[type];
             for (const coord of coords) {
-                const structure = this.roomBuilding.getForAt(type as StructureConstant,
+                const structure = this.getForAt(type as StructureConstant,
                     this.base.x + coord.x, this.base.y + coord.y) as any;
                 if (!structure || !structure.owner || structure.owner.username == USER_NAME) return false;
             }
