@@ -1,5 +1,6 @@
 import { Bee } from "Bee/Bee";
 import { Process } from "process/Process";
+import { PROCESS_BOOST } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 type BoostType = 'single' | 'lasting';

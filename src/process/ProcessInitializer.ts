@@ -6,6 +6,7 @@ import { ProcessMineSource } from "./instances/mineSource";
 import { ProcessScout } from "./instances/scout";
 import { ProcessUpgrade } from "./instances/upgrade";
 import { Process } from "./Process"
+import { PROCESS_BASE_WORK, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_SCOUT, PROCESS_UPGRADE } from "./Processes";
 
 // 注册的顺序将决定优先级
 Process.registerProcess(PROCESS_FILLING, Bucket.bottom, ProcessFilling, 100, [ROLE_FILLER]);

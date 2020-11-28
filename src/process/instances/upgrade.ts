@@ -2,6 +2,7 @@ import { BeeFactorty, ROLE_UPGRADER } from "Bee/BeeFactory";
 import { setups } from "beeSpawning/setups";
 import { WishConfig, WishManager } from "beeSpawning/WishManager";
 import { Process } from "process/Process";
+import { PROCESS_UPGRADE } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile

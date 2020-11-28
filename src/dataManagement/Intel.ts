@@ -2,6 +2,7 @@ import { BeeBot } from "BeeBot/BeeBot";
 import { Traveler } from "movement/Traveler";
 import { ProcessScout } from "process/instances/scout";
 import { Process } from "process/Process";
+import { PROCESS_SCOUT } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { Cartographer, ROOMTYPE_CONTROLLER, ROOMTYPE_CORE, ROOMTYPE_HIGHEAY, ROOMTYPE_SOURCEKEEPER } from "utilities/Cartographer";
 
@@ -39,11 +40,13 @@ export class Intel {
     private static requests: { roomName: string, requestType: 'intel' | 'costMatrix' }[] = [];
     private static observeRequests: string[] = [];
 
-    public static getRoomIntel(roomName: string): RoomIntel | undefined {
+    public static getRoomIntel(roomName: string, requestWhenMissing: boolean = true): RoomIntel | undefined {
         const intel = this.roomIntel[roomName];
         if (!intel) {
             const room = Game.rooms[roomName];
             if (room) return this.scanRoom(room);
+
+            if (requestWhenMissing) this.requestRoomIntel(roomName);
         }
         return intel;
     }
@@ -53,11 +56,13 @@ export class Intel {
         this.requests.push({ roomName, requestType: 'intel' });
     }
 
-    public static getRoomCostMatrix(roomName: string): CostMatrix | undefined {
+    public static getRoomCostMatrix(roomName: string, requestWhenMissing: boolean = true): CostMatrix | undefined {
         const matrix = this.roomCostMatrix[roomName];
         if (!matrix) {
             const room = Game.rooms[roomName];
             if (room) return this.generateCostMatrix(room);
+
+            if (requestWhenMissing) this.requestRoomCostMatrix(roomName);
         }
         return matrix;
     }

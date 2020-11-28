@@ -3,6 +3,7 @@ import { BeeScout } from "Bee/instances/scout";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
 import { Process } from "process/Process";
+import { PROCESS_SCOUT } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile

@@ -29,8 +29,9 @@ import { ProcessFilling } from 'process/instances/filling';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessUpgrade } from 'process/instances/upgrade';
 import { Process } from 'process/Process';
-import { Processes } from 'process/Processes';
+import { PROCESS_BASE_WORK, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_UPGRADE, Processes } from 'process/Processes';
 import { ErrorMapper, reset } from "./ErrorMapper";
+import { clock } from 'event/Clock';
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();
@@ -59,6 +60,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
     repeater.repeatActions();
     timer.checkForTimesUp();
+    clock.tick();
 
     BeeManager.run();
     Intel.handleRequests();

@@ -5,6 +5,13 @@ import { profile } from "../profiler/decorator";
 import { Visualizer } from "../visuals/Visualizer";
 import { Process, STATE_ACTIVE, STATE_WAITING } from "./Process";
 
+export const PROCESS_FILLING = 'filling';
+export const PROCESS_MINE_SOURCE = 'mineSource';
+export const PROCESS_UPGRADE = 'upgrade';
+export const PROCESS_BASE_WORK = 'baseWork';
+export const PROCESS_BOOST = 'boost';
+export const PROCESS_SCOUT = 'scout';
+
 @profile
 export class Processes {
     private static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
