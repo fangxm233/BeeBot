@@ -5,6 +5,7 @@ import { repeater } from "event/Repeater";
 import { timer } from "event/Timer";
 import { ProcessFilling } from "process/instances/filling";
 import { Process, STATE_ACTIVE } from "process/Process";
+import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { calBodyCost, timeAfterTick } from "utilities/helpers";
 import { getFreeKey } from "utilities/utils";
@@ -38,11 +39,9 @@ export class BeeManager {
             if (!spawn) continue;
 
             const availableEnergy = room.energyAvailable;
-            let capacity = room.energyCapacityAvailable;
-            const filling = Process.getProcess<ProcessFilling>(roomName, PROCESS_FILLING);
-            if (filling?.bees[ROLE_FILLER].length == 0 || !filling?.energyEnough) capacity = availableEnergy;
+            const capacity = this.getRoomEnergyCapacity(room);
 
-            const body = wish.setup.generateCreepBody(wish.budget == Infinity ? Math.max(capacity, 300) : wish.budget);
+            const body = wish.setup.generateCreepBody(wish.budget == Infinity ? capacity : wish.budget);
             if (body.length == 0) return; // TODO: 对能量不足做出反应
             const cost = calBodyCost(body);
             if (cost > availableEnergy) {
@@ -65,6 +64,12 @@ export class BeeManager {
                 log.error(`can't spawn creep! code: ${code} name: ${name} body: ${body}`);
             }
         }
+    }
+
+    public static getRoomEnergyCapacity(room: Room) {
+        const filling = Process.getProcess<ProcessFilling>(room.name, PROCESS_FILLING);
+        if (filling?.bees[ROLE_FILLER].length == 0 || !filling?.energyEnough) return Math.max(room.energyAvailable, 300);
+        else return room.energyCapacityAvailable;
     }
 
     public static clearDiedBees() {
