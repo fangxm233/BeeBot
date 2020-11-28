@@ -19,10 +19,33 @@ export class BeeSetup {
     public bodySetup: BodySetup;
 
     private bodyCache: { [budget: number]: BodyPartConstant[] } = {};
+    private maxCostCache: number;
+    private minCostCache: number;
 
     constructor(role: string, setup: BodySetup) {
         this.role = role;
         this.bodySetup = setup;
+    }
+
+    public maxCost() {
+        if (this.maxCostCache) return this.maxCostCache;
+        return this.maxCostCache = calBodyCost(this.generateCreepBody(Infinity));
+    }
+
+    public minCost() {
+        if (this.minCostCache) return this.minCostCache;
+
+        this.minCostCache = _.sum(this.bodySetup.ratio, ratio => {
+            const { part, num } = BeeSetup.decodeRatio(ratio);
+            return BODYPART_COST[part] * num;
+        });
+
+        if (this.bodySetup.scaleWithBodySize) {
+            if (this.bodySetup.prefix) this.minCostCache += calBodyCost(this.bodySetup.prefix);
+            if (this.bodySetup.suffix) this.minCostCache += calBodyCost(this.bodySetup.suffix);
+        }
+
+        return this.minCostCache;
     }
 
     public generateCreepBody(budget: number): BodyPartConstant[] {
@@ -30,20 +53,20 @@ export class BeeSetup {
         if (this.bodyCache[budget]) return this.bodyCache[budget];
 
         // 计算一个单元的价格和数目
-        let costPreUnit = _.sum(this.bodySetup.ratio, ratio => {
+        let costPerUnit = _.sum(this.bodySetup.ratio, ratio => {
             const { part, num } = BeeSetup.decodeRatio(ratio);
             return BODYPART_COST[part] * num;
         });
-        let countPreUnit = _.sum(this.bodySetup.ratio);
+        let countPerUnit = _.sum(this.bodySetup.ratio, ratio => BeeSetup.decodeRatio(ratio).num);
         // 计算前置后置
         if (this.bodySetup.scaleWithBodySize) {
             if (this.bodySetup.prefix) {
-                countPreUnit += this.bodySetup.prefix.length;
-                costPreUnit += calBodyCost(this.bodySetup.prefix);
+                countPerUnit += this.bodySetup.prefix.length;
+                costPerUnit += calBodyCost(this.bodySetup.prefix);
             }
             if (this.bodySetup.suffix) {
-                countPreUnit += this.bodySetup.suffix.length;
-                costPreUnit += calBodyCost(this.bodySetup.suffix);
+                countPerUnit += this.bodySetup.suffix.length;
+                costPerUnit += calBodyCost(this.bodySetup.suffix);
             }
         }
 
@@ -60,11 +83,11 @@ export class BeeSetup {
                 availableBudget -= calBodyCost(this.bodySetup.suffix);
             }
         }
-        maxSize = Math.min(maxSize, this.bodySetup.maxSize * countPreUnit);
+        maxSize = Math.min(maxSize, this.bodySetup.maxSize * countPerUnit);
 
         // 计算缩放倍数
-        let multiple = Math.floor(availableBudget / costPreUnit);
-        if (multiple * countPreUnit > maxSize) multiple = Math.floor(maxSize / countPreUnit);
+        let multiple = Math.floor(availableBudget / costPerUnit);
+        if (multiple * countPerUnit > maxSize) multiple = Math.floor(maxSize / countPerUnit);
 
         // 生成creep身体
         const body: BodyPartConstant[] = [];
