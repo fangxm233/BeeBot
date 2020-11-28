@@ -36,3 +36,7 @@ export function calBodyCost(body: BodyPartConstant[]) {
 export function isOwner(object: any): boolean {
 	return object.owner && object.owner.username == USER_NAME;
 }
+
+export function partCount(body: BodyPartConstant[], type: BodyPartConstant) {
+	return _.countBy(body, body => body)[type] || 0;
+}
