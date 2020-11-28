@@ -17,25 +17,49 @@ export const setups = {
 
     [ROLE_MINER]: {
         source: {
-            early: new BeeSetup(ROLE_MINER, {
-                ratio: ['w2', 'c1', 'm1'],
-                maxSize: 1
-            }),
+            base: {
+                stage1: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w2', 'm1'],
+                    maxSize: 1
+                }),
 
-            default: new BeeSetup(ROLE_MINER, {
-                ratio: ['w6', 'c1', 'm3'],
-                maxSize: 1
-            }),
+                stage2: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w3', 'm3'],
+                    maxSize: 1
+                }),
 
-            outpost: new BeeSetup(ROLE_MINER, {
-                ratio: ['w6', 'm3', 'c1'],
-                maxSize: 2
-            }),
+                default: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w6', 'c1', 'm3'],
+                    maxSize: 1
+                }),
 
-            heavy: new BeeSetup(ROLE_MINER, {
-                ratio: ['w20', 'c4', 'm10'],
-                maxSize: 1
-            }),
+                heavy: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w20', 'c4', 'm10'],
+                    maxSize: 1
+                }),
+            },
+
+            outpost: {
+                stage1: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w2', 'm1'],
+                    maxSize: 1
+                }),
+
+                stage2: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w3', 'm3'],
+                    maxSize: 1
+                }),
+
+                default: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w6', 'm3', 'c1'],
+                    maxSize: 2
+                }),
+
+                heavy: new BeeSetup(ROLE_MANAGER, {
+                    ratio: ['w12', 'c4', 'm8'],
+                    maxSize: 1
+                })
+            }
         },
 
         mineral: {
