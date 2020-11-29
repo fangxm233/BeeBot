@@ -56,6 +56,11 @@ export class Intel {
         this.requests.push({ roomName, requestType: 'intel' });
     }
 
+    public static refreshRoomIntel(roomName: string) {
+        const room = Game.rooms[roomName];
+        if (room) this.scanRoom(room);
+    }
+
     public static getRoomCostMatrix(roomName: string, requestWhenMissing: boolean = true): CostMatrix | undefined {
         const matrix = this.roomCostMatrix[roomName];
         if (!matrix) {
@@ -70,6 +75,11 @@ export class Intel {
     public static requestRoomCostMatrix(roomName: string) {
         if (this.requests.find(request => request.roomName == roomName)) return;
         this.requests.push({ roomName, requestType: 'costMatrix' });
+    }
+
+    public static refreshRoomCostMatrix(roomName: string) {
+        const room = Game.rooms[roomName];
+        if (room) this.generateCostMatrix(room);
     }
 
     public static requestObserve(roomName: string) {
