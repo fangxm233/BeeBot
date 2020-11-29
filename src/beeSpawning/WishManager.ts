@@ -71,6 +71,7 @@ export class WishManager {
 
     public clear() {
         this.wishes.forEach(w => w.cancel());
+        this._wishes = [];
     }
 
     public getCount(role: ALL_ROLES) {
