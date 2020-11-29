@@ -337,6 +337,10 @@ export class Bee {
 
     // 另外添加的方法
 
+    public travelToRoom(roomName: string, ops?: TravelToOptions) {
+        return Traveler.travelToRoom(this, roomName, ops);
+    }
+
     public moveOffExit() {
         Traveler.moveOffExit(this);
     }

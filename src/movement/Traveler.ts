@@ -161,6 +161,11 @@ export class Traveler {
         return this.move(bee, nextDirection as DirectionConstant);
     }
 
+    public static travelToRoom(bee: Bee, roomName: string, options: TravelToOptions = {}): number {
+        options.range = 23;
+        return this.travelTo(bee, new RoomPosition(25, 25, roomName), options);
+    }
+
     public static moveOffExit(bee: Bee): ScreepsReturnCode {
         if (bee.pos.isEdge) {
             return Traveler.move(bee, bee.pos.getDirectionTo(bee.pos.availableNeighbors().filter(pos => !pos.isEdge)[0]));
