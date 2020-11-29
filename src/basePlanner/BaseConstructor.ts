@@ -114,7 +114,11 @@ export class BaseConstructor {
             if (missing) return;
 
             if (type == STRUCTURE_CONTAINER && rcl >= CONTAINER_CONSTRUCT_RCL) {
-                const coords = [...data.harvestPos.source, data.harvestPos.mineral!, data.containerPos!.controller]
+                const coords = [
+                    ...data.harvestPos.source.filter(coord => !room.links.find(
+                        link => link.pos.inRangeToXY(coord.x, coord.y, 1))),
+                    data.harvestPos.mineral!,
+                    data.containerPos!.controller];
                 const missing = checkAndConstructMissing(coords, STRUCTURE_CONTAINER, false);
                 if (missing) return;
             }
