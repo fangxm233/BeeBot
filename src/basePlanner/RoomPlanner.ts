@@ -11,6 +11,7 @@ import { RoadPlanner } from "./RoadPlanner";
 import { exits, structureLayout } from "./structurePreset";
 
 const ROAD_COST = 1;
+const CONTAINER_COST = 5;
 const WALL_OCCUPIED_COUNT = 3;          // 允许基地内被墙占据的格子最大数目
 const PERIPHERY_WIDTH = 3;              // 边缘宽度
 const ROAD_SWAMP_SCORE = -0.6;          // 在路上的沼泽得分
@@ -108,12 +109,13 @@ export class RoomPlanner {
 
             roadPlanner.updateMatrix(path);
             const last = _.last(min.path!);
-            return { path: roadPlanner.cutPath(min.path!), last };
+            return { path: roadPlanner.cutPath(min.path!, 2), last };
         }
 
         result.harvestPos = { source: [] };
         result.sourcesPath = [];
         if (ownedRoom) result.linkPos = { source: [], controller: undefined! };
+        intel.sources = _.sortBy(intel.sources!, coord => center.getRangeToXY(coord.x, coord.y))
         for (const coord of intel.sources!) {
             const best = findBestPath(coord);
             if (!best.path) return best;
@@ -168,44 +170,6 @@ export class RoomPlanner {
         this.roomData[target] = result;
         this.serializeData();
         return { result };
-    }
-
-    public static replanRoads(baseName: string) { // TODO: 刷新CostMatrix
-        const data = this.getRoomData(baseName);
-        if (!data) {
-            log.warning(`RoomData of ${printRoomName(baseName)} does not exists! replaning...`);
-            this.planRoom(baseName, undefined, true);
-            return;
-        }
-
-        const generatePath = (coord: Coord) => {
-            const result = roadPlanner.generatePathTo(coordToRoomPosition(coord, baseName));
-            if (!result.path) {
-                log.warning(`Failed to replan roads of ${printRoomName(baseName)}!`);
-                return;
-            }
-            const path = roadPlanner.cutPath(result.path);
-            roadPlanner.updateMatrix(path);
-            return path;
-        }
-
-        const base = data.basePos!;
-        const roadPlanner = new RoadPlanner(baseName, base, true);
-        for (let i = 0; i < data.harvestPos.source.length; i++) {
-            const path = generatePath(data.harvestPos.source[i]);
-            if (!path) return;
-            data.sourcesPath[i] = { path, length: path.length };
-        }
-
-        let path = generatePath(data.containerPos!.controller);
-        if (!path) return;
-        data.controllerPath = { path, length: path.length };
-
-        path = generatePath(data.harvestPos.mineral!);
-        if (!path) return;
-        data.mineralPath = { path, length: path.length };
-
-        this.serializeData();
     }
 
     public static findBasePos(roomName: string): Coord | undefined {
@@ -306,6 +270,21 @@ export class RoomPlanner {
         score += findPath(room.controller!).path.length * CONTROLLER_DISTANCE_SCORE;
 
         return score;
+    }
+
+    public static getLayoutCostMatrix(base: Coord, rcl: number) {
+        const matrix = new PathFinder.CostMatrix();
+        const layout = structureLayout[rcl].buildings;
+
+        for (const type in layout) {
+            const coords = layout[type];
+            let cost = 0xff;
+            if (type == STRUCTURE_ROAD) cost = ROAD_COST;
+            if (type == STRUCTURE_CONTAINER) cost = CONTAINER_COST;
+            coords.forEach(coord => matrix.set(base.x + coord.x, base.y + coord.y, cost));
+        }
+
+        return matrix;
     }
 
     private static getLayoutStructureType(rcl: number, coord: Coord): StructureConstant {

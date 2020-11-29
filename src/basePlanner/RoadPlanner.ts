@@ -2,6 +2,7 @@ import { Intel } from "dataManagement/Intel";
 import { Traveler } from "movement/Traveler";
 import { profile } from "profiler/decorator";
 import { packNumber, packPos, unpackNumber, unpackPos } from "utilities/packrat";
+import { RoomPlanner } from "./RoomPlanner";
 
 export const PLAIN_COST = 3;
 export const SWAMP_COST = 4;
@@ -27,10 +28,9 @@ export class RoadPlanner {
         const result = PathFinder.search(center, { pos, range: 0 }, {
             maxOps: 1e4, heuristicWeight: 1, plainCost: PLAIN_COST, swampCost: SWAMP_COST,
             roomCallback: roomName => {
-                if (this.isColony) {
-                    if (roomName == this.roomName) return new PathFinder.CostMatrix();
-                    else return false;
-                }
+                if (roomName == this.roomName) return RoomPlanner.getLayoutCostMatrix(this.base, 8);
+                if (this.isColony) return false;
+
                 const matrix = Intel.getRoomCostMatrix(roomName);
                 if (matrix) return matrix;
                 missing = true;

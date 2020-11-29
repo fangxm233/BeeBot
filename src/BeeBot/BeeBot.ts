@@ -22,7 +22,6 @@ export class BeeBot {
         this.colonies().forEach(room => {
             BaseConstructor.get(room.name);
             PriorityManager.arrangePriority(room.name);
-            event.addEventListener('onRclUpgrade', () => RoomPlanner.replanRoads(room.name));
         });
     }
 

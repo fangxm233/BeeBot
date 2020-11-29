@@ -102,14 +102,6 @@ export class BaseConstructor {
 
         const layout = structureLayout[rcl].buildings;
         for (const type of constructOrder) {
-            if (type == STRUCTURE_ROAD && rcl >= ROAD_CONSTRUCT_RCL) {
-                const paths = [...data.sourcesPath, data.controllerPath!, data.mineralPath!];
-                for (const path of paths) {
-                    const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
-                    if (missing) return;
-                }
-            }
-
             if (type == STRUCTURE_EXTENSION) {
                 const missing = checkAndConstructMissing(
                     this.filteredExtConstructingOrder.slice(0, CONTROLLER_STRUCTURES.extension[rcl]),
@@ -118,21 +110,30 @@ export class BaseConstructor {
                 continue;
             }
 
+            const missing = checkAndConstructMissing(layout[type], type, true);
+            if (missing) return;
+
             if (type == STRUCTURE_CONTAINER && rcl >= CONTAINER_CONSTRUCT_RCL) {
-                const missing = checkAndConstructMissing(data.harvestPos.source, STRUCTURE_CONTAINER, false);
+                const coords = [...data.harvestPos.source, data.harvestPos.mineral!, data.containerPos!.controller]
+                const missing = checkAndConstructMissing(coords, STRUCTURE_CONTAINER, false);
                 if (missing) return;
             }
 
             if (type == STRUCTURE_LINK && room.links.length < CONTROLLER_STRUCTURES.link[rcl]) {
-                const coords = [...data.linkPos!.source, data.linkPos!.controller]
-                    .sort((c1, c2) => center.getRangeToXY(c2.x, c2.y) - center.getRangeToXY(c1.x, c1.y))
+                const coords = _.sortBy([...data.linkPos!.source, data.linkPos!.controller],
+                    coord => -center.getRangeToXY(coord.x, coord.y))
                     .slice(0, CONTROLLER_STRUCTURES.link[rcl] - layout[STRUCTURE_LINK].length);
                 const missing = checkAndConstructMissing(coords, STRUCTURE_LINK, false);
                 if (missing) return;
             }
 
-            const missing = checkAndConstructMissing(layout[type], type, true);
-            if (missing) return;
+            if (type == STRUCTURE_ROAD && rcl >= ROAD_CONSTRUCT_RCL) {
+                const paths = [...data.sourcesPath, data.controllerPath!, data.mineralPath!];
+                for (const path of paths) {
+                    const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
+                    if (missing) return;
+                }
+            }
         }
 
         // TODO: outpost building
