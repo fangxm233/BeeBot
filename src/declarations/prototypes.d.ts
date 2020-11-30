@@ -2,6 +2,7 @@ interface Creep {
 	memory: CreepMemory;
 	boosts: _ResourceConstantSansEnergy[];
 	boostCounts: { [boostType: string]: number };
+	bodyCounts: { [bodyType: string]: number };
 	inRampart: boolean;
 }
 

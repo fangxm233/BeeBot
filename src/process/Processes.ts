@@ -11,6 +11,9 @@ export const PROCESS_UPGRADE = 'upgrade';
 export const PROCESS_BASE_WORK = 'baseWork';
 export const PROCESS_BOOST = 'boost';
 export const PROCESS_SCOUT = 'scout';
+export const PROCESS_TOWER = 'tower';
+export const PROCESS_RESERVING = 'reserving';
+export const PROCESS_CARRY = 'carry';
 
 @profile
 export class Processes {

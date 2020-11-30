@@ -7,7 +7,15 @@
 
 type ProcessState = 'sp' | 'a' | 'w' | 'sd';
 
-type ProcessTypes = 'filling' | 'mineSource' | 'boost' | 'upgrade' | 'baseWork' | 'scout';
+type ProcessTypes = 'filling'
+    | 'mineSource'
+    | 'boost'
+    | 'upgrade'
+    | 'baseWork'
+    | 'scout'
+    | 'tower'
+    | 'reserving'
+    | 'carry';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -27,4 +35,12 @@ type protoProcessMineSource = protoProcess & {
 
 type protoProcessBoost = protoProcess & {
     type: 'single' | 'lasting';
+};
+
+type protoProcessReserving = protoProcess & {
+    target: string;
+};
+
+type protoProcessCarry = protoProcess & {
+    target: string;
 }
