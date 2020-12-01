@@ -1,5 +1,6 @@
 import { TargetCache } from "caching/caching";
 import { USER_NAME } from "config";
+import { Intel } from "dataManagement/Intel";
 import { isStoreStructure } from "declarations/typeGuards";
 import { event } from "event/Event";
 import { timer } from "event/Timer";
@@ -317,8 +318,10 @@ export class Bee {
         if ((target as any)._arrangedCallback) return this.creep.upgradeController(target);
         (target as any)._arrangedCallback = true;
         timer.callBackAtTick(timeAfterTick(1), () => {
-            if (Game.getObjectById(target.id)!.level > target.level)
+            if (Game.getObjectById(target.id)!.level > target.level) {
+                Intel.refreshRoomIntel(target.room.name);
                 event.invokeEvent('onRclUpgrade');
+            }
         });
         return this.creep.upgradeController(target);
     }
