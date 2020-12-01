@@ -15,6 +15,7 @@
     "scripts": {
         "build": "rollup -c",
         "push-main": "rollup -c --environment DEST:main",
+        "push-season": "rollup -c --environment DEST:season",
         "push-pserver": "rollup -c --environment DEST:pserver",
         "push-sim": "rollup -c --environment DEST:sim"
     },
