@@ -95,8 +95,12 @@ export class Intel {
                     this.requestObserve(request.roomName);
                 } else {
                     const room = _.min(BeeBot.colonies(), room => Game.map.getRoomLinearDistance(room.name, request.roomName));
-                    const scouting = Process.getProcess<ProcessScout>(room.name, PROCESS_SCOUT);
-                    if (scouting) scouting.requestScout(request.roomName);
+                    let scout = Process.getProcess<ProcessScout>(room.name, PROCESS_SCOUT);
+                    if (!scout) {
+                        scout = new ProcessScout(room.name);
+                        Process.startProcess(scout);
+                    }
+                    scout.requestScout(request.roomName);
                 }
             } else {
                 this.scanRoom(room);
