@@ -18,6 +18,7 @@ export const PROCESS_CARRY = 'carry';
 @profile
 export class Processes {
     private static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
+        if (!proto) return;
         const registration = Process.getProcessRegistration(processName);
         if (!registration) {
             throw new Error(`The process ${processName} has not been registered.`);
