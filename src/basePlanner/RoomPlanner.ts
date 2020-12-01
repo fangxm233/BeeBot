@@ -290,6 +290,7 @@ export class RoomPlanner {
             data.sourcesPath.forEach(path => path.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST)));
             data.mineralPath!.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST));
             data.controllerPath!.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST));
+            [data.linkPos!.controller, ...data.linkPos!.source].forEach(coord => matrix.set(coord.x, coord.y, 0xff));
         }
         return matrix;
     }
