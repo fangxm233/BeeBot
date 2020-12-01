@@ -26,7 +26,6 @@ export class ProcessMineSource extends Process {
         super(roomName, PROCESS_MINE_SOURCE);
         this.wishManager = new WishManager(roomName, targetRoom, this);
         this.target = targetRoom;
-        this.init();
     }
 
     protected getProto() {
@@ -45,16 +44,6 @@ export class ProcessMineSource extends Process {
         const baseRoom = Game.rooms[this.roomName];
 
         if (!targetIntel || !baseIntel || !baseData || !baseRoom) return false;
-        if (!targetRoom) {
-            let scout = Process.getProcess<ProcessScout>(this.roomName, PROCESS_SCOUT);
-            if (!scout) {
-                scout = new ProcessScout(this.roomName);
-                Process.startProcess(scout);
-            }
-
-            scout.requestScout(this.target);
-            return false;
-        }
 
         this.center = coordToRoomPosition(baseData.basePos!, this.roomName);
         this.sources = targetIntel.sources!.map(coord => coordToRoomPosition(coord, this.target))
@@ -66,7 +55,6 @@ export class ProcessMineSource extends Process {
         this.setup = this.chooseSetup()!;
         if (!this.setup) return false;
         if (!this.calMinerCount()) return false;
-
         return this.inited = true;
     }
 
@@ -74,8 +62,7 @@ export class ProcessMineSource extends Process {
         const baseRoom = Game.rooms[this.roomName];
         if (!baseRoom) return;
 
-        return _.max(_.sortBy(setups[ROLE_MINER].source[this.roomName == this.target ? 'base' : 'outpost'],
-            setup => setup.minCost())
+        return _.max(Object.values(setups[ROLE_MINER].source[this.roomName == this.target ? 'base' : 'outpost'])
             .filter(setup => setup.minCost() < BeeManager.getRoomEnergyCapacity(baseRoom)),
             setup => setup.maxCost());
     }
@@ -93,21 +80,24 @@ export class ProcessMineSource extends Process {
     }
 
     public run() {
+        if (!this.inited && !this.init()) return;
         this.foreachBee(ROLE_MINER, bee => bee.run());
     }
 
     public wishCreeps() {
         if (!this.inited && !this.init()) return;
-        this.chooseSetup();
+        this.wishManager.clear();
+        this.setup = this.chooseSetup()!;
         this.calMinerCount();
 
+        // TODO: 修复当数量变化的时候会造成多个miner
         this.wishManager.arrangeCyclingBees(ROLE_MINER, this.setup, Infinity, ['s']);
         const beeCount = _.countBy(this.bees[ROLE_MINER], (bee: BeeMiner) => bee.memory.s);
-        const wishCount = _.countBy(this.wishManager.wishes, wish => wish.extraMemory.s);
         this.sources.forEach((pos, i) => {
-            const nowCount = (beeCount[i] || 0) + (wishCount[i] || 0);
+            const nowCount = beeCount[i] || 0;
             if (nowCount >= this.minerCount[i]) return;
             this.wishManager.wishBee({ setup: this.setup, count: this.minerCount[i] - nowCount, extraMemory: { s: i } });
+            // log.debug('miner wish s: ', i, 'count: ', this.minerCount[i] - nowCount);
         });
     }
 }
