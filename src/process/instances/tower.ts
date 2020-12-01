@@ -35,12 +35,12 @@ export class ProcessTower extends Process {
     }
 
     public check() {
-        if (!this.inited && !this.init()) return false;
         const room = Game.rooms[this.roomName];
         if (!room) {
             this.close();
             return false;
         }
+        if (!this.inited && !this.init()) return false;
 
         if (room.find(FIND_HOSTILE_CREEPS).length) return true;
         if (room.find(FIND_HOSTILE_POWER_CREEPS).length) return true;
@@ -59,12 +59,12 @@ export class ProcessTower extends Process {
     }
 
     public run() {
-        if (!this.inited && !this.init()) return;
         const room = Game.rooms[this.roomName];
         if (!room) {
             this.close();
             return;
         }
+        if (!this.inited && !this.init()) return;
 
         const hostleCreeps = [...room.find(FIND_HOSTILE_CREEPS), ...room.find(FIND_HOSTILE_POWER_CREEPS)];
 
