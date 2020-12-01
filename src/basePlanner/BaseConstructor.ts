@@ -45,18 +45,18 @@ export class BaseConstructor {
 
     constructor(roomName: string) {
         this.roomName = roomName;
-        const data = RoomPlanner.getRoomData(roomName);
+        let data = RoomPlanner.getRoomData(roomName);
         const terrain = Game.map.getRoomTerrain(roomName);
         if (!data) {
             log.warning(`RoomData of ${printRoomName(this.roomName)} does not exists! replaning...`);
-            RoomPlanner.planRoom(this.roomName, undefined, true);
-            return;
+            data = RoomPlanner.planRoom(this.roomName, undefined, true).result;
+            if (!data) return;
         }
 
         this.base = data.basePos!;
         this.filteredExtConstructingOrder = extConstructOrder.filter(
-            coord => terrain.get(data.basePos!.x + coord.x, data.basePos!.y + coord.y) != TERRAIN_MASK_WALL)
-            .map(coord => new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, roomName));
+            coord => terrain.get(data!.basePos!.x + coord.x, data!.basePos!.y + coord.y) != TERRAIN_MASK_WALL)
+            .map(coord => new RoomPosition(data!.basePos!.x + coord.x, data!.basePos!.y + coord.y, roomName));
 
         BaseConstructor.constructors[roomName] = this;
         event.addEventListener('onBuildComplete', () => this.constructBuildings());
@@ -143,13 +143,10 @@ export class BaseConstructor {
             }
         }
 
-        console.log('hello');
         const outposts = BeeBot.getOutposts(this.roomName);
         outposts.forEach(outpost => {
-            console.log('hi');
             const data = RoomPlanner.getRoomData(outpost);
             if (!data) return;
-            console.log('getted data');
 
             if (rcl >= ROAD_CONSTRUCT_RCL) {
                 for (const path of data.sourcesPath) {
