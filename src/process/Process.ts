@@ -176,6 +176,7 @@ export class Process {
         log.debug(this.roomName, this.processName, this.id, 'activated');
     }
     public sleep(targetTime: number) {
+        if (targetTime < Game.time) return;
         this.state = STATE_SLEEPING;
         this.memory.slt = targetTime;
         timer.callBackAtTick(targetTime, () => this.awake());
@@ -194,7 +195,7 @@ export class Process {
     public close(killAllCreep: boolean = true) {
         if (this.parent) this.removeParent();
 
-        Memory.processes[this.roomName][this.id] = undefined as any;
+        Memory.processes[this.processName][this.roomName][this.id] = undefined as any;
         Process.processes[this.roomName][this.id] = undefined as any;
         Process.processesById[this.fullId] = undefined as any;
         Process.processesByType[this.processName][this.fullId] = undefined as any;
