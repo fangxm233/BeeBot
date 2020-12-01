@@ -10,7 +10,7 @@ export class BeeWorker extends Bee {
         this.task?.isValid();
         if (!this.task) {
             if (!this.store.energy) {
-                this.task = ResourcesManager.getEnergySource(this);
+                this.task = ResourcesManager.getEnergySource(this, false);
             } else {
                 this.chooseWork();
             }
