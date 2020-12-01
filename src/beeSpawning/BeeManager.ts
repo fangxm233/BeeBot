@@ -60,6 +60,7 @@ export class BeeManager {
                 bees[name] = wish.bee;
                 process.registerBee(wish.bee, wish.role);
                 PriorityManager.arrangePriority(roomName);
+                Process.getProcess<ProcessFilling>(room.name, PROCESS_FILLING)?.awake();
             } else {
                 log.error(`can't spawn creep! code: ${code} name: ${name} body: ${body}`);
             }
@@ -68,7 +69,9 @@ export class BeeManager {
 
     public static getRoomEnergyCapacity(room: Room) {
         const filling = Process.getProcess<ProcessFilling>(room.name, PROCESS_FILLING);
-        if (filling?.bees[ROLE_FILLER].length == 0 || !filling?.energyEnough) return Math.max(room.energyAvailable, 300);
+        if (!filling) return Math.max(room.energyAvailable, 300);
+        if (filling.bees[ROLE_FILLER].length < filling.count || !filling?.energyEnough)
+            return Math.max(room.energyAvailable, 300);
         else return room.energyCapacityAvailable;
     }
 
