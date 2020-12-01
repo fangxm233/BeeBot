@@ -1,3 +1,4 @@
+import { RoomPlanner } from "basePlanner/RoomPlanner";
 import { Bee } from "Bee/Bee";
 import { profile } from "profiler/decorator";
 import { withdrawTargetType } from "tasks/instances/task_withdraw";
@@ -7,7 +8,7 @@ import { Tasks } from "tasks/Tasks";
 @profile
 export class ResourcesManager {
 
-    public static getEnergySource(bee: Bee, minAmount?: number): Task | null {
+    public static getEnergySource(bee: Bee, isFiller: boolean, minAmount?: number): Task | null {
         const remain = minAmount === undefined ? bee.store.getFreeCapacity() * 0.5 : minAmount;
         const candidates: (withdrawTargetType | Resource)[] =
             bee.room.tombstones.filter(tomb => tomb.store.energy >= remain);
@@ -21,7 +22,9 @@ export class ResourcesManager {
             if (bee.room.terminal.energy >= remain) candidates.push(bee.room.terminal);
         }
 
-        candidates.push(...bee.room.containers.filter(container => container.store.energy >= remain));
+        candidates.push(...bee.room.containers.filter(
+            container => container.store.energy >= remain
+                && (isFiller || !RoomPlanner.isFillerContainer(container.pos))));
         candidates.push(...bee.room.links.filter(link => link.store.energy >= remain));
 
         const spawnRoom = Game.rooms[bee.process.roomName];

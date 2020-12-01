@@ -1,5 +1,10 @@
 interface Memory {
     MemVer: number;
+    beebot: {
+        outposts: {
+            [roomName: string]: string[];
+        }
+    }
     processes: {
         [processName: string]: {
             [roomName: string]: protoProcess[];
@@ -21,6 +26,14 @@ interface CreepMemory {
      * arriveTick
      */
     AT?: number;
+}
+
+type BeeFillerMemory = CreepMemory & {
+    i: number;
+}
+
+type BeeCarrierMemory = CreepMemory & {
+    i: number;
 }
 
 type BeeMinerMemory = CreepMemory & {
