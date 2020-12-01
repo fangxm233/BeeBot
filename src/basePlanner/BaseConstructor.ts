@@ -1,3 +1,4 @@
+import { BeeBot } from "BeeBot/BeeBot";
 import { USER_NAME } from "config";
 import { log } from "console/log";
 import { isStoreStructure } from "declarations/typeGuards";
@@ -35,12 +36,12 @@ export const LINK_TWO_CONSTRUCT_RCL = 6;
 @profile
 export class BaseConstructor {
     private static constructors: { [roomName: string]: BaseConstructor } = {};
+    private static roomBuilding: { [roomName: string]: RoomStructures } = {};
 
     private roomName: string;
     private base: Coord;
     private filteredExtConstructingOrder: RoomPosition[];
     private finishedRcl: number = 0;
-    private roomBuilding: RoomStructures;
 
     constructor(roomName: string) {
         this.roomName = roomName;
@@ -84,10 +85,12 @@ export class BaseConstructor {
         } else if (!this.finishedBuildingsAtRcl(rcl)) this.finishedRcl--;
         if (this.finishedRcl == rcl) return;
 
-        const checkAndConstructMissing = (coords: Coord[], type: StructureConstant, transforn: boolean) => {
-            const missing = this.checkMissingBuildings(type, coords, transforn);
+        const checkAndConstructMissing = (coords: Coord[] | RoomPosition[],
+            type: StructureConstant, transform: boolean) => {
+            const missing = this.checkMissingBuildings(type, coords, transform);
             if (!missing.length) return false;
-            this.createConstructionSites(type, missing, transforn);
+            console.log('missed')
+            this.createConstructionSites(type, missing, transform);
             return true;
         }
 
@@ -140,29 +143,74 @@ export class BaseConstructor {
             }
         }
 
-        // TODO: outpost building
+        console.log('hello');
+        const outposts = BeeBot.getOutposts(this.roomName);
+        outposts.forEach(outpost => {
+            console.log('hi');
+            const data = RoomPlanner.getRoomData(outpost);
+            if (!data) return;
+            console.log('getted data');
+
+            if (rcl >= ROAD_CONSTRUCT_RCL) {
+                for (const path of data.sourcesPath) {
+                    const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
+                    if (missing) return;
+                }
+            }
+
+            if (rcl >= CONTAINER_CONSTRUCT_RCL) {
+                const missing = checkAndConstructMissing(data.harvestPos.source, STRUCTURE_CONTAINER, false);
+                if (missing) return;
+            }
+        })
     }
 
-    private checkMissingBuildings(type: StructureConstant, coords: Coord[], transform: boolean) {
-        const room = Game.rooms[this.roomName];
+    private checkMissingBuildings(type: StructureConstant, coords: Coord[], transform: boolean): Coord[];
+    private checkMissingBuildings(type: StructureConstant, poses: RoomPosition[]): RoomPosition[];
+
+    private checkMissingBuildings(type: StructureConstant, coords: Coord[] | RoomPosition[], transform?: boolean) {
+        if (!coords.length) return [];
+
+        function isRoomPositionArray(coords): coords is RoomPosition[] {
+            return coords[0] instanceof RoomPosition;
+        }
+
+        if (isRoomPositionArray(coords)) {
+            return coords.filter(pos => {
+                const roomBuilding = this.getRoomStructures(pos.roomName);
+                if (!roomBuilding) return false;
+                const structure = roomBuilding.getForAt(type, pos) as any;
+                return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
+            })
+        }
+
+        const roomBuilding = this.getRoomStructures(this.roomName);
+        if (!roomBuilding) return [];
+
         return coords.filter(coord => {
             const x = coord.x + (transform ? this.base.x : 0);
             const y = coord.y + (transform ? this.base.y : 0);
-            const structure = this.roomBuilding.getForAt(type, x, y) as any;
+            const structure = roomBuilding.getForAt(type, x, y) as any;
             return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
         })
     }
 
-    private createConstructionSites(type: StructureConstant, coords: Coord[], transform: boolean) {
+    private createConstructionSites(type: StructureConstant, coords: Coord[], transform: boolean);
+    private createConstructionSites(type: StructureConstant, poses: RoomPosition[]);
+
+    private createConstructionSites(type: StructureConstant, coords: Coord[] | RoomPosition[], transform?: boolean) {
         for (const coord of coords) {
-            const room = Game.rooms[this.roomName];
+            let roomName = this.roomName;
+            if (coord instanceof RoomPosition) roomName = coord.roomName;
+            const room = Game.rooms[roomName];
+            if (!room) continue;
 
             const x = coord.x + (transform ? this.base.x : 0);
             const y = coord.y + (transform ? this.base.y : 0);
             const code = room.createConstructionSite(x, y, type as any);
             if (code === OK) continue;
             if (code === ERR_INVALID_TARGET) {
-                const structure = this.roomBuilding.getForAt(type, x, y);
+                const structure = room.lookForAt(LOOK_STRUCTURES, x, y)[0];
                 if (structure && structure.destroy) structure.destroy();
             }
             if (code === ERR_RCL_NOT_ENOUGH) {
@@ -230,7 +278,7 @@ export class BaseConstructor {
         }
         if (y == undefined) return;
 
-        const structures = this.getRoomStructures();
+        const structures = this.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x + this.base.x, y + this.base.y);
@@ -247,7 +295,7 @@ export class BaseConstructor {
         }
         if (y == undefined) return;
 
-        const structures = this.getRoomStructures();
+        const structures = this.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x + this.base.x, y + this.base.y)[type] as any;
@@ -264,7 +312,7 @@ export class BaseConstructor {
         if (y == undefined) return;
         if (x < 1 || x > 48 || y < 1 || y > 48) return;
 
-        const structures = this.getRoomStructures();
+        const structures = this.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x, y);
@@ -281,22 +329,23 @@ export class BaseConstructor {
         if (y == undefined) return;
         if (x < 1 || x > 48 || y < 1 || y > 48) return;
 
-        const structures = this.getRoomStructures();
+        const structures = this.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x, y)[type] as any;
     }
 
-    public getRoomStructures(): RoomStructures | undefined {
-        if (this.roomBuilding && Game.time - this.roomBuilding.time < 5) return this.roomBuilding;
+    public getRoomStructures(roomName: string): RoomStructures | undefined {
+        if (BaseConstructor.roomBuilding[roomName] && Game.time - BaseConstructor.roomBuilding[roomName].time < 5)
+            return BaseConstructor.roomBuilding[roomName];
 
-        const room = Game.rooms[this.roomName];
-        if (!room) return this.roomBuilding;
+        const room = Game.rooms[roomName];
+        if (!room) return BaseConstructor.roomBuilding[roomName];
         const structures: RoomStructures = new RoomStructures();
         for (const structure of room.find(FIND_STRUCTURES)) {
             structures.setStructure(structure, structure.pos.x, structure.pos.y);
         }
 
-        return this.roomBuilding = structures;
+        return BaseConstructor.roomBuilding[roomName] = structures;
     }
 }

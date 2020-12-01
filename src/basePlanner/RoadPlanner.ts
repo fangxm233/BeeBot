@@ -28,7 +28,7 @@ export class RoadPlanner {
         const result = PathFinder.search(center, { pos, range: 0 }, {
             maxOps: 1e4, heuristicWeight: 1, plainCost: PLAIN_COST, swampCost: SWAMP_COST,
             roomCallback: roomName => {
-                if (roomName == this.roomName) return RoomPlanner.getLayoutCostMatrix(this.base, 8);
+                if (roomName == this.roomName) return RoomPlanner.getBaseCostMatrix(roomName, this.base, 8);
                 if (this.isColony) return false;
 
                 const matrix = Intel.getRoomCostMatrix(roomName);
@@ -79,6 +79,7 @@ export class RoadPlanner {
                 path = '';
             }
             if (pos.isEdge) continue;
+            if (pos.roomName != posNext.roomName) continue;
             path += pos.getDirectionTo(posNext);
         }
 

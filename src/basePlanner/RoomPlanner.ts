@@ -7,8 +7,9 @@ import { coordToRoomPosition, timeAfterTick } from "utilities/helpers";
 import { packCoord, packCoordList, packRoomName, unpackCoord, unpackCoordList, unpackRoomName } from "utilities/packrat";
 import { isCoordEqual, printRoomName } from "utilities/utils";
 import { Visualizer } from "visuals/Visualizer";
+import { BaseConstructor } from "./BaseConstructor";
 import { RoadPlanner } from "./RoadPlanner";
-import { exits, structureLayout } from "./structurePreset";
+import { exits, fillingRouteCoords, structureLayout } from "./structurePreset";
 
 const ROAD_COST = 1;
 const CONTAINER_COST = 5;
@@ -272,7 +273,7 @@ export class RoomPlanner {
         return score;
     }
 
-    public static getLayoutCostMatrix(base: Coord, rcl: number) {
+    public static getBaseCostMatrix(baseName: string, base: Coord, rcl: number) {
         const matrix = new PathFinder.CostMatrix();
         const layout = structureLayout[rcl].buildings;
 
@@ -284,6 +285,12 @@ export class RoomPlanner {
             coords.forEach(coord => matrix.set(base.x + coord.x, base.y + coord.y, cost));
         }
 
+        const data = this.getRoomData(baseName);
+        if (data) {
+            data.sourcesPath.forEach(path => path.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST)));
+            data.mineralPath!.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST));
+            data.controllerPath!.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST));
+        }
         return matrix;
     }
 
@@ -293,6 +300,20 @@ export class RoomPlanner {
 
     public static getRoomData(roomName: string): RoomData | undefined {
         return this.roomData[roomName];
+    }
+
+    public static getFillingRoute(base: Coord, roomName: string, line: number) {
+        return fillingRouteCoords[line].map(
+            coord => coordToRoomPosition({ x: base.x + coord.x, y: base.y + coord.y }, roomName));
+    }
+
+    public static getFillerContainer(roomName: string, id: number) {
+        const coord = finalBase[STRUCTURE_CONTAINER][id];
+        return BaseConstructor.get(roomName).getForAtBase(STRUCTURE_CONTAINER, finalBase[STRUCTURE_CONTAINER][id]);
+    }
+
+    public static isFillerContainer(pos: RoomPosition) {
+        return !!BaseConstructor.get(pos.roomName).getForAt(STRUCTURE_CONTAINER, pos);
     }
 
     public static serializeData() {
@@ -331,13 +352,13 @@ export class RoomPlanner {
             const data = raw[roomName];
             const deserialized: RoomData = {
                 ownedRoom: data.o == 1,
-                controllerPath: RoadPlanner.deserializePath(data.c),
                 sourcesPath: _.map(data.s, (path: string[]) => RoadPlanner.deserializePath(path)),
                 harvestPos: { source: unpackCoordList(data.h.s) },
             } as any;
 
             if (deserialized.ownedRoom) {
                 deserialized.basePos = unpackCoord(data.b);
+                deserialized.controllerPath = RoadPlanner.deserializePath(data.c);
                 deserialized.mineralPath = RoadPlanner.deserializePath(data.m);
                 deserialized.linkPos = { source: unpackCoordList(data.l.s), controller: unpackCoord(data.l.c) };
                 deserialized.harvestPos.mineral = unpackCoord(data.h.m);

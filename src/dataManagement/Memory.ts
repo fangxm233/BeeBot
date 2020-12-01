@@ -1,8 +1,14 @@
-export const MemoryVersion = 1;
+export const MemoryVersion = 2;
 
 export class Mem {
     public static checkAndInit() {
         if (!Memory.MemVer) this.initMemory();
+        if (Memory.MemVer < MemoryVersion) {
+            for (let i = Memory.MemVer; i < MemoryVersion; i++) {
+                this.upgradeMemory(i);
+            }
+            this.upgradeMemory(Memory.MemVer);
+        }
     }
 
     public static initMemory() {
@@ -12,6 +18,7 @@ export class Mem {
         Memory.MemVer = MemoryVersion;
 
         Memory.processes = {};
+        Memory.beebot = { outposts: {} };
     }
 
     public static tryInitSameMemory(): boolean {
@@ -30,8 +37,10 @@ export class Mem {
         }
     }
 
-    // tslint:disable-next-line: no-empty
-    private static upgradeMemory(from: number, to: number) {
-
+    private static upgradeMemory(from: number) {
+        if (from == 1) {
+            Memory.beebot = { outposts: {} };
+        }
+        Memory.MemVer++;
     }
 }
