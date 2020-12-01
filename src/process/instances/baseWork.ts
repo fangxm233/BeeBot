@@ -1,8 +1,8 @@
-import { ROLE_UPGRADER, ROLE_WORKER } from "Bee/BeeFactory";
 import { setups } from "beeSpawning/setups";
 import { WishConfig, WishManager } from "beeSpawning/WishManager";
+import { ROLE_WORKER } from "declarations/constantsExport";
+import { PROCESS_BASE_WORK } from "declarations/constantsExport";
 import { Process } from "process/Process"
-import { PROCESS_BASE_WORK } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile

@@ -1,11 +1,11 @@
 import { bees } from "Bee/Bee";
-import { ROLE_FILLER } from "Bee/BeeFactory";
 import { log } from "console/log";
+import { ROLE_FILLER } from "declarations/constantsExport";
+import { PROCESS_FILLING } from "declarations/constantsExport";
 import { repeater } from "event/Repeater";
 import { timer } from "event/Timer";
 import { ProcessFilling } from "process/instances/filling";
 import { Process, STATE_ACTIVE } from "process/Process";
-import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { calBodyCost, timeAfterTick } from "utilities/helpers";
 import { getFreeKey } from "utilities/utils";

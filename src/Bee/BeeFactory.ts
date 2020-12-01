@@ -3,15 +3,6 @@ import { Process } from "process/Process";
 import { profile } from "profiler/decorator";
 import { Bee } from "./Bee";
 
-export const ROLE_FILLER = 'filler';
-export const ROLE_MINER = 'miner';
-export const ROLE_UPGRADER = 'upgrader';
-export const ROLE_CARRIER = 'carrier';
-export const ROLE_WORKER = 'worker';
-export const ROLE_MANAGER = 'manager';
-export const ROLE_SCOUT = 'scout';
-export const ROLE_RESERVER = 'reserver';
-
 @profile
 export class BeeFactorty {
     private static beeRegistry: {

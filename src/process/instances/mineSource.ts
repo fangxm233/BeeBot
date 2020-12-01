@@ -1,13 +1,13 @@
 import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { ROLE_MINER } from "Bee/BeeFactory";
 import { BeeMiner } from "Bee/instances/miner";
 import { BeeManager } from "beeSpawning/BeeManager";
 import { BeeSetup } from "beeSpawning/BeeSetup";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
 import { Intel } from "dataManagement/Intel";
+import { ROLE_MINER } from "declarations/constantsExport";
+import { PROCESS_MINE_SOURCE } from "declarations/constantsExport";
 import { Process } from "process/Process";
-import { PROCESS_MINE_SOURCE, PROCESS_SCOUT } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { coordToRoomPosition, partCount } from "utilities/helpers";
 import { ProcessScout } from "./scout";

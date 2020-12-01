@@ -23,6 +23,7 @@ import { log } from 'console/log';
 import { Intel } from 'dataManagement/Intel';
 import { Mem } from 'dataManagement/Memory';
 import { SegmentManager } from 'dataManagement/segmentManager';
+import { PROCESS_BASE_WORK, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_TOWER, PROCESS_UPGRADE } from 'declarations/constantsExport';
 import { clock } from 'event/Clock';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
@@ -32,7 +33,7 @@ import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessTower } from 'process/instances/tower';
 import { ProcessUpgrade } from 'process/instances/upgrade';
 import { Process } from 'process/Process';
-import { PROCESS_BASE_WORK, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_TOWER, PROCESS_UPGRADE, Processes } from 'process/Processes';
+import { Processes } from 'process/Processes';
 import { ErrorMapper, reset } from "./ErrorMapper";
 
 export const loop = ErrorMapper.wrapLoop(() => {

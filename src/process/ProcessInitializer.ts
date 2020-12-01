@@ -1,4 +1,5 @@
-import { ROLE_CARRIER, ROLE_FILLER, ROLE_MINER, ROLE_RESERVER, ROLE_SCOUT, ROLE_UPGRADER, ROLE_WORKER } from "Bee/BeeFactory";
+import { ROLE_CARRIER, ROLE_FILLER, ROLE_MINER, ROLE_RESERVER, ROLE_SCOUT, ROLE_UPGRADER, ROLE_WORKER } from "declarations/constantsExport";
+import { PROCESS_BASE_WORK, PROCESS_CARRY, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_RESERVING, PROCESS_SCOUT, PROCESS_TOWER, PROCESS_UPGRADE } from "declarations/constantsExport";
 import { ProcessBaseWork } from "./instances/baseWork";
 import { ProcessBoost } from "./instances/boost";
 import { ProcessCarry } from "./instances/carry";
@@ -9,7 +10,6 @@ import { ProcessScout } from "./instances/scout";
 import { ProcessTower } from "./instances/tower";
 import { ProcessUpgrade } from "./instances/upgrade";
 import { Process } from "./Process"
-import { PROCESS_BASE_WORK, PROCESS_CARRY, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_RESERVING, PROCESS_SCOUT, PROCESS_TOWER, PROCESS_UPGRADE } from "./Processes";
 
 // 注册的顺序将决定优先级
 Process.registerProcess(PROCESS_FILLING, Bucket.bottom, ProcessFilling, 100, [ROLE_FILLER]);

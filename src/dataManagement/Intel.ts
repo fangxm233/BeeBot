@@ -1,8 +1,8 @@
 import { BeeBot } from "BeeBot/BeeBot";
+import { PROCESS_SCOUT } from "declarations/constantsExport";
 import { Traveler } from "movement/Traveler";
 import { ProcessScout } from "process/instances/scout";
 import { Process } from "process/Process";
-import { PROCESS_SCOUT } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { Cartographer, ROOMTYPE_CONTROLLER, ROOMTYPE_CORE, ROOMTYPE_HIGHEAY, ROOMTYPE_SOURCEKEEPER } from "utilities/Cartographer";
 

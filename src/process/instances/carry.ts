@@ -1,12 +1,11 @@
 import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { ROLE_CARRIER } from "Bee/BeeFactory";
 import { BeeCarrier } from "Bee/instances/carrier";
 import { BeeSetup } from "beeSpawning/BeeSetup";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
-import { Intel } from "dataManagement/Intel";
+import { ROLE_CARRIER } from "declarations/constantsExport";
+import { PROCESS_CARRY } from "declarations/constantsExport";
 import { Process } from "process/Process";
-import { PROCESS_CARRY } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { coordToRoomPosition } from "utilities/helpers";
 

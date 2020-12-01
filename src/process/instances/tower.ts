@@ -2,8 +2,8 @@ import { BaseConstructor } from "basePlanner/BaseConstructor";
 import { RoomPlanner } from "basePlanner/RoomPlanner";
 import { structureLayout } from "basePlanner/structurePreset";
 import { USER_NAME } from "config";
+import { PROCESS_FILLING, PROCESS_TOWER } from "declarations/constantsExport";
 import { Process } from "process/Process";
-import { PROCESS_FILLING, PROCESS_TOWER } from "process/Processes";
 import { possibleDamage, possibleRepairPower, possibleTowerDamage, wouldBreakDefend } from "utilities/powerCalculation";
 import { ProcessFilling } from "./filling";
 

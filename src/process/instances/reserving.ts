@@ -1,11 +1,11 @@
-import { ROLE_RESERVER } from "Bee/BeeFactory";
 import { BeeManager } from "beeSpawning/BeeManager";
 import { BeeSetup } from "beeSpawning/BeeSetup";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
 import { Intel } from "dataManagement/Intel";
+import { ROLE_RESERVER } from "declarations/constantsExport";
+import { PROCESS_RESERVING } from "declarations/constantsExport";
 import { Process } from "process/Process"
-import { PROCESS_RESERVING } from "process/Processes";
 import { profile } from "profiler/decorator";
 import { partCount, timeAfterTick } from "utilities/helpers";
 

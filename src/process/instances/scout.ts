@@ -1,9 +1,9 @@
-import { ROLE_SCOUT } from "Bee/BeeFactory";
 import { BeeScout } from "Bee/instances/scout";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
+import { ROLE_SCOUT } from "declarations/constantsExport";
+import { PROCESS_SCOUT } from "declarations/constantsExport";
 import { Process } from "process/Process";
-import { PROCESS_SCOUT } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 const MAX_SCOUT_COUNT = 10;

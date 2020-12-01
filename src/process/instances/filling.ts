@@ -1,14 +1,14 @@
 import { ROAD_CONSTRUCT_RCL } from "basePlanner/BaseConstructor";
 import { structureLayout } from "basePlanner/structurePreset";
-import { ROLE_FILLER } from "Bee/BeeFactory";
 import { BeeFiller } from "Bee/instances/filler";
 import { BeeSetup } from "beeSpawning/BeeSetup";
 import { setups } from "beeSpawning/setups";
 import { WishManager } from "beeSpawning/WishManager";
 import { Intel } from "dataManagement/Intel";
+import { ROLE_FILLER } from "declarations/constantsExport";
+import { PROCESS_FILLING } from "declarations/constantsExport";
 import { event } from "event/Event";
 import { Process } from "process/Process";
-import { PROCESS_FILLING } from "process/Processes";
 import { profile } from "profiler/decorator";
 
 @profile
