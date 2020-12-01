@@ -13,7 +13,7 @@ export class ProcessTower extends Process {
     private inited: boolean;
     private repairList: Id<Structure>[];
     private regularRepaitList: Id<Structure>[];
-    private tickToRepair: number;
+    private tickToRepair: number = 0;
     private center: RoomPosition;
 
     constructor(roomName: string) {
@@ -35,6 +35,7 @@ export class ProcessTower extends Process {
     }
 
     public check() {
+        if (!this.inited && !this.init()) return false;
         const room = Game.rooms[this.roomName];
         if (!room) {
             this.close();
@@ -139,7 +140,7 @@ export class ProcessTower extends Process {
 
         let poses = _.flatten([data.controllerPath!, ...data.sourcesPath, data.mineralPath!].map(path => path.path));
         poses.push(...structureLayout[room.controller!.level].buildings[STRUCTURE_ROAD].map(
-            coord => new RoomPosition(coord.x, coord.y, this.roomName)))
+            coord => new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, this.roomName)))
         poses = _.uniq(poses);
         this.regularRepaitList.push(..._.map(poses, pos => baseConstructor.getForAt(STRUCTURE_ROAD, pos)?.id!));
 
@@ -151,9 +152,9 @@ export class ProcessTower extends Process {
 
     private repairs(room: Room, structures: Structure[]): boolean {
         structures = structures.filter(structure => this.needToRepair(structure));
-        const structure = _.min(structures, structure => structure.hits);
-        if (!structure) return false;
 
+        if (!structures.length) return false;
+        const structure = _.min(structures, structure => structure.hits);
         this.repair(room.towers, structure);
         return true;
     }
