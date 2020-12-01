@@ -23,9 +23,13 @@ export class BeeScout extends Bee {
 
     public runCore() {
         this.task?.isValid();
-        if (!this.task && this.target) {
-            this.task = Tasks.goToRoom(this.target);
-        } else this.lock();
+        if (!this.task) {
+            if (this.target) this.task = Tasks.goToRoom(this.target);
+            else {
+                this.target = undefined;
+                this.lock();
+            }
+        }
 
         this.task?.run();
     }
