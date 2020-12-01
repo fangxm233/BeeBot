@@ -1,8 +1,10 @@
-import { BeeFactorty, ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER, ROLE_UPGRADER, ROLE_WORKER } from "./BeeFactory";
+import { BeeFactorty, ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER, ROLE_RESERVER, ROLE_SCOUT, ROLE_UPGRADER, ROLE_WORKER } from "./BeeFactory";
 import { BeeCarrier } from "./instances/carrier";
 import { BeeFiller } from "./instances/filler";
 import { BeeManager } from "./instances/manager";
 import { BeeMiner } from "./instances/miner";
+import { BeeReserver } from "./instances/reserver";
+import { BeeScout } from "./instances/scout";
 import { BeeUpgrader } from "./instances/upgrader";
 import { BeeWorker } from "./instances/worker";
 
@@ -13,3 +15,5 @@ BeeFactorty.registerBee(ROLE_CARRIER, BeeCarrier);
 BeeFactorty.registerBee(ROLE_MANAGER, BeeManager);
 BeeFactorty.registerBee(ROLE_WORKER, BeeWorker);
 BeeFactorty.registerBee(ROLE_UPGRADER, BeeUpgrader);
+BeeFactorty.registerBee(ROLE_RESERVER, BeeReserver);
+BeeFactorty.registerBee(ROLE_SCOUT, BeeScout);
