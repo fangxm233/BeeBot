@@ -10,6 +10,7 @@ export const ROLE_CARRIER = 'carrier';
 export const ROLE_WORKER = 'worker';
 export const ROLE_MANAGER = 'manager';
 export const ROLE_SCOUT = 'scout';
+export const ROLE_RESERVER = 'reserver';
 
 @profile
 export class BeeFactorty {
