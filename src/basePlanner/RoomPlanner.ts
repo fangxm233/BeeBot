@@ -47,7 +47,8 @@ export class RoomPlanner {
 
     public static planRoom(baseName: string, to?: string, loop?: boolean) {
         const result = this.planRoomCore(baseName, to);
-        if (result.intelMissing && loop) timer.callBackAtTick(timeAfterTick(1), () => this.planRoom(baseName, to, true));
+        if ((result.intelMissing || result.matrixMissing) && loop)
+            timer.callBackAtTick(timeAfterTick(1), () => this.planRoom(baseName, to, true));
         return result;
     }
 
@@ -291,6 +292,8 @@ export class RoomPlanner {
             data.mineralPath!.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST));
             data.controllerPath!.path.forEach(coord => matrix.set(coord.x, coord.y, ROAD_COST));
             [data.linkPos!.controller, ...data.linkPos!.source].forEach(coord => matrix.set(coord.x, coord.y, 0xff));
+            [...data.harvestPos.source, data.containerPos!.controller]
+                .forEach(coord => matrix.set(coord.x, coord.y, CONTAINER_COST));
         }
         return matrix;
     }
@@ -301,6 +304,11 @@ export class RoomPlanner {
 
     public static getRoomData(roomName: string): RoomData | undefined {
         return this.roomData[roomName];
+    }
+
+    public static removeRoomData(roomName: string) {
+        this.roomData[roomName] = undefined!;
+        this.serializeData();
     }
 
     public static getFillingRoute(base: Coord, roomName: string, line: number) {
@@ -317,12 +325,19 @@ export class RoomPlanner {
         return !!BaseConstructor.get(pos.roomName).getForAt(STRUCTURE_CONTAINER, pos);
     }
 
+    public static getManagerPos(roomName: string): RoomPosition | undefined {
+        const data = this.getRoomData(roomName);
+        if (!data) return;
+        return new RoomPosition(data.basePos!.x + 6, data.basePos!.y + 4, roomName);
+    }
+
     public static serializeData() {
         if (Object.keys(this.roomData).length == 0) return;
         const result: { [roomName: string]: any } = {};
 
         for (const roomName in this.roomData) {
             const data = this.roomData[roomName];
+            if (!data) continue;
             const serialized: any = {};
 
             serialized.o = data.ownedRoom ? 1 : 0;
@@ -370,3 +385,5 @@ export class RoomPlanner {
         }
     }
 }
+
+(global as any).RoomPlanner = RoomPlanner;
