@@ -44,6 +44,7 @@ export class ProcessTower extends Process {
 
         if (room.find(FIND_HOSTILE_CREEPS).length) return true;
         if (room.find(FIND_HOSTILE_POWER_CREEPS).length) return true;
+        if (room.find(FIND_MY_CREEPS).filter(creep => creep.hits < creep.hitsMax).length) return true;
 
         this.tickToRepair--;
 
