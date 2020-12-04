@@ -10,40 +10,38 @@ import { PROCESS_MINE_SOURCE } from "declarations/constantsExport";
 import { Process } from "process/Process";
 import { profile } from "profiler/decorator";
 import { coordToRoomPosition, partCount } from "utilities/helpers";
-import { ProcessScout } from "./scout";
 
 @profile
 export class ProcessMineSource extends Process {
     public memory: protoProcessMineSource;
     public sources: RoomPosition[];
     public target: string;
+    public earlyOutpost: boolean;
     private minerCount: number[];
     private inited: boolean;
     private center: RoomPosition;
     private setup: BeeSetup;
 
-    constructor(roomName: string, targetRoom: string) {
+    constructor(roomName: string, targetRoom: string, earlyOutpost?: boolean) {
         super(roomName, PROCESS_MINE_SOURCE);
         this.wishManager = new WishManager(roomName, targetRoom, this);
         this.target = targetRoom;
+        this.earlyOutpost = !!earlyOutpost;
     }
 
     protected getProto() {
-        return { target: this.target };
+        return { target: this.target, EO: this.earlyOutpost ? 1 : undefined };
     }
 
     public static getInstance(proto: protoProcessMineSource, roomName: string) {
-        return new ProcessMineSource(roomName, proto.target);
+        return new ProcessMineSource(roomName, proto.target, proto.EO ? true : undefined);
     }
 
     private init(): boolean {
         const targetIntel = Intel.getRoomIntel(this.target);
-        const baseIntel = Intel.getRoomIntel(this.roomName);
         const baseData = RoomPlanner.getRoomData(this.roomName);
-        const targetRoom = Game.rooms[this.target];
-        const baseRoom = Game.rooms[this.roomName];
 
-        if (!targetIntel || !baseIntel || !baseData || !baseRoom) return false;
+        if (!targetIntel || !baseData) return false;
 
         this.center = coordToRoomPosition(baseData.basePos!, this.roomName);
         this.sources = targetIntel.sources!.map(coord => coordToRoomPosition(coord, this.target))
@@ -59,11 +57,13 @@ export class ProcessMineSource extends Process {
     }
 
     private chooseSetup(): BeeSetup | undefined {
+        if (this.earlyOutpost) return setups[ROLE_MINER].source.outpost.early;
+
         const baseRoom = Game.rooms[this.roomName];
         if (!baseRoom) return;
 
         return _.max(Object.values(setups[ROLE_MINER].source[this.roomName == this.target ? 'base' : 'outpost'])
-            .filter(setup => setup.minCost() < BeeManager.getRoomEnergyCapacity(baseRoom)),
+            .filter(setup => setup.minCost() <= BeeManager.getRoomEnergyCapacity(baseRoom)),
             setup => setup.maxCost());
     }
 
