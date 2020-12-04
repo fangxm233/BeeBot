@@ -31,6 +31,7 @@ type protoProcessFilling = protoProcess & {
 
 type protoProcessMineSource = protoProcess & {
     target: string;
+    EO: number;
 };
 
 type protoProcessBoost = protoProcess & {
