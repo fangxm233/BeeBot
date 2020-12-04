@@ -88,7 +88,7 @@ interface Room {
 
 interface RoomObject {
 	ref: string;
-	targetedBy: string[];
+	targetedBy: Creep[];
 
 	serialize(): ProtoRoomObject;
 }
