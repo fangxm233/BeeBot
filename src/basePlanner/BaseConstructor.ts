@@ -6,7 +6,7 @@ import { clock } from "event/Clock";
 import { event } from "event/Event";
 import { timer } from "event/Timer";
 import { profile } from "profiler/decorator";
-import { isOwner, timeAfterTick } from "utilities/helpers";
+import { coordToRoomPosition, isOwner, timeAfterTick } from "utilities/helpers";
 import { printRoomName } from "utilities/utils";
 import { RoomPlanner } from "./RoomPlanner";
 import { RoomStructures } from "./RoomStructures";
@@ -53,13 +53,17 @@ export class BaseConstructor {
             if (!data) return;
         }
 
+        BaseConstructor.constructors[roomName] = this;
+        if (!data.ownedRoom) return;
+
         this.base = data.basePos!;
         this.filteredExtConstructingOrder = extConstructOrder.filter(
             coord => terrain.get(data!.basePos!.x + coord.x, data!.basePos!.y + coord.y) != TERRAIN_MASK_WALL)
             .map(coord => new RoomPosition(data!.basePos!.x + coord.x, data!.basePos!.y + coord.y, roomName));
 
-        BaseConstructor.constructors[roomName] = this;
-        event.addEventListener('onBuildComplete', () => this.constructBuildings());
+        // 等待RoomStructures更新
+        event.addEventListener('onBuildComplete',
+            () => timer.callBackAtTick(timeAfterTick(1), () => this.constructBuildings()));
         // 等待RoomData更新
         event.addEventListener('onRclUpgrade',
             () => timer.callBackAtTick(timeAfterTick(1), () => this.constructBuildings()));
@@ -89,7 +93,6 @@ export class BaseConstructor {
             type: StructureConstant, transform: boolean) => {
             const missing = this.checkMissingBuildings(type, coords, transform);
             if (!missing.length) return false;
-            console.log('missed')
             this.createConstructionSites(type, missing, transform);
             return true;
         }
@@ -120,8 +123,7 @@ export class BaseConstructor {
                 const coords = [
                     ...data.harvestPos.source.filter(coord => !room.links.find(
                         link => link.pos.inRangeToXY(coord.x, coord.y, 1))),
-                    data.harvestPos.mineral!,
-                    data.containerPos!.controller];
+                    data.harvestPos.mineral!];
                 const missing = checkAndConstructMissing(coords, STRUCTURE_CONTAINER, false);
                 if (missing) return;
             }
@@ -156,7 +158,8 @@ export class BaseConstructor {
             }
 
             if (rcl >= CONTAINER_CONSTRUCT_RCL) {
-                const missing = checkAndConstructMissing(data.harvestPos.source, STRUCTURE_CONTAINER, false);
+                const missing = checkAndConstructMissing(data.harvestPos.source.map(
+                    coord => coordToRoomPosition(coord, outpost)), STRUCTURE_CONTAINER, false);
                 if (missing) return;
             }
         })
@@ -174,14 +177,14 @@ export class BaseConstructor {
 
         if (isRoomPositionArray(coords)) {
             return coords.filter(pos => {
-                const roomBuilding = this.getRoomStructures(pos.roomName);
+                const roomBuilding = BaseConstructor.getRoomStructures(pos.roomName);
                 if (!roomBuilding) return false;
                 const structure = roomBuilding.getForAt(type, pos) as any;
                 return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
             })
         }
 
-        const roomBuilding = this.getRoomStructures(this.roomName);
+        const roomBuilding = BaseConstructor.getRoomStructures(this.roomName);
         if (!roomBuilding) return [];
 
         return coords.filter(coord => {
@@ -208,13 +211,15 @@ export class BaseConstructor {
             if (code === OK) continue;
             if (code === ERR_INVALID_TARGET) {
                 const structure = room.lookForAt(LOOK_STRUCTURES, x, y)[0];
+                if (!structure) continue;
+                if (structure.structureType == type && isOwner(structure)) continue;
                 if (structure && structure.destroy) structure.destroy();
             }
             if (code === ERR_RCL_NOT_ENOUGH) {
                 room.find(FIND_STRUCTURES).filter(structure =>
                     structure.structureType == type
                     && (structure as any).owner
-                    && (structure as any).owner.username == USER_NAME).forEach(structure => structure.destroy());
+                    && (structure as any).owner.username != USER_NAME).forEach(structure => structure.destroy());
             }
             return false;
         }
@@ -275,7 +280,7 @@ export class BaseConstructor {
         }
         if (y == undefined) return;
 
-        const structures = this.getRoomStructures(this.roomName);
+        const structures = BaseConstructor.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x + this.base.x, y + this.base.y);
@@ -292,7 +297,7 @@ export class BaseConstructor {
         }
         if (y == undefined) return;
 
-        const structures = this.getRoomStructures(this.roomName);
+        const structures = BaseConstructor.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x + this.base.x, y + this.base.y)[type] as any;
@@ -309,7 +314,7 @@ export class BaseConstructor {
         if (y == undefined) return;
         if (x < 1 || x > 48 || y < 1 || y > 48) return;
 
-        const structures = this.getRoomStructures(this.roomName);
+        const structures = BaseConstructor.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x, y);
@@ -326,23 +331,33 @@ export class BaseConstructor {
         if (y == undefined) return;
         if (x < 1 || x > 48 || y < 1 || y > 48) return;
 
-        const structures = this.getRoomStructures(this.roomName);
+        const structures = BaseConstructor.getRoomStructures(this.roomName);
         if (!structures) return;
 
         return structures.getAt(x, y)[type] as any;
     }
 
-    public getRoomStructures(roomName: string): RoomStructures | undefined {
-        if (BaseConstructor.roomBuilding[roomName] && Game.time - BaseConstructor.roomBuilding[roomName].time < 5)
-            return BaseConstructor.roomBuilding[roomName];
-
+    public static refreshRoomStructures(roomName: string): RoomStructures | undefined {
         const room = Game.rooms[roomName];
-        if (!room) return BaseConstructor.roomBuilding[roomName];
+        if (!room) return this.roomBuilding[roomName];
         const structures: RoomStructures = new RoomStructures();
         for (const structure of room.find(FIND_STRUCTURES)) {
             structures.setStructure(structure, structure.pos.x, structure.pos.y);
         }
 
-        return BaseConstructor.roomBuilding[roomName] = structures;
+        return this.roomBuilding[roomName] = structures;
+    }
+
+    public static getRoomStructures(roomName: string): RoomStructures | undefined {
+        if (this.roomBuilding[roomName]) return this.roomBuilding[roomName];
+
+        const room = Game.rooms[roomName];
+        if (!room) return this.roomBuilding[roomName];
+        const structures: RoomStructures = new RoomStructures();
+        for (const structure of room.find(FIND_STRUCTURES)) {
+            structures.setStructure(structure, structure.pos.x, structure.pos.y);
+        }
+
+        return this.roomBuilding[roomName] = structures;
     }
 }
