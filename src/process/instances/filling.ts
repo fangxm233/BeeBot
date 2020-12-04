@@ -50,7 +50,7 @@ export class ProcessFilling extends Process {
 
     private init(): boolean {
         this.wishManager.setDefault('role', ROLE_FILLER);
-        this.wishManager.setDefault('budget', Infinity);
+        this.wishManager.setDefault('budget', 1650); // 容量1100
         return this.chooseSetup() && this.judgeCount();
     }
 
@@ -65,7 +65,7 @@ export class ProcessFilling extends Process {
     private judgeCount(): boolean {
         const data = Intel.getRoomIntel(this.roomName);
         if (!data) return false;
-        this.count = structureLayout[data.rcl!].buildings[STRUCTURE_CONTAINER].length;
+        this.count = structureLayout[data.rcl!].buildings[STRUCTURE_CONTAINER].length || 1;
         return true;
     }
 
