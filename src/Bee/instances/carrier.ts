@@ -25,9 +25,12 @@ export class BeeCarrier extends Bee {
             } else if (!this.pos.isNearTo(this.targetPos)) {
                 this.task = Tasks.goTo(this.targetPos);
             } else {
-                const drop = this.targetPos.lookFor(LOOK_RESOURCES).filter(resource =>
+                const drop = this.targetPos.findInRange(FIND_DROPPED_RESOURCES, 4).filter(resource =>
                     resource.resourceType == RESOURCE_ENERGY && resource.amount >= this.store.getFreeCapacity())[0];
-                if (drop) this.pickup(drop);
+                if (drop) {
+                    if (!this.pos.isNearTo(drop)) this.task = Tasks.goTo(drop);
+                    else this.pickup(drop);
+                }
                 else {
                     const container = this.targetPos.lookForStructure(STRUCTURE_CONTAINER);
                     if (container && container.store.energy >= this.store.getFreeCapacity()) {
