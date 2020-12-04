@@ -47,7 +47,7 @@ export class Processes {
             Process.processesByType[processName] = {};
             for (const roomName in processes) {
                 const roomProcesses = processes[roomName];
-                Process.processes[roomName] = {};
+                if (!Process.processes[roomName]) Process.processes[roomName] = {};
                 for (const id in roomProcesses) {
                     const protoProcess = roomProcesses[id];
                     try {

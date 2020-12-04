@@ -44,7 +44,7 @@ export class Process {
         return Process.processRegistry.find(registration => registration.processName == processName);
     }
 
-    /** 使用短ID */
+    /** 使用全ID */
     public static processes: {
         [roomName: string]: {
             [processId: string]: Process
@@ -196,7 +196,7 @@ export class Process {
         if (this.parent) this.removeParent();
 
         Memory.processes[this.processName][this.roomName][this.id] = undefined as any;
-        Process.processes[this.roomName][this.id] = undefined as any;
+        Process.processes[this.roomName][this.fullId] = undefined as any;
         Process.processesById[this.fullId] = undefined as any;
         Process.processesByType[this.processName][this.fullId] = undefined as any;
         this.closed = true;
@@ -255,6 +255,10 @@ export class Process {
         return this.processesById[a1] as unknown as T;
     }
 
+    public static getProcesses<T>(roomName: string, type: ProcessTypes): T[] {
+        return _.filter(this.processesByType[type], process => process && process.roomName == roomName) as unknown as T[];
+    }
+
     public static startProcess(process: Process): string {
         if (!this.processes[process.roomName])
             this.processes[process.roomName] = {};
@@ -267,7 +271,7 @@ export class Process {
 
         const free = getFreeKey(Memory.processes[process.processName][process.roomName]);
         process.id = free;
-        this.processes[process.roomName][free] = process;
+        this.processes[process.roomName][process.fullId] = process;
         this.processesById[process.fullId] = process;
         this.processesByType[process.processName][process.fullId] = process;
         Memory.processes[process.processName][process.roomName][free] = process.protoProcess;
@@ -282,7 +286,7 @@ export class Process {
     }
     public static addProcess(process: Process) {
         if (!this.processes[process.roomName]) this.processes[process.roomName] = {};
-        this.processes[process.roomName][process.id] = process;
+        this.processes[process.roomName][process.fullId] = process;
         this.processesById[process.fullId] = process;
         this.processesByType[process.processName][process.fullId] = process;
 
