@@ -110,7 +110,7 @@ export class BeeMiner extends Bee {
 
     private runNone() {
         if (this.store.energy >= this.workCount * BUILD_POWER || !this.store.getFreeCapacity()) {
-            const site = this.pos.lookFor(LOOK_CONSTRUCTION_SITES)[0];
+            const site = this.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 3)[0];
             if (site) {
                 this.build(site);
                 return;
