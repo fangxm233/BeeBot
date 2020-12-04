@@ -12,7 +12,9 @@ export class BeeUpgrader extends Bee {
             if (!this.store.energy) {
                 this.task = ResourcesManager.getEnergySource(this, false);
             } else {
-                this.task = Tasks.upgrade(this.room.controller!);
+                const spawnRoom = Game.rooms[this.process.roomName];
+                if (!spawnRoom) return;
+                this.task = Tasks.upgrade(spawnRoom.controller!);
             }
         }
         this.task?.run();
