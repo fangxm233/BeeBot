@@ -7,7 +7,6 @@ export class Mem {
             for (let i = Memory.MemVer; i < MemoryVersion; i++) {
                 this.upgradeMemory(i);
             }
-            this.upgradeMemory(Memory.MemVer);
         }
     }
 
