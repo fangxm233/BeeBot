@@ -5,7 +5,7 @@ import { ProcessFilling } from "process/instances/filling";
 import { profile } from "profiler/decorator";
 import { ResourcesManager } from "resourceManagement/ResourcesManager";
 
-type fillingTargetType = StructureSpawn | StructureTower | StructureExtension;
+export type fillingTargetType = StructureSpawn | StructureTower | StructureExtension;
 
 @profile
 export class BeeFiller extends Bee {
@@ -15,6 +15,7 @@ export class BeeFiller extends Bee {
     private containerId: Id<StructureContainer>;
     private index: number = -1;
     private finished: boolean;
+    private energyEnough: boolean;
 
     public get memory(): BeeFillerMemory {
         return this.creep.memory as BeeFillerMemory;
@@ -35,8 +36,9 @@ export class BeeFiller extends Bee {
 
         if (!this.store.energy) {
             if (!this.task) this.task =
-                ResourcesManager.getEnergySource(this, !this.finished, this.process.energyEnough ? undefined : 1);
+                ResourcesManager.getEnergySource(this, !this.finished, this.energyEnough ? undefined : 1);
             this.task?.isValid();
+            this.energyEnough = !!this.task;
             this.process.energyEnough = !!this.task;
             this.task?.run();
             return;
