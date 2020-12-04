@@ -1,4 +1,4 @@
-import { ROLE_CARRIER, ROLE_FILLER, ROLE_MINER, ROLE_RESERVER, ROLE_SCOUT, ROLE_UPGRADER, ROLE_WORKER } from "declarations/constantsExport";
+import { ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER, ROLE_RESERVER, ROLE_SCOUT, ROLE_UPGRADER, ROLE_WORKER } from "declarations/constantsExport";
 import { PROCESS_BASE_WORK, PROCESS_CARRY, PROCESS_FILLING, PROCESS_MINE_SOURCE, PROCESS_RESERVING, PROCESS_SCOUT, PROCESS_TOWER, PROCESS_UPGRADE } from "declarations/constantsExport";
 import { ProcessBaseWork } from "./instances/baseWork";
 import { ProcessBoost } from "./instances/boost";
@@ -17,6 +17,6 @@ Process.registerProcess(PROCESS_TOWER, Bucket.bottom, ProcessTower);
 Process.registerProcess(PROCESS_MINE_SOURCE, Bucket.level2, ProcessMineSource, 100, [ROLE_MINER]);
 Process.registerProcess(PROCESS_CARRY, Bucket.level1, ProcessCarry, 100, [ROLE_CARRIER]);
 Process.registerProcess(PROCESS_UPGRADE, Bucket.level4, ProcessUpgrade, 100, [ROLE_UPGRADER]);
-Process.registerProcess(PROCESS_BASE_WORK, Bucket.level3, ProcessBaseWork, 100, [ROLE_WORKER]);
+Process.registerProcess(PROCESS_BASE_WORK, Bucket.level3, ProcessBaseWork, 100, [ROLE_WORKER, ROLE_MANAGER]);
 Process.registerProcess(PROCESS_SCOUT, Bucket.level5, ProcessScout, 100, [ROLE_SCOUT]);
 Process.registerProcess(PROCESS_RESERVING, Bucket.level6, ProcessReserving, 100, [ROLE_RESERVER]);
