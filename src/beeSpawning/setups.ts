@@ -40,14 +40,9 @@ export const setups = {
             },
 
             outpost: {
-                stage1: new BeeSetup(ROLE_MINER, {
-                    ratio: ['w2', 'm1'],
-                    maxSize: 1
-                }),
-
-                stage2: new BeeSetup(ROLE_MINER, {
-                    ratio: ['w3', 'm3'],
-                    maxSize: 1
+                early: new BeeSetup(ROLE_MINER, {
+                    ratio: ['w1', 'm1'],
+                    maxSize: 5
                 }),
 
                 default: new BeeSetup(ROLE_MINER, {
@@ -80,7 +75,7 @@ export const setups = {
 
     [ROLE_UPGRADER]: {
         default: new BeeSetup(ROLE_UPGRADER, {
-            ratio: ['w1', 'c1', 'm2'],
+            ratio: ['w1', 'c1', 'm1'],
             maxSize: Infinity
         }),
 
