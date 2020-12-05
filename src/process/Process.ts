@@ -13,7 +13,7 @@ export const STATE_SUSPENDED = 'sd'
 
 interface ProcessRegistration {
     processName: string,
-    priotiry: number,
+    priority: number,
     suspendBucket: number,
     wishListInterval: number,
     requiredRoles: string[],
@@ -32,7 +32,7 @@ export class Process {
         requiredRoles: string[] = []) {
         this.processRegistry.push({
             processName,
-            priotiry: this.processRegistry.length,
+            priority: this.processRegistry.length,
             suspendBucket,
             constructor,
             wishListInterval,
@@ -66,7 +66,7 @@ export class Process {
     public roomName: string;
     public processName: ProcessTypes;
     public parent: string;
-    public subProccesses: string[];
+    public subProcesses: string[];
     public bees: { [role: string]: Bee[] };
     public id: number;
     public closed: boolean;
@@ -96,7 +96,7 @@ export class Process {
             st: this.state,
             slt: this.sleepTime ? this.sleepTime : undefined,
             p: this.parent,
-            sp: this.subProccesses.length ? this.subProccesses : undefined,
+            sp: this.subProcesses.length ? this.subProcesses : undefined,
             bees: Object.keys(bees).length ? bees : undefined,
         }, this.getProto());
     }
@@ -107,7 +107,7 @@ export class Process {
     constructor(roomName: string, processName: ProcessTypes) {
         this.roomName = roomName;
         this.processName = processName;
-        this.subProccesses = [];
+        this.subProcesses = [];
         this.bees = {};
         const registration = Process.getProcessRegistration(processName);
         if (registration && registration.requiredRoles.length) {
@@ -138,12 +138,12 @@ export class Process {
 
     private addSubProcess(processId: string) {
         if (!Process.getProcess(processId)) return;
-        this.subProccesses.push(processId);
+        this.subProcesses.push(processId);
         if (!this.memory.sp) this.memory.sp = [];
         this.memory.sp.push(processId);
     }
     public removeSubProcess(processId: string) {
-        _.pull(this.subProccesses, processId);
+        _.pull(this.subProcesses, processId);
         _.pull(this.memory.sp, processId);
     }
 
@@ -188,7 +188,7 @@ export class Process {
     }
     public suspend() {
         this.state = STATE_SUSPENDED;
-        if (this.subProccesses.length) this.subProccesses.map(
+        if (this.subProcesses.length) this.subProcesses.map(
             id => Process.getProcess<Process>(id)).forEach(p => p && p.suspend());
         log.debug(this.roomName, this.processName, this.id, 'suspended');
     }
@@ -202,7 +202,7 @@ export class Process {
         this.closed = true;
 
         if (killAllCreep) _.forEach(this.bees, (bees, role) => this.foreachBee(role!, bee => bee.suicide()));
-        if (this.subProccesses.length) this.subProccesses.map(
+        if (this.subProcesses.length) this.subProcesses.map(
             id => Process.getProcess<Process>(id)).forEach(p => p && p.close(killAllCreep));
 
         log.debug(this.roomName, this.processName, this.id, 'closed');
