@@ -3,6 +3,11 @@ interface Memory {
     beebot: {
         outposts: {
             [roomName: string]: string[];
+        },
+        colonies: {
+            [roomName: string]: {
+                stage: ColonyStage,
+            }
         }
     }
     processes: {

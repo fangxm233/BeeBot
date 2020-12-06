@@ -1,0 +1,1 @@
+type ColonyStage = 'early' | 'medium' | 'final';

@@ -1,4 +1,4 @@
-export const MemoryVersion = 2;
+export const MemoryVersion = 3;
 
 export class Mem {
     public static checkAndInit() {
@@ -17,7 +17,7 @@ export class Mem {
         Memory.MemVer = MemoryVersion;
 
         Memory.processes = {};
-        Memory.beebot = { outposts: {} };
+        Memory.beebot = { outposts: {}, colonies: {} };
     }
 
     public static tryInitSameMemory(): boolean {
@@ -38,7 +38,10 @@ export class Mem {
 
     private static upgradeMemory(from: number) {
         if (from == 1) {
-            Memory.beebot = { outposts: {} };
+            Memory.beebot = { outposts: {}, colonies: {} };
+        }
+        if(from == 2) {
+            Memory.beebot.colonies = {};
         }
         Memory.MemVer++;
     }

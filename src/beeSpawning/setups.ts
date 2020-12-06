@@ -1,4 +1,14 @@
-import { ROLE_CARRIER, ROLE_FILLER, ROLE_MANAGER, ROLE_MINER, ROLE_RESERVER, ROLE_SCOUT, ROLE_UPGRADER, ROLE_WORKER } from "declarations/constantsExport";
+import {
+    ROLE_CARRIER, ROLE_CLAIMER,
+    ROLE_FILLER,
+    ROLE_MANAGER,
+    ROLE_MINER,
+    ROLE_PIONEER,
+    ROLE_RESERVER,
+    ROLE_SCOUT,
+    ROLE_UPGRADER,
+    ROLE_WORKER,
+} from 'declarations/constantsExport';
 import { BeeSetup } from "./BeeSetup";
 
 export const setups = {
@@ -121,4 +131,18 @@ export const setups = {
             maxSize: 6
         })
     },
+
+    [ROLE_PIONEER]: {
+        default: new BeeSetup(ROLE_PIONEER, {
+            ratio: ['w1', 'c1', 'm2'],
+            maxSize: Infinity
+        })
+    },
+
+    [ROLE_CLAIMER]: {
+        default: new BeeSetup(ROLE_CLAIMER, {
+            ratio: ['C1', 'm5'],
+            maxSize: 1
+        })
+    }
 }

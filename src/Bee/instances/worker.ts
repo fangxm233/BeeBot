@@ -1,10 +1,10 @@
-import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { Bee } from "Bee/Bee";
-import { BeeBot } from "BeeBot/BeeBot";
-import { profile } from "profiler/decorator";
-import { ResourcesManager } from "resourceManagement/ResourcesManager";
-import { Tasks } from "tasks/Tasks";
-import { fillingTargetType } from "./filler";
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { Bee } from 'Bee/Bee';
+import { BeeBot } from 'BeeBot/BeeBot';
+import { profile } from 'profiler/decorator';
+import { ResourcesManager } from 'resourceManagement/ResourcesManager';
+import { Tasks } from 'tasks/Tasks';
+import { fillingTargetType } from './filler';
 
 @profile
 export class BeeWorker extends Bee {
@@ -26,7 +26,7 @@ export class BeeWorker extends Bee {
         if (!room) return;
 
         const controller = room.controller;
-        const early = controller && controller.level < 4;
+        const early = BeeBot.getColonyStage(room.name) == 'early';
         if (controller && controller.ticksToDowngrade <= (!early ? 10000 : 2000))
             if (this.upgradeAction()) return;
 

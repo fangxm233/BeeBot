@@ -1,16 +1,16 @@
-import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { Bee } from "Bee/Bee";
-import { BeeBot } from "BeeBot/BeeBot";
-import { profile } from "profiler/decorator";
-import { withdrawTargetType } from "tasks/instances/task_withdraw";
-import { Task } from "tasks/Task";
-import { Tasks } from "tasks/Tasks";
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { Bee } from 'Bee/Bee';
+import { BeeBot } from 'BeeBot/BeeBot';
+import { profile } from 'profiler/decorator';
+import { withdrawTargetType } from 'tasks/instances/task_withdraw';
+import { Task } from 'tasks/Task';
+import { Tasks } from 'tasks/Tasks';
 
 @profile
 export class ResourcesManager {
 
     public static getEnergySource(bee: Bee, isFiller: boolean, minAmount?: number): Task | null {
-        const early = !Game.rooms[bee.process.roomName].storage;
+        const early = BeeBot.getColonyStage(bee.room.name) == 'early';
         const remain = minAmount === undefined ? bee.store.getFreeCapacity() * 0.5 : minAmount;
 
         let candidates: (withdrawTargetType | Resource)[] =
@@ -22,7 +22,7 @@ export class ResourcesManager {
                 const room = Game.rooms[roomName];
                 if (!room) return;
                 candidates.push(...room.droppedEnergy.filter(energy => energy.amount > remain));
-            })
+            });
         }
 
         if (bee.room.storage) {
@@ -46,6 +46,7 @@ export class ResourcesManager {
             function getOrdered(target: withdrawTargetType | Resource) {
                 return _.sum(target.targetedBy, creep => creep.store.getFreeCapacity());
             }
+
             if (structure instanceof Resource) return structure.amount > getOrdered(structure);
             return structure.store.energy >= getOrdered(structure);
         });

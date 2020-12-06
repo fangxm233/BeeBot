@@ -15,7 +15,8 @@ type ProcessTypes = 'filling'
     | 'scout'
     | 'tower'
     | 'reserving'
-    | 'carry';
+    | 'carry'
+    | 'colonize';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -25,9 +26,7 @@ interface protoProcess {
     bees: { [role: string]: string[] };
 }
 
-type protoProcessFilling = protoProcess & {
-
-};
+type protoProcessFilling = protoProcess & {};
 
 type protoProcessMineSource = protoProcess & {
     target: string;
@@ -44,4 +43,9 @@ type protoProcessReserving = protoProcess & {
 
 type protoProcessCarry = protoProcess & {
     target: string;
-}
+};
+
+type protoProcessColonize = protoProcess & {
+    from: string;
+    claimed: boolean;
+};
