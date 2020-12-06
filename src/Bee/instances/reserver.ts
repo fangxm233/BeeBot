@@ -1,7 +1,7 @@
-import { Bee } from "Bee/Bee";
-import { ProcessReserving } from "process/instances/reserving";
-import { profile } from "profiler/decorator";
-import { Tasks } from "tasks/Tasks";
+import { Bee } from 'Bee/Bee';
+import { ProcessReserving } from 'process/instances/reserving';
+import { profile } from 'profiler/decorator';
+import { Tasks } from 'tasks/Tasks';
 
 @profile
 export class BeeReserver extends Bee {
@@ -16,6 +16,11 @@ export class BeeReserver extends Bee {
             } else {
                 this.task = Tasks.reserve(this.room.controller!);
             }
+        }
+
+        if (this.pos.isNearTo(this.room.controller!) && !this.arriveTick) {
+            this.arriveTick = 600 - this.ticksToLive;
+            this.process.ticksToArrive = this.arriveTick;
         }
 
         this.task.run();
