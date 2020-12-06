@@ -1,7 +1,6 @@
-import { ROLE_FILLER, ROLE_MINER } from "declarations/constantsExport";
-import { PROCESS_MINE_SOURCE } from "declarations/constantsExport";
-import { ProcessMineSource } from "process/instances/mineSource";
-import { profile } from "profiler/decorator";
+import { PROCESS_MINE_SOURCE, ROLE_FILLER, ROLE_MINER } from 'declarations/constantsExport';
+import { ProcessMineSource } from 'process/instances/mineSource';
+import { profile } from 'profiler/decorator';
 
 @profile
 export class PriorityManager {
