@@ -53,7 +53,7 @@ export class Processes {
                     try {
                         this.restoreProcess(protoProcess, processName, roomName, Number(id));
                     } catch (error) {
-                        log.error(`An error occured when restoring processes:\n${error.message}\n${error.stack}`);
+                        log.error(`An error occurred when restoring processes:\n${error.message}\n${error.stack}`);
                     }
                 }
             }

@@ -1,10 +1,9 @@
-import { BeeScout } from "Bee/instances/scout";
-import { setups } from "beeSpawning/setups";
-import { WishManager } from "beeSpawning/WishManager";
-import { ROLE_SCOUT } from "declarations/constantsExport";
-import { PROCESS_SCOUT } from "declarations/constantsExport";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
+import { BeeScout } from 'Bee/instances/scout';
+import { setups } from 'beeSpawning/setups';
+import { WishManager } from 'beeSpawning/WishManager';
+import { PROCESS_SCOUT, ROLE_SCOUT } from 'declarations/constantsExport';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
 
 const MAX_SCOUT_COUNT = 10;
 
@@ -36,7 +35,7 @@ export class ProcessScout extends Process {
             roomName => !Game.rooms[roomName] && !bees.find(bee => bee.target == roomName));
         bees = bees.filter(bee => !bee.target);
 
-        if (!bees.length) {
+        if (!bees.length && this.scoutRequests.length) {
             if (this.wishManager.getCount(ROLE_SCOUT)) return;
             if (this.bees[ROLE_SCOUT].length >= MAX_SCOUT_COUNT) return;
             this.wishManager.wishBee({});
@@ -56,7 +55,7 @@ export class ProcessScout extends Process {
                 if (this.wishManager.getCount(ROLE_SCOUT)) return;
                 this.wishManager.wishBee({});
             }
-        })
+        });
     }
 
     public wishCreeps() {

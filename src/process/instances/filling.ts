@@ -1,22 +1,21 @@
-import { ROAD_CONSTRUCT_RCL } from "basePlanner/BaseConstructor";
-import { structureLayout } from "basePlanner/structurePreset";
-import { BeeFiller } from "Bee/instances/filler";
-import { BeeSetup } from "beeSpawning/BeeSetup";
-import { setups } from "beeSpawning/setups";
-import { WishManager } from "beeSpawning/WishManager";
-import { Intel } from "dataManagement/Intel";
-import { ROLE_FILLER } from "declarations/constantsExport";
-import { PROCESS_FILLING } from "declarations/constantsExport";
-import { event } from "event/Event";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
+import { ROAD_CONSTRUCT_RCL } from 'basePlanner/BaseConstructor';
+import { structureLayout } from 'basePlanner/structurePreset';
+import { BeeFiller } from 'Bee/instances/filler';
+import { BeeSetup } from 'beeSpawning/BeeSetup';
+import { setups } from 'beeSpawning/setups';
+import { WishManager } from 'beeSpawning/WishManager';
+import { Intel } from 'dataManagement/Intel';
+import { PROCESS_FILLING, ROLE_FILLER } from 'declarations/constantsExport';
+import { event } from 'event/Event';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
 
 @profile
 export class ProcessFilling extends Process {
     public energyEnough = true;
     public count: number;
     private setup: BeeSetup;
-    private inited: boolean;
+    private initialized: boolean;
 
     constructor(roomName: string) {
         super(roomName, PROCESS_FILLING);
@@ -70,7 +69,7 @@ export class ProcessFilling extends Process {
     }
 
     public wishCreeps() {
-        if (!this.inited && !this.init()) return;
+        if (!this.initialized && !this.init()) return;
         this.wishManager.clear();
 
         this.wishManager.arrangeCyclingBees(ROLE_FILLER, this.setup, Infinity, ['i']);

@@ -1,15 +1,14 @@
-import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { BeeMiner } from "Bee/instances/miner";
-import { BeeManager } from "beeSpawning/BeeManager";
-import { BeeSetup } from "beeSpawning/BeeSetup";
-import { setups } from "beeSpawning/setups";
-import { WishManager } from "beeSpawning/WishManager";
-import { Intel } from "dataManagement/Intel";
-import { ROLE_MINER } from "declarations/constantsExport";
-import { PROCESS_MINE_SOURCE } from "declarations/constantsExport";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
-import { coordToRoomPosition, partCount } from "utilities/helpers";
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { BeeMiner } from 'Bee/instances/miner';
+import { BeeManager } from 'beeSpawning/BeeManager';
+import { BeeSetup } from 'beeSpawning/BeeSetup';
+import { setups } from 'beeSpawning/setups';
+import { WishManager } from 'beeSpawning/WishManager';
+import { Intel } from 'dataManagement/Intel';
+import { PROCESS_MINE_SOURCE, ROLE_MINER } from 'declarations/constantsExport';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
+import { coordToRoomPosition, partCount } from 'utilities/helpers';
 
 @profile
 export class ProcessMineSource extends Process {
@@ -37,6 +36,13 @@ export class ProcessMineSource extends Process {
         return new ProcessMineSource(roomName, proto.target, proto.EO ? true : undefined);
     }
 
+    public setEarly(earlyOutpost: boolean) {
+        if (earlyOutpost == this.earlyOutpost) return;
+        this.earlyOutpost = earlyOutpost;
+        this.memory.EO = earlyOutpost ? 1 : 0;
+        this.init();
+    }
+
     private init(): boolean {
         const targetIntel = Intel.getRoomIntel(this.target);
         const baseData = RoomPlanner.getRoomData(this.roomName);
@@ -44,8 +50,8 @@ export class ProcessMineSource extends Process {
         if (!targetIntel || !baseData) return false;
 
         this.center = coordToRoomPosition(baseData.basePos!, this.roomName);
-        this.sources = targetIntel.sources!.map(coord => coordToRoomPosition(coord, this.target))
-            .sort((pos1, pos2) => pos1.getMultiRoomRangeTo(this.center) - pos2.getMultiRoomRangeTo(this.center));
+        this.sources = _.sortBy(targetIntel.sources!.map(coord => coordToRoomPosition(coord, this.target))
+            , pos => pos.getMultiRoomRangeTo(this.center));
 
         this.wishManager.setDefault('role', ROLE_MINER);
         this.wishManager.setDefault('budget', Infinity);
@@ -63,7 +69,7 @@ export class ProcessMineSource extends Process {
         if (!baseRoom) return;
 
         return _.max(Object.values(setups[ROLE_MINER].source[this.roomName == this.target ? 'base' : 'outpost'])
-            .filter(setup => setup.minCost() <= BeeManager.getRoomEnergyCapacity(baseRoom)),
+                .filter(setup => setup.minCost() <= BeeManager.getRoomEnergyCapacity(baseRoom)),
             setup => setup.maxCost());
     }
 
@@ -96,8 +102,14 @@ export class ProcessMineSource extends Process {
         this.sources.forEach((pos, i) => {
             const nowCount = beeCount[i] || 0;
             if (nowCount >= this.minerCount[i]) return;
-            this.wishManager.wishBee({ setup: this.setup, count: this.minerCount[i] - nowCount, extraMemory: { s: i } });
+            this.wishManager.wishBee({
+                setup: this.setup,
+                count: this.minerCount[i] - nowCount,
+                extraMemory: { s: i },
+            });
             // log.debug('miner wish s: ', i, 'count: ', this.minerCount[i] - nowCount);
         });
     }
 }
+
+(global as any).ProcessMineSource = ProcessMineSource;

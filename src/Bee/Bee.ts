@@ -1,15 +1,15 @@
-import { TargetCache } from "caching/caching";
-import { USER_NAME } from "config";
-import { Intel } from "dataManagement/Intel";
-import { isStoreStructure } from "declarations/typeGuards";
-import { event } from "event/Event";
-import { timer } from "event/Timer";
-import { Traveler } from "movement/Traveler";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
-import { ITask } from "tasks";
-import { initializeTask } from "tasks/initializer";
-import { getFreeCapacity, timeAfterTick } from "utilities/helpers";
+import { TargetCache } from 'caching/caching';
+import { USER_NAME } from 'config';
+import { Intel } from 'dataManagement/Intel';
+import { isStoreStructure } from 'declarations/typeGuards';
+import { event } from 'event/Event';
+import { timer } from 'event/Timer';
+import { Traveler } from 'movement/Traveler';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
+import { ITask } from 'tasks';
+import { initializeTask } from 'tasks/initializer';
+import { getFreeCapacity, timeAfterTick } from 'utilities/helpers';
 
 export const bees: { [beeName: string]: Bee } = {};
 
@@ -113,6 +113,7 @@ export class Bee {
     public get arriveTick(): number {
         return this.memory.AT || 0;
     }
+
     public set arriveTick(tick: number) {
         this.memory.AT = tick;
     }
@@ -137,6 +138,7 @@ export class Bee {
         }
         return this._task;
     }
+
     public set task(task: ITask | null) {
         // Assert that there is an up-to-date target cache
         TargetCache.assert();
@@ -237,7 +239,7 @@ export class Bee {
     public move(dirOrPos: DirectionConstant | RoomPosition) {
         if (typeof dirOrPos == 'number')
             return this.creep.move(dirOrPos);
-        else return this.creep.move(this.creep.pos.getDirectionTo(dirOrPos))
+        else return this.creep.move(this.creep.pos.getDirectionTo(dirOrPos));
     }
 
     public moveByPath(path: PathStep[] | RoomPosition[] | string) {
@@ -260,7 +262,7 @@ export class Bee {
     }
 
     public pull(target: Creep) {
-        return this.creep.pull(target)
+        return this.creep.pull(target);
     }
 
     public rangedAttack(target: AnyCreep | Structure) {
@@ -371,7 +373,8 @@ export class Bee {
     }
 
     protected runCore(): number | void {
-        if (this.task) return this.task.run()
+        if (this.task) return this.task.run();
     }
 }
+
 (global as any).bees = bees;

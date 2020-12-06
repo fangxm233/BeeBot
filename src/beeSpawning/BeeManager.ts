@@ -1,16 +1,15 @@
-import { bees } from "Bee/Bee";
-import { log } from "console/log";
-import { ROLE_FILLER } from "declarations/constantsExport";
-import { PROCESS_FILLING } from "declarations/constantsExport";
-import { repeater } from "event/Repeater";
-import { timer } from "event/Timer";
-import { ProcessFilling } from "process/instances/filling";
-import { Process, STATE_ACTIVE } from "process/Process";
-import { profile } from "profiler/decorator";
-import { calBodyCost, timeAfterTick } from "utilities/helpers";
-import { getFreeKey } from "utilities/utils";
-import { BeeWish } from "./BeeWish";
-import { PriorityManager } from "./PriorityManager";
+import { bees } from 'Bee/Bee';
+import { log } from 'console/log';
+import { PROCESS_FILLING, ROLE_FILLER } from 'declarations/constantsExport';
+import { repeater } from 'event/Repeater';
+import { timer } from 'event/Timer';
+import { ProcessFilling } from 'process/instances/filling';
+import { Process, STATE_ACTIVE } from 'process/Process';
+import { profile } from 'profiler/decorator';
+import { calBodyCost, timeAfterTick } from 'utilities/helpers';
+import { getFreeKey } from 'utilities/utils';
+import { BeeWish } from './BeeWish';
+import { PriorityManager } from './PriorityManager';
 
 @profile
 export class BeeManager {
@@ -41,7 +40,7 @@ export class BeeManager {
             const availableEnergy = room.energyAvailable;
             const capacity = this.getRoomEnergyCapacity(room);
 
-            const body = wish.setup.generateCreepBody(wish.budget == Infinity ? capacity : wish.budget);
+            const body = wish.setup.generateCreepBody(Math.min(wish.budget, capacity));
             if (body.length == 0) return; // TODO: 对能量不足做出反应
             const cost = calBodyCost(body);
             if (cost > availableEnergy) {

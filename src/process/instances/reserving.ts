@@ -1,13 +1,12 @@
-import { BeeManager } from "beeSpawning/BeeManager";
-import { BeeSetup } from "beeSpawning/BeeSetup";
-import { setups } from "beeSpawning/setups";
-import { WishManager } from "beeSpawning/WishManager";
-import { Intel } from "dataManagement/Intel";
-import { ROLE_RESERVER } from "declarations/constantsExport";
-import { PROCESS_RESERVING } from "declarations/constantsExport";
-import { Process } from "process/Process"
-import { profile } from "profiler/decorator";
-import { partCount, timeAfterTick } from "utilities/helpers";
+import { BeeManager } from 'beeSpawning/BeeManager';
+import { BeeSetup } from 'beeSpawning/BeeSetup';
+import { setups } from 'beeSpawning/setups';
+import { WishManager } from 'beeSpawning/WishManager';
+import { Intel } from 'dataManagement/Intel';
+import { PROCESS_RESERVING, ROLE_RESERVER } from 'declarations/constantsExport';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
+import { partCount, timeAfterTick } from 'utilities/helpers';
 
 const DEFAULT_TICKS_TO_ARRIVE = 20;
 const AWAKE_AT_REMAINING = 1000;
@@ -15,11 +14,11 @@ const AWAKE_AT_REMAINING = 1000;
 @profile
 export class ProcessReserving extends Process {
     public memory: protoProcessReserving;
+    public ticksToArrive: number;
     public target: string;
     private setup: BeeSetup;
     private maxCount: number;
     private count: number;
-    private ticksToArrive: number;
     private ticksToEnd: number;
     private inited: boolean;
 
