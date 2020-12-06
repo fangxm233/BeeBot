@@ -56,8 +56,8 @@ export const setups = {
                 }),
 
                 default: new BeeSetup(ROLE_MINER, {
-                    ratio: ['w6', 'm3', 'c1'],
-                    maxSize: 2
+                    ratio: ['w6', 'm4', 'c2'],
+                    maxSize: 1
                 }),
 
                 heavy: new BeeSetup(ROLE_MANAGER, {
