@@ -117,7 +117,8 @@ export class RoomPlanner {
         result.harvestPos = { source: [] };
         result.sourcesPath = [];
         if (ownedRoom) result.linkPos = { source: [], controller: undefined! };
-        intel.sources = _.sortBy(intel.sources!, coord => center.getRangeToXY(coord.x, coord.y))
+        intel.sources = _.sortBy(intel.sources!,
+                coord => center.getMultiRoomRangeTo(new RoomPosition(coord.x, coord.y, target)));
         for (const coord of intel.sources!) {
             const best = findBestPath(coord);
             if (!best.path) return best;
