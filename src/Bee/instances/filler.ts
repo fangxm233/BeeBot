@@ -84,7 +84,7 @@ export class BeeFiller extends Bee {
         } else {
             this.finished = true;
             if (!this.containerId) {
-                const container = RoomPlanner.getFillerContainer(this.room.name, this.memory.i);
+                const container = RoomPlanner.getFillerContainer(this.process.roomName, this.memory.i);
                 if (container) this.containerId = container.id;
             }
 
