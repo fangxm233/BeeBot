@@ -26,7 +26,7 @@ export class ProcessColonize extends Process {
 
     constructor(roomName: string, from: string) {
         super(roomName, PROCESS_COLONIZE);
-        this.wishManager = new WishManager(roomName, from, this);
+        this.wishManager = new WishManager(from, roomName, this);
         this.wishManager.setDefault('budget', Infinity);
         this.from = from;
     }
