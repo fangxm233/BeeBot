@@ -1,37 +1,36 @@
-import { BeeBot } from "BeeBot/BeeBot";
-import { USER_NAME } from "config";
-import { log } from "console/log";
-import { isStoreStructure } from "declarations/typeGuards";
-import { clock } from "event/Clock";
-import { event } from "event/Event";
-import { timer } from "event/Timer";
-import { profile } from "profiler/decorator";
-import { coordToRoomPosition, isOwner, timeAfterTick } from "utilities/helpers";
-import { printRoomName } from "utilities/utils";
-import { RoomPlanner } from "./RoomPlanner";
-import { RoomStructures } from "./RoomStructures";
-import { extConstructOrder, structureLayout } from "./structurePreset";
+import { BeeBot } from 'BeeBot/BeeBot';
+import { USER_NAME } from 'config';
+import { log } from 'console/log';
+import { isStoreStructure } from 'declarations/typeGuards';
+import { clock } from 'event/Clock';
+import { event } from 'event/Event';
+import { timer } from 'event/Timer';
+import { profile } from 'profiler/decorator';
+import { coordToRoomPosition, isOwner, timeAfterTick } from 'utilities/helpers';
+import { printRoomName } from 'utilities/utils';
+import { RoomPlanner } from './RoomPlanner';
+import { RoomStructures } from './RoomStructures';
+import { extConstructOrder, structureLayout } from './structurePreset';
 
 const constructOrder: StructureConstant[] = [
     STRUCTURE_SPAWN,
     STRUCTURE_ROAD,
     STRUCTURE_TOWER,
     STRUCTURE_EXTENSION,
+    STRUCTURE_LINK,
     STRUCTURE_CONTAINER,
     STRUCTURE_STORAGE,
-    STRUCTURE_LINK,
     STRUCTURE_TERMINAL,
     STRUCTURE_LAB,
+    STRUCTURE_EXTRACTOR,
     STRUCTURE_OBSERVER,
     STRUCTURE_FACTORY,
     STRUCTURE_POWER_SPAWN,
-    STRUCTURE_NUKER
+    STRUCTURE_NUKER,
 ];
 
 export const ROAD_CONSTRUCT_RCL = 4;
 export const CONTAINER_CONSTRUCT_RCL = 4;
-export const LINK_ONE_CONSTRUCT_RCL = 5;
-export const LINK_TWO_CONSTRUCT_RCL = 6;
 
 @profile
 export class BaseConstructor {
@@ -61,9 +60,13 @@ export class BaseConstructor {
             coord => terrain.get(data!.basePos!.x + coord.x, data!.basePos!.y + coord.y) != TERRAIN_MASK_WALL)
             .map(coord => new RoomPosition(data!.basePos!.x + coord.x, data!.basePos!.y + coord.y, roomName));
 
-        // 等待RoomStructures更新
         event.addEventListener('onBuildComplete',
-            () => timer.callBackAtTick(timeAfterTick(1), () => this.constructBuildings()));
+            (arg: OnBuildCompleteArg) => {
+                BaseConstructor.refreshRoomStructures(arg.pos.roomName);
+                if (Game.map.getRoomLinearDistance(arg.pos.roomName, roomName) > 2) return;
+                this.constructBuildings();
+            });
+
         // 等待RoomData更新
         event.addEventListener('onRclUpgrade',
             () => timer.callBackAtTick(timeAfterTick(1), () => this.constructBuildings()));
@@ -90,12 +93,13 @@ export class BaseConstructor {
         if (this.finishedRcl == rcl) return;
 
         const checkAndConstructMissing = (coords: Coord[] | RoomPosition[],
-            type: StructureConstant, transform: boolean) => {
+                                          type: StructureConstant, transform: boolean) => {
             const missing = this.checkMissingBuildings(type, coords, transform);
             if (!missing.length) return false;
+            console.log(type, JSON.stringify(missing));
             this.createConstructionSites(type, missing, transform);
             return true;
-        }
+        };
 
         const data = RoomPlanner.getRoomData(this.roomName);
         if (!data) {
@@ -116,14 +120,22 @@ export class BaseConstructor {
                 continue;
             }
 
+            if (type == STRUCTURE_EXTRACTOR) {
+                if (rcl < 6) continue;
+                const mineral = room.find(FIND_MINERALS)[0];
+                const missing = checkAndConstructMissing([mineral.pos], STRUCTURE_EXTRACTOR, false);
+                if (missing) return;
+                continue;
+            }
+
             const missing = checkAndConstructMissing(layout[type], type, true);
             if (missing) return;
 
             if (type == STRUCTURE_CONTAINER && rcl >= CONTAINER_CONSTRUCT_RCL) {
                 const coords = [
                     ...data.harvestPos.source.filter(coord => !room.links.find(
-                        link => link.pos.inRangeToXY(coord.x, coord.y, 1))),
-                    data.harvestPos.mineral!];
+                        link => link.pos.inRangeToXY(coord.x, coord.y, 1)))];
+                if (rcl >= 6) coords.push(data.harvestPos.mineral!);
                 const missing = checkAndConstructMissing(coords, STRUCTURE_CONTAINER, false);
                 if (missing) return;
             }
@@ -152,17 +164,15 @@ export class BaseConstructor {
 
             if (rcl >= ROAD_CONSTRUCT_RCL) {
                 for (const path of data.sourcesPath) {
-                    const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
-                    if (missing) return;
+                    checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
                 }
             }
 
             if (rcl >= CONTAINER_CONSTRUCT_RCL) {
-                const missing = checkAndConstructMissing(data.harvestPos.source.map(
+                checkAndConstructMissing(data.harvestPos.source.map(
                     coord => coordToRoomPosition(coord, outpost)), STRUCTURE_CONTAINER, false);
-                if (missing) return;
             }
-        })
+        });
     }
 
     private checkMissingBuildings(type: StructureConstant, coords: Coord[], transform: boolean): Coord[];
@@ -181,7 +191,7 @@ export class BaseConstructor {
                 if (!roomBuilding) return false;
                 const structure = roomBuilding.getForAt(type, pos) as any;
                 return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
-            })
+            });
         }
 
         const roomBuilding = BaseConstructor.getRoomStructures(this.roomName);
@@ -192,7 +202,7 @@ export class BaseConstructor {
             const y = coord.y + (transform ? this.base.y : 0);
             const structure = roomBuilding.getForAt(type, x, y) as any;
             return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
-        })
+        });
     }
 
     private createConstructionSites(type: StructureConstant, coords: Coord[], transform: boolean);
@@ -247,11 +257,6 @@ export class BaseConstructor {
         return true;
     }
 
-    private finishedBuildingOutposts(): boolean {
-        // TODO
-        return false;
-    }
-
     public clearRoom(clean: boolean = false) {
         const room = Game.rooms[this.roomName];
         if (!room) return;
@@ -290,7 +295,7 @@ export class BaseConstructor {
     public getForAtBase<T extends StructureConstant>(type: T, pos: Coord): TypeToStructure[T] | undefined;
 
     public getForAtBase<T extends StructureConstant>(type: T, x: number | Coord,
-        y?: number): TypeToStructure[T] | undefined {
+                                                     y?: number): TypeToStructure[T] | undefined {
         if (typeof x != 'number') {
             y = x.y;
             x = x.x;
