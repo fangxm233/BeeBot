@@ -1,6 +1,5 @@
-import { BaseConstructor } from "basePlanner/BaseConstructor";
-import { Bee } from "Bee/Bee";
-import { profile } from "profiler/decorator";
+import { Bee } from 'Bee/Bee';
+import { profile } from 'profiler/decorator';
 
 @profile
 export class BeeManager extends Bee {
@@ -8,7 +7,8 @@ export class BeeManager extends Bee {
     private upgradeLinkId: Id<StructureLink>;
 
     public runCore() {
-        const constructor = BaseConstructor.get(this.room.name);
+        this.arriveTick = 1;
+        
         const storage = this.room.storage;
         const controller = this.room.controller!;
         if (!storage) return;
@@ -27,17 +27,26 @@ export class BeeManager extends Bee {
                     return;
                 }
                 if (!this.store.energy) {
-                    this.getEnergy(remain);
+                    this.getEnergy(storage, remain);
                     return;
                 }
                 this.transferEnergy(centerLink, remain);
+                return;
+            }
+            if (this.store.energy) {
+                this.transferEnergy(storage);
+                return;
+            }
+            if (centerLink && centerLink.store.energy) {
+                this.getEnergy(centerLink);
+                return;
             }
         }
     }
 
-    private getEnergy(amount?: number) {
-        if (!this.pos.isNearTo(this.room.storage!)) this.travelTo(this.room.storage!);
-        else this.withdraw(this.room.storage!, RESOURCE_ENERGY, amount);
+    private getEnergy(target: Structure, amount?: number) {
+        if (!this.pos.isNearTo(target)) this.travelTo(target);
+        else this.withdraw(target, RESOURCE_ENERGY, amount);
     }
 
     private transferEnergy(target: Structure, amount?: number) {
