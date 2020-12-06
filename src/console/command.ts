@@ -1,4 +1,6 @@
 import { BeeBot } from 'BeeBot/BeeBot';
+import { Process } from 'process/Process';
+import { ProcessColonize } from 'process/instances/colonize';
 
 export class Command {
     public static run() {
@@ -19,6 +21,11 @@ export class Command {
             if (snips[0] == 'outpost') {
                 const from = flag.name.split('_')[1];
                 if (from) BeeBot.goOutpost(from, flag.pos.roomName);
+                flag.remove();
+                continue;
+            }
+            if(snips[0] == 'colony') {
+                Process.startProcess(new ProcessColonize(flag.pos.roomName, snips[1]));
                 flag.remove();
                 continue;
             }
