@@ -1,5 +1,6 @@
 import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { BeeMiner } from 'Bee/instances/miner';
+import { BeeBot } from 'BeeBot/BeeBot';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { BeeSetup } from 'beeSpawning/BeeSetup';
 import { setups } from 'beeSpawning/setups';
@@ -49,7 +50,7 @@ export class ProcessMineSource extends Process {
 
         if (!targetIntel || !baseData) return false;
 
-        this.center = coordToRoomPosition(baseData.basePos!, this.roomName);
+        this.center = new RoomPosition(baseData.basePos!.x + 5, baseData.basePos!.y + 5, this.roomName);
         this.sources = _.sortBy(targetIntel.sources!.map(coord => coordToRoomPosition(coord, this.target))
             , pos => pos.getMultiRoomRangeTo(this.center));
 
@@ -68,7 +69,8 @@ export class ProcessMineSource extends Process {
         const baseRoom = Game.rooms[this.roomName];
         if (!baseRoom) return;
 
-        return _.max(Object.values(setups[ROLE_MINER].source[this.roomName == this.target ? 'base' : 'outpost'])
+        return _.max(_.filter(setups[ROLE_MINER].source[this.roomName == this.target ? 'base' : 'outpost'],
+            (setup, name) => BeeBot.getColonyStage(this.roomName) == 'final' || name != 'heavy')
                 .filter(setup => setup.minCost() <= BeeManager.getRoomEnergyCapacity(baseRoom)),
             setup => setup.maxCost());
     }
