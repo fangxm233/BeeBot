@@ -43,7 +43,7 @@ export class BeeWorker extends Bee {
             structures.push(...room.towers.filter(
                 tower => tower.store.getFreeCapacity(RESOURCE_ENERGY) > 400));
             structures = structures.filter(structure => !structure.targetedBy.length
-                || structure.targetedBy.find(
+                || structure.targetedBy.every(
                     targeted => targeted.pos.getRangeTo(structure) > this.pos.getRangeTo(structure)));
             if (structures.length)
                 if (this.transferAction(structures)) return;
