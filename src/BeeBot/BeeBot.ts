@@ -4,7 +4,6 @@ import { PriorityManager } from 'beeSpawning/PriorityManager';
 import {
     PROCESS_BASE_WORK,
     PROCESS_CARRY,
-    PROCESS_COLONIZE,
     PROCESS_FILLING,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
@@ -98,7 +97,7 @@ export class BeeBot {
 
     private static startEarlyOutposts(roomName: string) {
         this.getEarlyOutposts(roomName).forEach(outpost => {
-            if(Process.getProcess<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE, 'target', outpost)) return;
+            if (Process.getProcess<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE, 'target', outpost)) return;
             const process = new ProcessMineSource(roomName, outpost, true);
             Process.startProcess(process);
         });
@@ -123,7 +122,6 @@ export class BeeBot {
     }
 
     public static initializeColony(roomName: string) {
-        if (this.getColonyStage(roomName)) return;
         const stage = this.judgeColonyStage(roomName);
         this.setColonyStage(roomName, stage);
 
