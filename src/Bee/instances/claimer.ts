@@ -23,5 +23,7 @@ export class BeeClaimer extends Bee {
                 }
             }
         }
+
+        this.task.run();
     }
 }
