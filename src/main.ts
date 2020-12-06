@@ -27,6 +27,7 @@ import { clock } from 'event/Clock';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
 import { Processes } from 'process/Processes';
+import { sandBox } from 'sandBox';
 import { ErrorMapper, reset } from './ErrorMapper';
 
 export const loop = ErrorMapper.wrapLoop(() => {
@@ -55,6 +56,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
     stats.commit();
     if (USE_ACTION_COUNTER) actionsCounter.save(3000);
+
+    try {
+        sandBox();
+    } catch (e) {
+        log.error('Error occurred in sandBox.');
+        log.error(e.message);
+        log.error(e.stack);
+    }
 });
 
 function globalReset() {
