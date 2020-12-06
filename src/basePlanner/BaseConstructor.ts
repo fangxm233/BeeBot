@@ -43,17 +43,21 @@ export class BaseConstructor {
     private finishedRcl: number = 0;
 
     constructor(roomName: string) {
+        if (!BeeBot.colonies().find(room => room.name == roomName)) {
+            log.error('Should not new BaseConstructor for a non-base room!');
+            return;
+        }
+
         this.roomName = roomName;
         let data = RoomPlanner.getRoomData(roomName);
         const terrain = Game.map.getRoomTerrain(roomName);
         if (!data) {
-            log.warning(`RoomData of ${printRoomName(this.roomName)} does not exists! replaning...`);
+            log.warning(`RoomData of ${printRoomName(this.roomName)} does not exists! planing...`);
             data = RoomPlanner.planRoom(this.roomName, undefined, true).result;
             if (!data) return;
         }
 
         BaseConstructor.constructors[roomName] = this;
-        if (!data.ownedRoom) return;
 
         this.base = data.basePos!;
         this.filteredExtConstructingOrder = extConstructOrder.filter(

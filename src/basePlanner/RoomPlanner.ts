@@ -170,6 +170,8 @@ export class RoomPlanner {
             Visualizer.drawRoads(result.mineralPath!.path);
         }
 
+        if(!to) log.info(`Completed plan for ${baseName}.`);
+        else log.info(`Completed plan from ${baseName} to ${to}.`);
         this.roomData[target] = result;
         this.serializeData();
         return { result };
