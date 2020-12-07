@@ -21,7 +21,7 @@ import { ProcessTower } from 'process/instances/tower';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
-import { hasAgressiveParts } from 'utilities/helpers';
+import { hasAggressiveParts } from 'utilities/helpers';
 import { getAllColonyRooms } from 'utilities/utils';
 
 const EARLY_OUTPOST_DEPTH = 1;
@@ -167,8 +167,9 @@ export class BeeBot {
     private static checkForSafeMode(room: Room) {
         const data = RoomPlanner.getRoomData(room.name);
         if (!data) return;
-        if (room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAgressiveParts(creep)).find(creep =>
-            creep.pos.inRangeTo(data.basePos!.x, data.basePos!.y, 5) || creep.pos.inRangeTo(room.controller!, 2)))
+        if (room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep)).find(creep =>
+            creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 5)
+            || creep.pos.inRangeTo(room.controller!, 2)))
             room.controller!.activateSafeMode();
     }
 }
