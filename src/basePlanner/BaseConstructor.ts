@@ -152,7 +152,8 @@ export class BaseConstructor {
             }
 
             if (type == STRUCTURE_ROAD && rcl >= ROAD_CONSTRUCT_RCL) {
-                const paths = [...data.sourcesPath, data.controllerPath!, data.mineralPath!];
+                const paths = [...data.sourcesPath, data.controllerPath!];
+                if(rcl >= 6) paths.push(data.mineralPath!);
                 for (const path of paths) {
                     const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
                     if (missing) return;
