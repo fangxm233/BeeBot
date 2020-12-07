@@ -100,7 +100,6 @@ export class BaseConstructor {
                                           type: StructureConstant, transform: boolean) => {
             const missing = this.checkMissingBuildings(type, coords, transform);
             if (!missing.length) return false;
-            console.log(type, JSON.stringify(missing));
             this.createConstructionSites(type, missing, transform);
             return true;
         };
