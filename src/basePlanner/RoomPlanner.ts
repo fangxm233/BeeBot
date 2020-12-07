@@ -320,7 +320,6 @@ export class RoomPlanner {
     }
 
     public static getFillerContainer(roomName: string, id: number) {
-        const coord = finalBase[STRUCTURE_CONTAINER][id];
         return BaseConstructor.get(roomName).getForAtBase(STRUCTURE_CONTAINER, finalBase[STRUCTURE_CONTAINER][id]);
     }
 

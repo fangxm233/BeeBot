@@ -23,12 +23,12 @@ import { log } from 'console/log';
 import { Intel } from 'dataManagement/Intel';
 import { Mem } from 'dataManagement/Memory';
 import { SegmentManager } from 'dataManagement/segmentManager';
+import { ErrorMapper, reset } from 'ErrorMapper';
 import { clock } from 'event/Clock';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
 import { Processes } from 'process/Processes';
 import { sandBox } from 'sandBox';
-import { ErrorMapper, reset } from './ErrorMapper';
 
 export const loop = ErrorMapper.wrapLoop(() => {
     stats.reset();
