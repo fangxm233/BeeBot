@@ -325,7 +325,10 @@ export class RoomPlanner {
     }
 
     public static isFillerContainer(pos: RoomPosition) {
-        return !!BaseConstructor.get(pos.roomName).getForAt(STRUCTURE_CONTAINER, pos);
+        const center = RoomPlanner.getRoomData(pos.roomName)?.basePos;
+        if(!center) return false;
+        return !!finalBase[STRUCTURE_CONTAINER]
+            .find(coord => pos.x - center.x == coord.x && pos.y - center.y == coord.y);
     }
 
     public static getManagerPos(roomName: string): RoomPosition | undefined {
