@@ -129,7 +129,7 @@ export class BeeMiner extends Bee {
             }
 
             if (container.hitsMax - container.hits >= this.workCount * REPAIR_POWER
-                && this.store.getUsedCapacity() > this.workCount) {
+                && this.store.getUsedCapacity() >= this.workCount) {
                 this.repair(container);
                 return;
             }
