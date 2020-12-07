@@ -9,6 +9,7 @@ import { PROCESS_FILLING, ROLE_FILLER } from 'declarations/constantsExport';
 import { event } from 'event/Event';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
+import { BeeBot } from 'BeeBot/BeeBot';
 
 @profile
 export class ProcessFilling extends Process {
@@ -54,9 +55,7 @@ export class ProcessFilling extends Process {
     }
 
     private chooseSetup(): boolean {
-        const data = Intel.getRoomIntel(this.roomName);
-        if (!data) return false;
-        if (data.rcl! >= ROAD_CONSTRUCT_RCL) this.setup = setups[ROLE_FILLER].default;
+        if (BeeBot.getColonyStage(this.roomName) != 'early') this.setup = setups[ROLE_FILLER].default;
         else this.setup = setups[ROLE_FILLER].early;
         return true;
     }

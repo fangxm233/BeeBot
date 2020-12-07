@@ -16,6 +16,7 @@ export class ProcessBaseWork extends Process {
     private spawnManager: boolean;
     private workerConfig: WishConfig;
     private managerConfig: WishConfig;
+    private colonyStage: ColonyStage;
     private inited: boolean;
 
     constructor(roomName: string) {
@@ -36,9 +37,7 @@ export class ProcessBaseWork extends Process {
     }
 
     private chooseSetup(): boolean {
-        const room = Game.rooms[this.roomName];
-        if (!room) return false;
-        if (room.controller!.level >= ROAD_CONSTRUCT_RCL) {
+        if (this.colonyStage != 'early') {
             this.workerConfig.setup = setups[ROLE_WORKER].default;
         } else {
             this.workerConfig.setup = setups[ROLE_WORKER].early;
@@ -59,7 +58,9 @@ export class ProcessBaseWork extends Process {
         this.workerConfig = { role: ROLE_WORKER };
         this.managerConfig = { role: ROLE_MANAGER, setup: setups[ROLE_MANAGER].default } // 容量1500
 
-        if (room.controller!.level > 4) {
+        this.colonyStage = BeeBot.getColonyStage(this.roomName) || 'early';
+
+        if (this.colonyStage != 'early') {
             this.spawnManager = true;
         }
 
@@ -95,7 +96,7 @@ export class ProcessBaseWork extends Process {
         let numWorkers = Math.ceil(2 * (5 * buildTicks) /
             (bodies.length / 3 * CREEP_LIFE_TIME));
         numWorkers = Math.min(numWorkers, MAX_WORKERS);
-        if (controller.level < 4) numWorkers = Math.max(numWorkers, MAX_WORKERS);
+        if (this.colonyStage == 'early') numWorkers = Math.max(numWorkers, MAX_WORKERS);
 
         const nowCount = this.getCreepAndWishCount(ROLE_WORKER);
         if (nowCount < numWorkers) {
