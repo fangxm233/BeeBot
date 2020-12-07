@@ -23,6 +23,7 @@ import { profile } from 'profiler/decorator';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
 import { hasAggressiveParts } from 'utilities/helpers';
 import { getAllColonyRooms } from 'utilities/utils';
+import { ProcessUpgrade } from 'process/instances/upgrade';
 
 const EARLY_OUTPOST_DEPTH = 1;
 
@@ -114,6 +115,10 @@ export class BeeBot {
             this.arrangeOutposts(roomName);
             this.cancelEarlyOutposts(roomName);
             Process.startProcess(new ProcessCarry(roomName, roomName));
+            const upgrade = new ProcessUpgrade(roomName);
+            Process.startProcess(upgrade);
+            const baseWork = Process.getProcess<ProcessBaseWork>(roomName, PROCESS_BASE_WORK);
+            if(baseWork) upgrade.setParent(baseWork.fullId);
         }
     }
 
