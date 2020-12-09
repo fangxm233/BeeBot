@@ -87,7 +87,7 @@ interface TaskSettings {
 interface TaskOptions {
     blind?: boolean;
     nextPos?: ProtoPos;
-    moveOptions?: MoveToOpts;
+    moveOptions?: TravelToOptions;
     // moveOptions: TravelToOptions; // <- uncomment this line if you use Traveler
 }
 
