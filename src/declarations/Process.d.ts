@@ -16,7 +16,8 @@ type ProcessTypes = 'filling'
     | 'tower'
     | 'reserving'
     | 'carry'
-    | 'colonize';
+    | 'colonize'
+    | 'repair';
 
 interface protoProcess {
     st: ShortProcessState;

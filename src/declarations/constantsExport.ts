@@ -19,3 +19,4 @@ export const PROCESS_TOWER = 'tower';
 export const PROCESS_RESERVING = 'reserving';
 export const PROCESS_CARRY = 'carry';
 export const PROCESS_COLONIZE = 'colonize';
+export const PROCESS_REPAIR = 'repair';

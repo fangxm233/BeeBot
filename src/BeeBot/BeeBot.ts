@@ -16,14 +16,15 @@ import { ProcessCarry } from 'process/instances/carry';
 import { ProcessColonize } from 'process/instances/colonize';
 import { ProcessFilling } from 'process/instances/filling';
 import { ProcessMineSource } from 'process/instances/mineSource';
+import { ProcessRepair } from 'process/instances/repair';
 import { ProcessReserving } from 'process/instances/reserving';
 import { ProcessTower } from 'process/instances/tower';
+import { ProcessUpgrade } from 'process/instances/upgrade';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
 import { hasAggressiveParts } from 'utilities/helpers';
 import { getAllColonyRooms } from 'utilities/utils';
-import { ProcessUpgrade } from 'process/instances/upgrade';
 
 const EARLY_OUTPOST_DEPTH = 1;
 
@@ -118,7 +119,8 @@ export class BeeBot {
             const upgrade = new ProcessUpgrade(roomName);
             Process.startProcess(upgrade);
             const baseWork = Process.getProcess<ProcessBaseWork>(roomName, PROCESS_BASE_WORK);
-            if(baseWork) upgrade.setParent(baseWork.fullId);
+            if (baseWork) upgrade.setParent(baseWork.fullId);
+            Process.startProcess(new ProcessRepair(roomName));
         }
     }
 
@@ -137,6 +139,7 @@ export class BeeBot {
         if (!Process.getProcess(roomName, PROCESS_BASE_WORK))
             Process.startProcess(new ProcessBaseWork(roomName));
         this.startEarlyOutposts(roomName);
+        BaseConstructor.get(roomName).clearRoom();
     }
 
     public static routineCheck(roomName: string) {

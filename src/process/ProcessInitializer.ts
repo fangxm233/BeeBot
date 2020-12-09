@@ -4,6 +4,7 @@ import {
     PROCESS_COLONIZE,
     PROCESS_FILLING,
     PROCESS_MINE_SOURCE,
+    PROCESS_REPAIR,
     PROCESS_RESERVING,
     PROCESS_SCOUT,
     PROCESS_TOWER,
@@ -19,6 +20,7 @@ import {
     ROLE_UPGRADER,
     ROLE_WORKER,
 } from 'declarations/constantsExport';
+import { ProcessRepair } from 'process/instances/repair';
 import { ProcessBaseWork } from './instances/baseWork';
 import { ProcessCarry } from './instances/carry';
 import { ProcessColonize } from './instances/colonize';
@@ -40,3 +42,4 @@ Process.registerProcess(PROCESS_BASE_WORK, Bucket.level3, ProcessBaseWork, 100, 
 Process.registerProcess(PROCESS_SCOUT, Bucket.level5, ProcessScout, 100, [ROLE_SCOUT]);
 Process.registerProcess(PROCESS_RESERVING, Bucket.level6, ProcessReserving, 100, [ROLE_RESERVER]);
 Process.registerProcess(PROCESS_COLONIZE, Bucket.level3, ProcessColonize, 100, [ROLE_PIONEER, ROLE_CLAIMER]);
+Process.registerProcess(PROCESS_REPAIR, Bucket.level3, ProcessRepair, 100, [ROLE_WORKER]);

@@ -7,7 +7,7 @@ import { Process } from "process/Process";
 import { possibleDamage, possibleRepairPower, possibleTowerDamage, wouldBreakDefend } from "utilities/powerCalculation";
 import { ProcessFilling } from "./filling";
 
-const REPAIR_RAMPART_LINE = 5e3;
+const REPAIR_RAMPART_LINE = 100;
 
 export class ProcessTower extends Process {
     private inited: boolean;
