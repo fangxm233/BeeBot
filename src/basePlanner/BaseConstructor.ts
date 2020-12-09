@@ -1,3 +1,4 @@
+import { BarrierPlanner } from 'basePlanner/BarrierPlanner';
 import { BeeBot } from 'BeeBot/BeeBot';
 import { USER_NAME } from 'config';
 import { log } from 'console/log';
@@ -19,6 +20,7 @@ const constructOrder: StructureConstant[] = [
     STRUCTURE_EXTENSION,
     STRUCTURE_LINK,
     STRUCTURE_CONTAINER,
+    STRUCTURE_RAMPART,
     STRUCTURE_STORAGE,
     STRUCTURE_TERMINAL,
     STRUCTURE_LAB,
@@ -31,6 +33,7 @@ const constructOrder: StructureConstant[] = [
 
 export const ROAD_CONSTRUCT_RCL = 4;
 export const CONTAINER_CONSTRUCT_RCL = 4;
+export const RAMPART_CONSTRUCT_RCL = 3;
 
 @profile
 export class BaseConstructor {
@@ -129,6 +132,14 @@ export class BaseConstructor {
                 const missing = checkAndConstructMissing([mineral.pos], STRUCTURE_EXTRACTOR, false);
                 if (missing) return;
                 continue;
+            }
+
+            if(type == STRUCTURE_RAMPART) {
+                if(rcl < RAMPART_CONSTRUCT_RCL) continue;
+                const missing = checkAndConstructMissing(BarrierPlanner.get(this.roomName).getBarriers()
+                    , STRUCTURE_RAMPART, false);
+                if(missing) return;
+                continue
             }
 
             const missing = checkAndConstructMissing(layout[type], type, true);
