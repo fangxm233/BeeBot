@@ -60,7 +60,7 @@ export class ProcessBaseWork extends Process {
 
         this.colonyStage = BeeBot.getColonyStage(this.roomName) || 'early';
 
-        if (this.colonyStage != 'early') {
+        if (room.controller!.level >= 5) {
             this.spawnManager = true;
         }
 
