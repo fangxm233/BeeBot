@@ -15,7 +15,7 @@ export class BeePioneer extends Bee {
             if (this.room.name == this.process.from && !this.store.energy) {
                 this.task = ResourcesManager.getEnergySource(this, false);
             } else if (this.room.name != this.process.roomName) {
-                this.task = Tasks.goToRoom(this.process.roomName);
+                this.task = Tasks.goToRoom(this.process.roomName, { moveOptions: { preferHighway: true } });
             } else {
                 const controller = this.room.controller!;
                 if (!controller.my) return;
