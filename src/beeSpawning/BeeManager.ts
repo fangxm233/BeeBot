@@ -169,6 +169,7 @@ export class ProcessWishInvoker {
         this.processId = this.processId.filter(id => !!Process.getProcess(id));
         this.processId.forEach(id => {
             const process = Process.getProcess<Process>(id);
+            if(process?.sleepTime) return;
             if (process) process.wishCreeps();
         });
         return OK;
