@@ -73,6 +73,7 @@ export class ProcessUpgrade extends Process {
 
     public wishCreeps() {
         if (!this.inited && !this.init()) return;
+        this.judgeCount();
 
         const nowCount = this.getCreepAndWishCount(ROLE_UPGRADER);
         const config = { setup: this.setup, count: this.count - nowCount };
