@@ -1,52 +1,40 @@
-import { log } from "console/log";
-
-export class PriorityQueue<T>{
-    private queue: { priority: number, value: T }[] = [];
+export class PriorityQueue<T> {
+    private queue: { [priority: number]: T[] } = {};
 
     public get count() {
-        return this.queue.length;
+        return _.sum(this.queue, q => q.length);
     }
 
     public enqueue(value: T, priority: number) {
-        if (this.count == 0) {
-            this.queue.push({ value, priority });
-            return;
-        }
+        if (!this.queue[priority]) this.queue[priority] = [];
 
-        for (let i = 0; i < this.queue.length; i++) {
-            const element = this.queue[i];
-            const nextElememt = this.queue[i + 1];
-
-            if (element.priority == priority) {
-                this.queue.splice(i, 0, { value, priority });
-                break;
-            }
-            if (element.priority > priority) {
-                if (!nextElememt) {
-                    this.queue.push({ value, priority });
-                    break;
-                }
-                else if (nextElememt.priority <= priority) {
-                    this.queue.splice(i + 1, 0, { value, priority });
-                    break;
-                }
-            }
-            if (element.priority < priority) {
-                this.queue.splice(i, 0, { value, priority });
-                break;
-            }
-        }
+        this.queue[priority].push(value);
     }
 
     public dequeue(): T | undefined {
-        return this.queue.pop()?.value;
+        for (const priority in this.queue) {
+            if (!this.queue[priority]?.length) continue;
+            return this.queue[priority].shift();
+        }
+        return;
     }
 
     public remove(iteratee: (value: T, index?: number) => boolean) {
-        _.remove(this.queue, iteratee);
+        _.forEach(this.queue, queue => _.remove(queue, iteratee));
     }
 
     public peek(): T | undefined {
-        return _.last(this.queue)?.value;
+        for (const priority in this.queue) {
+            if (!this.queue[priority]?.length) continue;
+            return this.queue[priority][0];
+        }
+        return;
+    }
+
+    public peeks = function* (): Generator<T[]> {
+        for (const priority in this.queue) {
+            if (!this.queue[priority]?.length) continue;
+            yield this.queue[priority];
+        }
     }
 }
