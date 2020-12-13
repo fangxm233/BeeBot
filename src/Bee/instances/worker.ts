@@ -1,3 +1,4 @@
+import { BarrierPlanner } from 'basePlanner/BarrierPlanner';
 import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { Bee } from 'Bee/Bee';
 import { BeeBot } from 'BeeBot/BeeBot';
@@ -5,7 +6,6 @@ import { profile } from 'profiler/decorator';
 import { ResourcesManager } from 'resourceManagement/ResourcesManager';
 import { Tasks } from 'tasks/Tasks';
 import { fillingTargetType } from './filler';
-import { BarrierPlanner } from 'basePlanner/BarrierPlanner';
 
 @profile
 export class BeeWorker extends Bee {
@@ -55,11 +55,6 @@ export class BeeWorker extends Bee {
                 if (this.transferAction(structures)) return;
         }
 
-        const planner = BarrierPlanner.get(room.name);
-        ramparts = room.ramparts.filter(rampart => rampart.hits < planner.getBarrierHitsTarget(rampart.pos));
-        if(ramparts.length)
-            if(this.repairAction(ramparts)) return;
-
         const buildSites = room.find(FIND_MY_CONSTRUCTION_SITES);
         BeeBot.getOutposts(room.name).forEach(roomName => {
             const data = RoomPlanner.getRoomData(roomName);
@@ -69,6 +64,11 @@ export class BeeWorker extends Bee {
         });
         if (buildSites.length)
             if (this.buildAction(buildSites)) return;
+
+        const planner = BarrierPlanner.get(room.name);
+        ramparts = room.ramparts.filter(rampart => rampart.hits < planner.getBarrierHitsTarget(rampart.pos));
+        if(ramparts.length)
+            if(this.repairAction(ramparts)) return;
 
         if (this.upgradeAction()) return;
     }
