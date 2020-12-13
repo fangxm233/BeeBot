@@ -68,6 +68,7 @@ export class RoomPlanner {
         else base = this.getRoomData(baseName)?.basePos;
         if (!base) {
             Intel.requestRoomIntel(baseName);
+            log.warning(`Failed to find basePos for ${baseName}.`);
             return { failed: true };
         }
         result.basePos = base;
