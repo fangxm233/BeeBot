@@ -25,11 +25,11 @@ import { BeeWorker } from './instances/worker';
 // 注册顺序将会决定role的优先级 先注册的初始优先级高
 BeeFactorty.registerBee(ROLE_FILLER, BeeFiller);
 BeeFactorty.registerBee(ROLE_MANAGER, BeeManager);
+BeeFactorty.registerBee(ROLE_CLAIMER, BeeClaimer);
+BeeFactorty.registerBee(ROLE_PIONEER, BeePioneer);
 BeeFactorty.registerBee(ROLE_MINER, BeeMiner);
 BeeFactorty.registerBee(ROLE_CARRIER, BeeCarrier);
 BeeFactorty.registerBee(ROLE_WORKER, BeeWorker);
 BeeFactorty.registerBee(ROLE_UPGRADER, BeeUpgrader);
 BeeFactorty.registerBee(ROLE_SCOUT, BeeScout);
 BeeFactorty.registerBee(ROLE_RESERVER, BeeReserver);
-BeeFactorty.registerBee(ROLE_CLAIMER, BeeClaimer);
-BeeFactorty.registerBee(ROLE_PIONEER, BeePioneer);
