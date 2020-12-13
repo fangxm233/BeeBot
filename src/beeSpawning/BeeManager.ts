@@ -38,7 +38,7 @@ export class BeeManager {
             if (!spawn) continue;
 
             const availableEnergy = room.energyAvailable;
-            const capacity = this.getRoomEnergyCapacity(room);
+            const capacity = this.getRoomEnergyCapacity(room); // TODO：处理降级时候多余的ext
 
             const body = wish.setup.generateCreepBody(Math.min(wish.budget, capacity));
             if (body.length == 0) return; // TODO: 对能量不足做出反应
@@ -52,7 +52,7 @@ export class BeeManager {
             this.dequeueWish(roomName);
             wish.spawned = true;
             let name = wish.name;
-            if (!name) name = wish.role + '_' + getFreeKey(bees, wish.role + '_');
+            if (!name) name = wish.role + '_' + getFreeKey(Game.creeps, wish.role + '_');
             const code = spawn.spawnCreep(body, name, { memory: wish.extraMemory }); // TODO: 使用消耗顺序
             if (code === OK) {
                 wish.bee.creep = Game.creeps[name];
@@ -75,7 +75,7 @@ export class BeeManager {
     }
 
     public static clearDiedBees() {
-        const processToResfresh: { [name: string]: Process } = {};
+        const processToRefresh: { [name: string]: Process } = {};
         const roomsToArrange: string[] = [];
 
         for (const beeName in bees) {
@@ -86,14 +86,14 @@ export class BeeManager {
                 if (bee.cyclingCallbackId) timer.cancelCallBack(bee.cyclingCallbackId);
                 if (!bee.process.closed) {
                     bee.process.removeBee(beeName);
-                    processToResfresh[bee.process.fullId] = bee.process;
+                    processToRefresh[bee.process.fullId] = bee.process;
                 }
                 if (!_.contains(roomsToArrange, bee.process.roomName)) roomsToArrange.push(bee.process.roomName);
                 bees[beeName] = undefined as any;
                 if (Memory.creeps[beeName]) Memory.creeps[beeName] = undefined as any;
             }
         }
-        _.forEach(processToResfresh, process => process.wishCreeps());
+        _.forEach(processToRefresh, process => process.wishCreeps());
         roomsToArrange.forEach(roomName => PriorityManager.arrangePriority(roomName));
 
         // 只是检查下没有漏掉的项
@@ -169,7 +169,7 @@ export class ProcessWishInvoker {
         this.processId = this.processId.filter(id => !!Process.getProcess(id));
         this.processId.forEach(id => {
             const process = Process.getProcess<Process>(id);
-            if(process?.sleepTime) return;
+            if (process?.sleepTime) return;
             if (process) process.wishCreeps();
         });
         return OK;
