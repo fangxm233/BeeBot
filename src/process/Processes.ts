@@ -67,16 +67,20 @@ export class Processes {
             const processes = Process.processesByType[processRegistration.processName];
             _.forEach(processes, process => {
                 if (!process) return;
-                switch (process.state) {
-                    case STATE_ACTIVE:
-                        process.run();
-                        return;
-                    case STATE_WAITING:
-                        if (process.check()) {
-                            process.awake();
+                try {
+                    switch (process.state) {
+                        case STATE_ACTIVE:
                             process.run();
-                        }
-                        return;
+                            return;
+                        case STATE_WAITING:
+                            if (process.check()) {
+                                process.awake();
+                                process.run();
+                            }
+                            return;
+                    }
+                } catch (e) {
+                    log.throw(e);
                 }
             });
         }
