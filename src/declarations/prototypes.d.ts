@@ -1,5 +1,6 @@
 interface Creep {
 	memory: CreepMemory;
+	hitsLost: number;
 	boosts: _ResourceConstantSansEnergy[];
 	boostCounts: { [boostType: string]: number };
 	bodyCounts: { [bodyType: string]: number };

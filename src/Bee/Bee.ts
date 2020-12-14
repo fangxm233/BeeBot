@@ -177,6 +177,10 @@ export class Bee {
 
     public travelState?: TravelState;
 
+    public get hitsLost() {
+        return this.hitsMax - this.hits;
+    }
+
     // creep的动作
 
     public attack(target: AnyCreep | Structure) {

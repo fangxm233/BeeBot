@@ -41,3 +41,10 @@ Object.defineProperty(Creep.prototype, 'inRampart', {
 	},
 	configurable: true,
 });
+
+Object.defineProperty(Creep.prototype, 'hitsLost', {
+	get() {
+		return this.hitsMax - this.hits;
+	},
+	configurable: true,
+})
