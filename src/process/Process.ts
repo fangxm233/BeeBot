@@ -1,4 +1,4 @@
-import { Bee } from 'Bee/Bee';
+import { Bee, bees } from 'Bee/Bee';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { WishManager } from 'beeSpawning/WishManager';
 import { log } from 'console/log';
@@ -234,7 +234,10 @@ export class Process {
     }
 
     public sleep(targetTime: number) {
-        if (targetTime < Game.time) return;
+        if (targetTime < Game.time) {
+            if(this.state == STATE_SLEEPING) this.awake();
+            return;
+        }
         this.state = STATE_SLEEPING;
         this.memory.slt = targetTime;
         timer.callBackAtTick(targetTime, () => this.awake());
