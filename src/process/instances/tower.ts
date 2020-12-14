@@ -67,26 +67,28 @@ export class ProcessTower extends Process {
         }
         if (!this.inited && !this.init()) return;
 
-        const hostleCreeps = [...room.find(FIND_HOSTILE_CREEPS), ...room.find(FIND_HOSTILE_POWER_CREEPS)];
+        const hostileCreeps = [...room.find(FIND_HOSTILE_CREEPS), ...room.find(FIND_HOSTILE_POWER_CREEPS)];
 
-        const targets = hostleCreeps.filter(creep => {
+        const targets = hostileCreeps.filter(creep => {
+            if(creep.pos.isEdge) return false;
             const towerDamage = possibleTowerDamage(room, creep.pos);
             if (creep instanceof PowerCreep) {
-                const damage = possibleDamage([], creep.pos, USER_NAME, true, towerDamage);
+                const damage = possibleDamage([], creep.pos, false, USER_NAME, true, towerDamage);
                 if (damage < 0) return false;
                 if (!creep.powers[PWR_SHIELD]) return true;
                 const power = creep.powers[PWR_SHIELD];
                 const shield = POWER_INFO[PWR_SHIELD].effect[power.level] / POWER_INFO[PWR_SHIELD].cooldown;
                 return shield < damage;
             }
-            return wouldBreakDefend(creep.body, creep.pos, USER_NAME, towerDamage);
+            return possibleDamage(creep.body, creep.pos, false, USER_NAME, true, towerDamage)
+                * creep.pos.rangeToEdge >= creep.hitsMax - creep.hits;
         });
 
         if (targets.length) {
             this.aimAt(room.towers, _.min(targets, target => target.pos.getRangeTo(this.center)));
             return;
-        } else if (hostleCreeps.length && Game.time % 5 == 0) {
-            room.towers.forEach(tower => tower.attack(_.sample(hostleCreeps)));
+        } else if (hostileCreeps.length && Game.time % 5 == 0) {
+            room.towers.forEach(tower => tower.attack(_.sample(hostileCreeps)));
             return;
         }
 
