@@ -57,6 +57,8 @@ Object.defineProperty(RoomPosition.prototype, 'isVisible', { // if the position 
 
 Object.defineProperty(RoomPosition.prototype, 'rangeToEdge', { // range to the nearest room edge
 	get() {
+		const exits = this.room?.find(FIND_EXIT);
+		if(exits) return _.min(exits, exit => this.getRangeTo(exit));
 		return _.min([this.x, 49 - this.x, this.y, 49 - this.y]);
 	},
 	configurable: true,
