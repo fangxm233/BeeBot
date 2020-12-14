@@ -81,6 +81,7 @@ export class Processes {
                     }
                 } catch (e) {
                     log.throw(e);
+                    log.trace(e);
                 }
             });
         }
