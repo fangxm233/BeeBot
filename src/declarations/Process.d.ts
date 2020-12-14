@@ -17,7 +17,9 @@ type ProcessTypes = 'filling'
     | 'reserving'
     | 'carry'
     | 'colonize'
-    | 'repair';
+    | 'repair'
+    | 'defendInvader'
+    | 'defendInvaderCore';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -49,4 +51,12 @@ type protoProcessCarry = protoProcess & {
 type protoProcessColonize = protoProcess & {
     from: string;
     claimed: boolean;
+};
+
+type protoProcessDefendInvader = protoProcess & {
+    target: string;
+};
+
+type protoProcessDefendInvaderCore = protoProcess & {
+    target: string;
 };

@@ -8,4 +8,6 @@ declare type ALL_ROLES =
     | 'scout'
     | 'reserver'
     | 'pioneer'
-    | 'claimer';
+    | 'claimer'
+    | 'deInvader'
+    | 'deInvaderCore';

@@ -8,6 +8,8 @@ export const ROLE_SCOUT = 'scout';
 export const ROLE_RESERVER = 'reserver';
 export const ROLE_PIONEER = 'pioneer';
 export const ROLE_CLAIMER = 'claimer';
+export const ROLE_DE_INVADER = 'deInvader';
+export const ROLE_DE_INVADER_CORE = 'deInvaderCore';
 
 export const PROCESS_FILLING = 'filling';
 export const PROCESS_MINE_SOURCE = 'mineSource';
@@ -20,3 +22,5 @@ export const PROCESS_RESERVING = 'reserving';
 export const PROCESS_CARRY = 'carry';
 export const PROCESS_COLONIZE = 'colonize';
 export const PROCESS_REPAIR = 'repair';
+export const PROCESS_DEFEND_INVADER = 'defendInvader';
+export const PROCESS_DEFEND_INVADER_CORE = 'defendInvaderCore';

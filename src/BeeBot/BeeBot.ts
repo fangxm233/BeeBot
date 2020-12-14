@@ -3,7 +3,7 @@ import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { PriorityManager } from 'beeSpawning/PriorityManager';
 import {
     PROCESS_BASE_WORK,
-    PROCESS_CARRY,
+    PROCESS_CARRY, PROCESS_DEFEND_INVADER, PROCESS_DEFEND_INVADER_CORE,
     PROCESS_FILLING,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
@@ -25,6 +25,8 @@ import { profile } from 'profiler/decorator';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
 import { hasAggressiveParts } from 'utilities/helpers';
 import { getAllColonyRooms } from 'utilities/utils';
+import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
+import { ProcessDefendInvader } from 'process/instances/defendInvader';
 
 const EARLY_OUTPOST_DEPTH = 1;
 
@@ -43,16 +45,21 @@ export class BeeBot {
             const roomName = room.name;
             BaseConstructor.get(roomName);
             PriorityManager.arrangePriority(roomName);
-            event.addEventListener('onBuildComplete', (arg: OnBuildCompleteArg) => {
-                if (arg.pos.roomName != roomName) return;
-                const stage = this.judgeColonyStage(roomName);
-                if (stage != this.getColonyStage(roomName))
-                    this.onColonyStageUpgrade(roomName, stage);
-                if (arg.type == STRUCTURE_TOWER && !Process.getProcess<ProcessTower>(roomName, PROCESS_TOWER))
-                    Process.startProcess(new ProcessTower(roomName));
-            });
-            clock.addAction(100, () => this.routineCheck(roomName));
+            this.setupColonyEvents(roomName);
         });
+    }
+
+    public static setupColonyEvents(roomName: string) {
+        event.addEventListener('onBuildComplete', (arg: OnBuildCompleteArg) => {
+            if (arg.pos.roomName != roomName) return;
+            const stage = this.judgeColonyStage(roomName);
+            if (stage != this.getColonyStage(roomName))
+                this.onColonyStageUpgrade(roomName, stage);
+            if (arg.type == STRUCTURE_TOWER && !Process.getProcess<ProcessTower>(roomName, PROCESS_TOWER))
+                Process.startProcess(new ProcessTower(roomName));
+        });
+        clock.addAction(100, () => this.routineCheck(roomName));
+        clock.addAction(10, () => this.checkOutpostInvaders(roomName));
     }
 
     public static goOutpost(from: string, to: string) {
@@ -175,10 +182,36 @@ export class BeeBot {
     private static checkForSafeMode(room: Room) {
         const data = RoomPlanner.getRoomData(room.name);
         if (!data) return;
-        if (room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep)).find(creep =>
-            creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 5)
-            || creep.pos.inRangeTo(room.controller!, 2)))
-            room.controller!.activateSafeMode();
+        const danger = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep)).filter(creep =>
+            creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
+            || creep.pos.inRangeTo(room.controller!, 2))
+            .filter(creep => creep.owner.username != 'Invader');
+
+        if (danger.length) {
+            const code = room.controller!.activateSafeMode();
+            if(code === OK) Game.notify(`Room ${room.name} is under attacking! SafeMode activated.
+            tick: ${Game.time} owner: ${JSON.stringify(danger.map(creep => creep.owner.username))} 
+            part: ${JSON.stringify(danger.map(creep => creep.bodyCounts))}`);
+        }
+    }
+
+    private static checkOutpostInvaders(roomName: string) {
+        const outposts = Memory.beebot.outposts[roomName];
+        if(!outposts?.length) return;
+        outposts.forEach(outpost => {
+            const room = Game.rooms[outpost];
+            if(!room) return;
+            if(room.invaderCore) {
+                const process = Process.getProcess<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE, 'target', outpost);
+                if(!process) Process.startProcess(new ProcessDefendInvaderCore(roomName, outpost));
+            }
+
+            const invaders = room.find(FIND_HOSTILE_CREEPS).filter(creep => creep.owner.username == 'Invader');
+            if(invaders.length) {
+                const process = Process.getProcess<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER, 'target', outpost);
+                if(!process) Process.startProcess(new ProcessDefendInvader(roomName, outpost));
+            }
+        })
     }
 }
 
