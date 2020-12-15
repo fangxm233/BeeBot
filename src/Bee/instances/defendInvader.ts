@@ -12,7 +12,7 @@ export class BeeDefendInvader extends Bee {
             return;
         }
 
-        const invaders = this.room.find(FIND_HOSTILE_CREEPS).filter(creep => creep.owner.username == 'Invader');
+        const invaders = this.room.find(FIND_HOSTILE_CREEPS);
         if (invaders.length) {
             this.heal(this.creep);
             const invader = this.pos.findClosestByRange(invaders);

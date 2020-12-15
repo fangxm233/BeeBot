@@ -182,9 +182,9 @@ export class BeeBot {
     private static checkForSafeMode(room: Room) {
         const data = RoomPlanner.getRoomData(room.name);
         if (!data) return;
-        const danger = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep)).filter(creep =>
-            creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
-            || creep.pos.inRangeTo(room.controller!, 2))
+        const danger = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep))
+            .filter(creep => creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
+            || creep.pos.inRangeTo(room.controller!, 1))
             .filter(creep => creep.owner.username != 'Invader');
 
         if (danger.length) {
@@ -206,7 +206,7 @@ export class BeeBot {
                 if(!process) Process.startProcess(new ProcessDefendInvaderCore(roomName, outpost));
             }
 
-            const invaders = room.find(FIND_HOSTILE_CREEPS).filter(creep => creep.owner.username == 'Invader');
+            const invaders = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep, false));
             if(invaders.length) {
                 const process = Process.getProcess<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER, 'target', outpost);
                 if(!process) Process.startProcess(new ProcessDefendInvader(roomName, outpost));
