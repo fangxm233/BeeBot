@@ -26,6 +26,7 @@ import {TaskUpgrade, upgradeTargetType} from './instances/task_upgrade';
 import {TaskWithdraw, withdrawTargetType} from './instances/task_withdraw';
 import {TaskWithdrawAll, withdrawAllTargetType} from './instances/task_withdrawAll';
 import {Task} from './Task';
+import { TaskAttackController } from 'tasks/instances/task_attackController';
 
 
 export function initializeTask(protoTask: protoTask): Task {
@@ -37,6 +38,9 @@ export function initializeTask(protoTask: protoTask): Task {
 	switch (taskName) {
 		case TaskAttack.taskName:
 			task = new TaskAttack(target as attackTargetType);
+			break;
+		case TaskAttackController.taskName:
+			task = new TaskAttackController(target as StructureController);
 			break;
 		case TaskBuild.taskName:
 			task = new TaskBuild(target as buildTargetType);

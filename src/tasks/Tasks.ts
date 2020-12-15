@@ -22,6 +22,7 @@ import { TaskTransferAll, transferAllTargetType } from './instances/task_transfe
 import { TaskUpgrade, upgradeTargetType } from './instances/task_upgrade';
 import { TaskWithdraw, withdrawTargetType } from './instances/task_withdraw';
 import { TaskWithdrawAll, withdrawAllTargetType } from './instances/task_withdrawAll';
+import { TaskAttackController } from 'tasks/instances/task_attackController';
 
 export class Tasks {
 
@@ -48,6 +49,10 @@ export class Tasks {
 
 	public static attack(target: attackTargetType, options = {} as TaskOptions): TaskAttack {
 		return new TaskAttack(target, options);
+	}
+
+	public static attackController(target: StructureController, options = {} as TaskOptions): TaskAttackController{
+		return new TaskAttackController(target, options);
 	}
 
 	public static build(target: buildTargetType, options = {} as TaskOptions): TaskBuild {

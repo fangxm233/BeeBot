@@ -1,4 +1,5 @@
 import { Bee } from 'Bee/Bee';
+import { USER_NAME } from 'config';
 import { ProcessReserving } from 'process/instances/reserving';
 import { profile } from 'profiler/decorator';
 import { Tasks } from 'tasks/Tasks';
@@ -14,7 +15,9 @@ export class BeeReserver extends Bee {
             if (this.room.name != this.process.target) {
                 this.task = Tasks.goToRoom(this.process.target);
             } else {
-                this.task = Tasks.reserve(this.room.controller!);
+                if(this.room.controller!.reservation && this.room.controller!.reservation.username != USER_NAME)
+                    this.task = Tasks.attackController(this.room.controller!);
+                else this.task = Tasks.reserve(this.room.controller!);
             }
         }
 
