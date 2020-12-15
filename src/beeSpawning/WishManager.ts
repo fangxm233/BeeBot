@@ -14,6 +14,7 @@ export interface WishConfig {
     setup?: BeeSetup;
     budget?: number;
     count?: number;
+    emergency?: boolean;
     extraMemory?: any;
     name?: string;
 }
@@ -34,18 +35,18 @@ export class WishManager {
 
     public wishBee(config: WishConfig) {
         _.assign(config, this.defaultConfigs);
-        const { setup, budget, extraMemory, name } = config;
+        const { setup, budget, extraMemory, name, emergency } = config;
 
         if (config.role) {
             const { count, role } = config;
             for (let i = 0; i < (count || 1); i++) {
                 const bee = BeeFactorty.getInstance(role, this.process);
-                const wish = new BeeWish(bee, setup!, budget!, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
+                const wish = new BeeWish(bee, setup!, budget!, this.room, this.spawnRoom, this.process.fullId, extraMemory, emergency, name);
                 this._wishes.push(wish);
                 BeeManager.wishBee(wish);
             }
         } else {
-            const wish = new BeeWish(config.bee!, setup!, budget!, this.room, this.spawnRoom, this.process.fullId, extraMemory, name);
+            const wish = new BeeWish(config.bee!, setup!, budget!, this.room, this.spawnRoom, this.process.fullId, extraMemory, emergency, name);
             this._wishes.push(wish);
             BeeManager.wishBee(wish);
         }

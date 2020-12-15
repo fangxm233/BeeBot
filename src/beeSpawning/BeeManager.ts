@@ -1,5 +1,6 @@
 import { bees } from 'Bee/Bee';
 import { log } from 'console/log';
+import { BEE_CONFIG_SEGMENT, SegmentManager } from 'dataManagement/SegmentManager';
 import { PROCESS_FILLING, ROLE_FILLER } from 'declarations/constantsExport';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
@@ -8,13 +9,14 @@ import { Process, STATE_ACTIVE } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { calBodyCost, timeAfterTick } from 'utilities/helpers';
 import { getFreeKey } from 'utilities/utils';
-import { BeeWish } from './BeeWish';
+import { BeeWish, protoBeeWish } from './BeeWish';
 import { PriorityManager } from './PriorityManager';
 
 @profile
 export class BeeManager {
     public static collectors: ProcessWishInvoker[] = [];
     public static wishes: { [roomName: string]: { [role in ALL_ROLES]: BeeWish[] } } = {};
+    private static beeConfigs: { [beeName: string]: protoBeeWish } = {};
 
     public static run() {
         for (const roomName in this.wishes) {
@@ -148,6 +150,15 @@ export class BeeManager {
             this.collectors.push(collector);
             collector.start();
         }
+    }
+
+    public static serializeBeeConfig() {
+        if (!Object.keys(this.beeConfigs).length) return;
+        SegmentManager.writeSegment(BEE_CONFIG_SEGMENT, JSON.stringify(this.beeConfigs));
+    }
+
+    public static deserializeBeeConfig() {
+        this.beeConfigs = JSON.parse(SegmentManager.getSegment(BEE_CONFIG_SEGMENT) || '');
     }
 }
 

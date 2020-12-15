@@ -2,13 +2,15 @@ import { profile } from "profiler/decorator";
 
 export const STATS_SEGMENT = 0;
 export const ROOM_DATA_SEGMENT = 1;
+export const BEE_CONFIG_SEGMENT = 2;
+export const INTEL_SEGMENT = 4;
 
 @profile
 export class SegmentManager {
     private static segmentsCache: { [id: number]: string } = {};
 
     public static applySegments() {
-        RawMemory.setActiveSegments([STATS_SEGMENT, ROOM_DATA_SEGMENT]);
+        RawMemory.setActiveSegments([STATS_SEGMENT, ROOM_DATA_SEGMENT, BEE_CONFIG_SEGMENT, INTEL_SEGMENT]);
     }
 
     public static getSegment(id: number): string | undefined {

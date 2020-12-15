@@ -15,6 +15,9 @@ export type BodyRatio = string[];
 
 @profile
 export class BeeSetup {
+    private static BeeSetups: BeeSetup[] = [];
+
+    public id: number;
     public role: string;
     public bodySetup: BodySetup;
 
@@ -25,6 +28,12 @@ export class BeeSetup {
     constructor(role: string, setup: BodySetup) {
         this.role = role;
         this.bodySetup = setup;
+
+        this.id = BeeSetup.BeeSetups.push(this) - 1;
+    }
+
+    public static getBeeSetup(id: number) {
+        return this.BeeSetups[id];
     }
 
     public maxCost() {
