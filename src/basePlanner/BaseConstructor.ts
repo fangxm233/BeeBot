@@ -134,12 +134,12 @@ export class BaseConstructor {
                 continue;
             }
 
-            if(type == STRUCTURE_RAMPART) {
-                if(rcl < RAMPART_CONSTRUCT_RCL) continue;
+            if (type == STRUCTURE_RAMPART) {
+                if (rcl < RAMPART_CONSTRUCT_RCL) continue;
                 const missing = checkAndConstructMissing(BarrierPlanner.get(this.roomName).getBarriers()
                     , STRUCTURE_RAMPART, false);
-                if(missing) return;
-                continue
+                if (missing) return;
+                continue;
             }
 
             const missing = checkAndConstructMissing(layout[type], type, true);
@@ -164,7 +164,7 @@ export class BaseConstructor {
 
             if (type == STRUCTURE_ROAD && rcl >= ROAD_CONSTRUCT_RCL) {
                 const paths = [...data.sourcesPath, data.controllerPath!];
-                if(rcl >= 6) paths.push(data.mineralPath!);
+                if (rcl >= 6) paths.push(data.mineralPath!);
                 for (const path of paths) {
                     const missing = checkAndConstructMissing(path.path, STRUCTURE_ROAD, false);
                     if (missing) return;
@@ -205,7 +205,7 @@ export class BaseConstructor {
                 const roomBuilding = BaseConstructor.getRoomStructures(pos.roomName);
                 if (!roomBuilding) return false;
                 const structure = roomBuilding.getForAt(type, pos) as any;
-                return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
+                return (!structure || (structure.owner && structure.owner.username != USER_NAME));
             });
         }
 
@@ -216,7 +216,7 @@ export class BaseConstructor {
             const x = coord.x + (transform ? this.base.x : 0);
             const y = coord.y + (transform ? this.base.y : 0);
             const structure = roomBuilding.getForAt(type, x, y) as any;
-            return !!(!structure || (structure.owner && structure.owner.username != USER_NAME));
+            return (!structure || (structure.owner && structure.owner.username != USER_NAME));
         });
     }
 
@@ -232,6 +232,13 @@ export class BaseConstructor {
 
             const x = coord.x + (transform ? this.base.x : 0);
             const y = coord.y + (transform ? this.base.y : 0);
+
+            const site = room.lookForAt(LOOK_CONSTRUCTION_SITES, x, y)[0];
+            if (site) {
+                if (site.structureType != type || !site.my) site.remove();
+                continue;
+            }
+
             const code = room.createConstructionSite(x, y, type as any);
             if (code === OK) continue;
             if (code === ERR_INVALID_TARGET) {
