@@ -33,7 +33,7 @@ BeeFactorty.registerBee(ROLE_DE_INVADER, BeeDefendInvader);
 BeeFactorty.registerBee(ROLE_DE_INVADER_CORE, BeeDefendInvaderCore);
 BeeFactorty.registerBee(ROLE_MINER, BeeMiner);
 BeeFactorty.registerBee(ROLE_CARRIER, BeeCarrier);
+BeeFactorty.registerBee(ROLE_RESERVER, BeeReserver);
 BeeFactorty.registerBee(ROLE_WORKER, BeeWorker);
 BeeFactorty.registerBee(ROLE_UPGRADER, BeeUpgrader);
 BeeFactorty.registerBee(ROLE_SCOUT, BeeScout);
-BeeFactorty.registerBee(ROLE_RESERVER, BeeReserver);
