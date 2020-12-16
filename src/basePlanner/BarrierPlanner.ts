@@ -160,6 +160,7 @@ export class BarrierPlanner {
     }
 
     private setMap(map: CostMatrix, x: number, y: number, value: number) {
+        if(map.get(x, y) == MAP_WALL) return;
         if (map.get(x, y) == MAP_ON) {
             if (value == MAP_ON) return;
             _.remove(this.barrier, coord => coord.x == x && coord.y == y);
