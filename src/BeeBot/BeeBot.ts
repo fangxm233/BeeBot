@@ -68,8 +68,10 @@ export class BeeBot {
         Memory.beebot.outposts[from].push(to);
         if (!Process.getProcess<ProcessMineSource>(from, PROCESS_MINE_SOURCE, 'target', to))
             Process.startProcess(new ProcessMineSource(from, to));
-        Process.startProcess(new ProcessReserving(from, to));
-        Process.startProcess(new ProcessCarry(from, to));
+        if (!Process.getProcess<ProcessMineSource>(from, PROCESS_RESERVING, 'target', to))
+            Process.startProcess(new ProcessReserving(from, to));
+        if (!Process.getProcess<ProcessMineSource>(from, PROCESS_CARRY, 'target', to))
+            Process.startProcess(new ProcessCarry(from, to));
         const result = RoomPlanner.planRoom(from, to, true);
         if (result.result) BaseConstructor.get(from).constructBuildings();
     }
