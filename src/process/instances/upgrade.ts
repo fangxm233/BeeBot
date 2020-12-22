@@ -65,7 +65,7 @@ export class ProcessUpgrade extends Process {
             return true;
         }
 
-        this.count = Math.min(Math.round(
+        this.count = level == 8 ? 1 : Math.min(Math.round(
             Math.pow(storage.store.energy / 1e5, UPGRADER_POW)) + UPGRADER_BIAS, MAX_UPGRADER);
 
         return true;
