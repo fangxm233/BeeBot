@@ -15,7 +15,8 @@ export class BeeReserver extends Bee {
             if (this.room.name != this.process.target) {
                 this.task = Tasks.goToRoom(this.process.target);
             } else {
-                if(this.room.controller!.reservation && this.room.controller!.reservation.username != USER_NAME)
+                if (this.room.controller!.reservation && this.room.controller!.reservation.username != USER_NAME
+                    || (this.room.controller!.owner && this.room.controller!.owner.username != USER_NAME))
                     this.task = Tasks.attackController(this.room.controller!);
                 else this.task = Tasks.reserve(this.room.controller!);
             }
