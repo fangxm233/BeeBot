@@ -86,3 +86,5 @@ export class ProcessReserving extends Process {
         return true;
     }
 }
+
+(global as any).ProcessReserving = ProcessReserving;
