@@ -5,6 +5,7 @@ import { BeeManager } from 'beeSpawning/BeeManager';
 import { BeeSetup } from 'beeSpawning/BeeSetup';
 import { setups } from 'beeSpawning/setups';
 import { WishManager } from 'beeSpawning/WishManager';
+import { USER_NAME } from 'config';
 import { Intel } from 'dataManagement/Intel';
 import { PROCESS_MINE_SOURCE, ROLE_MINER } from 'declarations/constantsExport';
 import { Process } from 'process/Process';
@@ -89,6 +90,15 @@ export class ProcessMineSource extends Process {
 
     public run() {
         if (!this.inited && !this.init()) return;
+        if (this.earlyOutpost) {
+            const room = Game.rooms[this.target];
+            if (room && (room.owner || room.controller!.reservation
+                && room.controller!.reservation.username != USER_NAME)) {
+                this.close();
+                return;
+            }
+        }
+
         this.foreachBee(ROLE_MINER, bee => bee.run());
     }
 
