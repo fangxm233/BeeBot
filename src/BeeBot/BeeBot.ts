@@ -14,6 +14,8 @@ import { event } from 'event/Event';
 import { ProcessBaseWork } from 'process/instances/baseWork';
 import { ProcessCarry } from 'process/instances/carry';
 import { ProcessColonize } from 'process/instances/colonize';
+import { ProcessDefendInvader } from 'process/instances/defendInvader';
+import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { ProcessFilling } from 'process/instances/filling';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessRepair } from 'process/instances/repair';
@@ -25,8 +27,7 @@ import { profile } from 'profiler/decorator';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
 import { hasAggressiveParts } from 'utilities/helpers';
 import { getAllColonyRooms } from 'utilities/utils';
-import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
-import { ProcessDefendInvader } from 'process/instances/defendInvader';
+import { Intel } from 'dataManagement/Intel';
 
 const EARLY_OUTPOST_DEPTH = 1;
 
@@ -66,8 +67,9 @@ export class BeeBot {
         if (!Memory.beebot.outposts[from]) Memory.beebot.outposts[from] = [];
         if (_.contains(Memory.beebot.outposts[from], to)) return;
         Memory.beebot.outposts[from].push(to);
-        if (!Process.getProcess<ProcessMineSource>(from, PROCESS_MINE_SOURCE, 'target', to))
-            Process.startProcess(new ProcessMineSource(from, to));
+        const mineSource = Process.getProcess<ProcessMineSource>(from, PROCESS_MINE_SOURCE, 'target', to);
+        if(mineSource?.earlyOutpost) mineSource.setEarly(false);
+        if (!mineSource) Process.startProcess(new ProcessMineSource(from, to));
         if (!Process.getProcess<ProcessMineSource>(from, PROCESS_RESERVING, 'target', to))
             Process.startProcess(new ProcessReserving(from, to));
         if (!Process.getProcess<ProcessMineSource>(from, PROCESS_CARRY, 'target', to))
@@ -93,7 +95,8 @@ export class BeeBot {
 
     public static getEarlyOutposts(roomName: string) {
         return Cartographer.findRoomsInRange(roomName, EARLY_OUTPOST_DEPTH)
-            .filter(outPost => Cartographer.roomType(outPost) == ROOMTYPE_CONTROLLER && outPost != roomName);
+            .filter(outPost => Cartographer.roomType(outPost) == ROOMTYPE_CONTROLLER
+                && outPost != roomName && !Intel.getRoomIntel(outPost, true)?.owner);
     }
 
     public static arrangeOutposts(roomName: string) { // TODO: auto outposts arrangement
@@ -115,8 +118,11 @@ export class BeeBot {
     }
 
     public static cancelEarlyOutposts(roomName: string) {
-        this.getEarlyOutposts(roomName).forEach(room =>
-            Process.getProcess<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE, 'target', room)?.close());
+        this.getEarlyOutposts(roomName).forEach(room => {
+            const process = Process.getProcess<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE, 'target', room);
+            if(!process?.earlyOutpost) return;
+            process.close();
+        });
     }
 
     private static onColonyStageUpgrade(roomName: string, stage: ColonyStage) {
