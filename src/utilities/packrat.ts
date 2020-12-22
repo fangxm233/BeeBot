@@ -345,8 +345,10 @@ export function unpackPosList(chars: string): RoomPosition[] {
     return posList;
 }
 
-export function packNumber(num: string): string {
+export function packNumber(num: number | string): string {
     let result = '';
+
+    if(typeof num == 'number') num = num.toString();
     // tslint:disable-next-line: no-var-keyword
     for (var i = 0; i + 3 < num.length; i += 4) {
         result += String.fromCharCode(Number.parseInt(num.substr(i, 4), 10));
