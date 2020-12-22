@@ -6,13 +6,14 @@ import { PROCESS_FILLING, PROCESS_TOWER } from "declarations/constantsExport";
 import { Process } from "process/Process";
 import { possibleDamage, possibleRepairPower, possibleTowerDamage, wouldBreakDefend } from "utilities/powerCalculation";
 import { ProcessFilling } from "./filling";
+import { event } from 'event/Event';
 
 const REPAIR_RAMPART_LINE = 100;
 
 export class ProcessTower extends Process {
     private inited: boolean;
     private repairList: Id<Structure>[];
-    private regularRepaitList: Id<Structure>[];
+    private regularRepairList: Id<Structure>[];
     private tickToRepair: number = 0;
     private center: RoomPosition;
 
@@ -26,6 +27,11 @@ export class ProcessTower extends Process {
         if (!room || !data) return false;
 
         this.center = new RoomPosition(data.basePos!.x, data.basePos!.y, this.roomName);
+
+        event.addEventListener('onBuildComplete', (arg: OnBuildCompleteArg) => {
+            if(arg.pos.roomName != this.roomName) return;
+            this.genLists();
+        })
 
         return this.genLists();
     }
@@ -49,8 +55,8 @@ export class ProcessTower extends Process {
         this.tickToRepair--;
 
         if (this.tickToRepair <= 0) {
-            this.regularRepaitList = this.regularRepaitList.filter(id => !!Game.getObjectById(id));
-            const structures = this.regularRepaitList.map(id => Game.getObjectById(id)!);
+            this.regularRepairList = this.regularRepairList.filter(id => !!Game.getObjectById(id));
+            const structures = this.regularRepairList.map(id => Game.getObjectById(id)!);
             if (!this.repairs(room, structures)) {
                 this.tickToRepair = _.min(structures.map(structure => this.calDecalTime(structure)));
             }
@@ -133,11 +139,11 @@ export class ProcessTower extends Process {
 
         const baseConstructor = BaseConstructor.get(this.roomName);
 
-        this.regularRepaitList = [];
-        this.regularRepaitList.push(
+        this.regularRepairList = [];
+        this.regularRepairList.push(
             ..._.compact(_.map([...data.harvestPos.source, data.harvestPos.mineral!, data.containerPos!.controller],
                 coord => baseConstructor.getForAt(STRUCTURE_CONTAINER, coord)?.id!)));
-        this.regularRepaitList.push(
+        this.regularRepairList.push(
             ..._.compact(_.map(structureLayout[8].buildings[STRUCTURE_CONTAINER],
                 coord => baseConstructor.getForAtBase(STRUCTURE_CONTAINER, coord)?.id!)));
 
@@ -145,10 +151,10 @@ export class ProcessTower extends Process {
         poses.push(...structureLayout[room.controller!.level].buildings[STRUCTURE_ROAD].map(
             coord => new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, this.roomName)))
         poses = _.uniq(poses);
-        this.regularRepaitList.push(..._.map(poses, pos => baseConstructor.getForAt(STRUCTURE_ROAD, pos)?.id!));
+        this.regularRepairList.push(..._.map(poses, pos => baseConstructor.getForAt(STRUCTURE_ROAD, pos)?.id!));
 
-        this.repairList = [...this.regularRepaitList, ...room.find(FIND_MY_STRUCTURES).map(s => s.id)];
-        this.regularRepaitList.push(...room.ramparts.map(ram => ram.id));
+        this.repairList = [...this.regularRepairList, ...room.find(FIND_MY_STRUCTURES).map(s => s.id)];
+        this.regularRepairList.push(...room.ramparts.map(ram => ram.id));
 
         return true;
     }
