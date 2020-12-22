@@ -24,8 +24,11 @@ export class BeePioneer extends Bee {
                         source.targetedBy.length < source.pos.availableNeighbors(true, false).length)[0];
                     if (source) this.task = Tasks.harvest(source);
                 } else {
-                    const site = this.room.constructionSites[0];
-                    if (site) this.task = Tasks.build(site);
+                    if(controller.level < 2) this.task = Tasks.upgrade(controller);
+                    else {
+                        const site = this.room.constructionSites[0];
+                        if (site) this.task = Tasks.build(site);
+                    }
                 }
 
             }
