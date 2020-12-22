@@ -69,6 +69,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
 function globalReset() {
     log.info('global reset');
     RoomPlanner.deserializeData();
+    Intel.deserializeData();
     Processes.restoreProcesses();
+
+    clock.addAction(10, () => {
+        if(!Intel.checkDirty()) return;
+        Intel.serializeData();
+        Intel.resetDirty();
+    });
+
     BeeBot.OnGlobalRested();
 }

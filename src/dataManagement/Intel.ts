@@ -1,10 +1,27 @@
-import { BeeBot } from "BeeBot/BeeBot";
-import { PROCESS_SCOUT } from "declarations/constantsExport";
-import { Traveler } from "movement/Traveler";
-import { ProcessScout } from "process/instances/scout";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
-import { Cartographer, ROOMTYPE_CONTROLLER, ROOMTYPE_CORE, ROOMTYPE_HIGHEAY, ROOMTYPE_SOURCEKEEPER } from "utilities/Cartographer";
+import { BeeBot } from 'BeeBot/BeeBot';
+import { INTEL_SEGMENT, SegmentManager } from 'dataManagement/SegmentManager';
+import { PROCESS_SCOUT } from 'declarations/constantsExport';
+import { Traveler } from 'movement/Traveler';
+import { ProcessScout } from 'process/instances/scout';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
+import {
+    Cartographer,
+    ROOMTYPE_CONTROLLER,
+    ROOMTYPE_CORE,
+    ROOMTYPE_HIGHEAY,
+    ROOMTYPE_SOURCEKEEPER,
+} from 'utilities/Cartographer';
+import {
+    packCoord,
+    packCoordList,
+    packNumber,
+    packRoomName,
+    unpackCoord,
+    unpackCoordList,
+    unpackNumber,
+    unpackRoomName,
+} from 'utilities/packrat';
 
 export interface RoomIntel {
     owner?: string;
@@ -21,16 +38,21 @@ export interface RoomIntel {
 
     invaderCore?: Coord;
     invaderLevel?: number;
-}
-interface SerializedRoomIntel {
-    o?: string;
-    r?: number;
-    s?: string;
-    m?: string;
-    mt?: string;
-    c?: string;
 
-    k?: string;
+    time: number;
+}
+
+interface SerializedRoomIntel {
+    o?: string; // owner
+    r?: number; // rcl
+    s?: string; // sources
+    m?: string; // mineral
+    mt?: MineralConstant; // mineralType
+    c?: string; // controller
+
+    k?: string; // keepers
+
+    t: string; // time
 }
 
 @profile
@@ -39,6 +61,7 @@ export class Intel {
     private static roomCostMatrix: { [roomName: string]: CostMatrix } = {};
     private static requests: { roomName: string, requestType: 'intel' | 'costMatrix' }[] = [];
     private static observeRequests: string[] = [];
+    private static dirty: boolean = false;
 
     public static getRoomIntel(roomName: string, requestWhenMissing: boolean = true): RoomIntel | undefined {
         const intel = this.roomIntel[roomName];
@@ -119,7 +142,7 @@ export class Intel {
 
     private static scanRoom(room: Room) {
         const type = Cartographer.roomType(room.name);
-        const intel: RoomIntel = {};
+        const intel: RoomIntel = { time: Game.time };
 
         if (room.sources.length) intel.sources = room.sources.map(source => source.pos);
         switch (type) {
@@ -152,11 +175,61 @@ export class Intel {
                 break;
         }
 
+        this.dirty = true;
         return this.roomIntel[room.name] = intel;
     }
 
     private static generateCostMatrix(room: Room) {
+        this.dirty = true;
         return this.roomCostMatrix[room.name] =
             Traveler.addStructuresToMatrix(room, new PathFinder.CostMatrix(), 1);
+    }
+
+    public static checkDirty(){
+        return this.dirty;
+    }
+
+    public static resetDirty() {
+        this.dirty = false;
+    }
+
+    public static serializeData() {
+        if (!Object.keys(this.roomIntel).length) return;
+
+        const result: { [roomName: string]: SerializedRoomIntel } = {};
+
+        _.forEach(this.roomIntel, (intel, roomName) => {
+            const serialized: SerializedRoomIntel = { t: packNumber(intel.time) };
+
+            if (intel.rcl) serialized.r = intel.rcl;
+            if (intel.sources) serialized.s = packCoordList(intel.sources);
+            if (intel.mineral) serialized.m = packCoord(intel.mineral);
+            if (intel.mineralType) serialized.mt = intel.mineralType;
+            if (intel.controller) serialized.c = packCoord(intel.controller);
+            if (intel.keepers) serialized.k = packCoordList(intel.keepers);
+
+            result[packRoomName(roomName!)] = serialized;
+        });
+
+        SegmentManager.writeSegment(INTEL_SEGMENT, JSON.stringify(result));
+    }
+
+    public static deserializeData() {
+        const data = SegmentManager.getSegment(INTEL_SEGMENT);
+        if (!data) return;
+
+        const parsed: { [roomName: string]: SerializedRoomIntel } = JSON.parse(data);
+        _.forEach(parsed, (intel, roomName) => {
+            const result: RoomIntel = { time: Number(unpackNumber(intel.t)) };
+
+            if (intel.r) result.rcl = intel.r;
+            if (intel.s) result.sources = unpackCoordList(intel.s);
+            if (intel.m) result.mineral = unpackCoord(intel.m);
+            if (intel.mt) result.mineralType = intel.mt;
+            if (intel.c) result.controller = unpackCoord(intel.c);
+            if (intel.k) result.keepers = unpackCoordList(intel.k);
+
+            this.roomIntel[unpackRoomName(roomName!)] = result;
+        });
     }
 }
