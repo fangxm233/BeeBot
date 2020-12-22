@@ -14,6 +14,10 @@ export class BeeCarrier extends Bee {
 
     public runCore() {
         if (!this.targetPos) this.targetPos = this.process.poses[this.memory.i];
+        if(!this.targetPos) {
+            this.suicide();
+            return;
+        }
 
         this.task?.isValid();
         if (!this.task) {
