@@ -3,6 +3,7 @@ import { Traveler } from "movement/Traveler";
 import { profile } from "profiler/decorator";
 import { packNumber, packPos, unpackNumber, unpackPos } from "utilities/packrat";
 import { RoomPlanner } from "./RoomPlanner";
+import { Cartographer, ROOMTYPE_CORE, ROOMTYPE_SOURCEKEEPER } from 'utilities/Cartographer';
 
 export const PLAIN_COST = 3;
 export const SWAMP_COST = 4;
@@ -21,7 +22,7 @@ export class RoadPlanner {
         this.isColony = isColony;
     }
 
-    public generatePathTo(pos: RoomPosition): GeneratePathResult {
+    public generatePathTo(pos: RoomPosition, avoidCenter?: boolean): GeneratePathResult {
         const center = new RoomPosition(this.base.x + 5, this.base.y + 5, this.roomName);
 
         let missing = false;
@@ -30,6 +31,8 @@ export class RoadPlanner {
             roomCallback: roomName => {
                 if (roomName == this.roomName) return RoomPlanner.getBaseCostMatrix(roomName, this.base, 8);
                 if (this.isColony) return false;
+                const type = Cartographer.roomType(roomName);
+                if(avoidCenter && (type == ROOMTYPE_CORE || type == ROOMTYPE_SOURCEKEEPER)) return false;
 
                 const matrix = Intel.getRoomCostMatrix(roomName);
                 if (matrix) return matrix;
@@ -92,6 +95,7 @@ export class RoadPlanner {
             let lastPos = unpackPos(path.substr(0, 2)); // 起始位置占两个字符
             result.push(lastPos);
             path = path.slice(2);
+
             for (const dir of unpackNumber(path)) {
                 const pos = Traveler.positionAtDirection(lastPos, Number.parseInt(dir, 10));
                 if (!pos) continue;
