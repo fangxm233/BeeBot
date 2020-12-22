@@ -15,7 +15,10 @@ export class BeeClaimer extends Bee {
                 this.task = Tasks.goToRoom(this.process.roomName, { moveOptions: { preferHighway: true } });
             } else {
                 const controller = this.room.controller!;
-                if (!controller.my) this.task = Tasks.claim(controller);
+                if (!controller.my) {
+                    if(controller.reservation) this.task = Tasks.attackController(controller);
+                    else this.task = Tasks.claim(controller);
+                }
                 else {
                     this.process.setClaimed(true);
                     this.suicide();
