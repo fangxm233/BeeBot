@@ -1,6 +1,8 @@
 import { BeeBot } from 'BeeBot/BeeBot';
 import { Process } from 'process/Process';
 import { ProcessColonize } from 'process/instances/colonize';
+import { ProcessDismantle } from 'process/instances/dismantle';
+import { PROCESS_DISMANTLE } from 'declarations/constantsExport';
 
 export class Command {
     public static run() {
@@ -27,6 +29,11 @@ export class Command {
             if(snips[0] == 'colony') {
                 Process.startProcess(new ProcessColonize(flag.pos.roomName, snips[1]));
                 flag.remove();
+                continue;
+            }
+            if(snips[0] == 'dismantle') {
+                if(!Process.getProcess<ProcessDismantle>(snips[1], PROCESS_DISMANTLE, 'target', flag.pos.roomName))
+                    Process.startProcess(new ProcessDismantle(snips[1], flag.pos.roomName));
                 continue;
             }
         }

@@ -4,6 +4,7 @@ import {
     PROCESS_COLONIZE,
     PROCESS_DEFEND_INVADER,
     PROCESS_DEFEND_INVADER_CORE,
+    PROCESS_DISMANTLE,
     PROCESS_FILLING,
     PROCESS_MINE_SOURCE,
     PROCESS_REPAIR,
@@ -15,6 +16,7 @@ import {
     ROLE_CLAIMER,
     ROLE_DE_INVADER,
     ROLE_DE_INVADER_CORE,
+    ROLE_DISMANTLER,
     ROLE_FILLER,
     ROLE_MANAGER,
     ROLE_MINER,
@@ -26,6 +28,7 @@ import {
 } from 'declarations/constantsExport';
 import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
+import { ProcessDismantle } from 'process/instances/dismantle';
 import { ProcessRepair } from 'process/instances/repair';
 import { ProcessBaseWork } from './instances/baseWork';
 import { ProcessCarry } from './instances/carry';
@@ -51,3 +54,4 @@ Process.registerProcess(PROCESS_COLONIZE, Bucket.level3, ProcessColonize, 100, [
 Process.registerProcess(PROCESS_REPAIR, Bucket.level3, ProcessRepair, 100, [ROLE_WORKER]);
 Process.registerProcess(PROCESS_DEFEND_INVADER, Bucket.level3, ProcessDefendInvader, 100, [ROLE_DE_INVADER]);
 Process.registerProcess(PROCESS_DEFEND_INVADER_CORE, Bucket.level3, ProcessDefendInvaderCore, 100, [ROLE_DE_INVADER_CORE]);
+Process.registerProcess(PROCESS_DISMANTLE, Bucket.level4, ProcessDismantle, 100, [ROLE_DISMANTLER]);

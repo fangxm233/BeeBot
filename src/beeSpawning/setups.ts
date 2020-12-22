@@ -1,5 +1,5 @@
 import {
-    ROLE_CARRIER, ROLE_CLAIMER, ROLE_DE_INVADER, ROLE_DE_INVADER_CORE,
+    ROLE_CARRIER, ROLE_CLAIMER, ROLE_DE_INVADER, ROLE_DE_INVADER_CORE, ROLE_DISMANTLER,
     ROLE_FILLER,
     ROLE_MANAGER,
     ROLE_MINER,
@@ -156,6 +156,13 @@ export const setups = {
     [ROLE_DE_INVADER_CORE]: {
         default: new BeeSetup(ROLE_DE_INVADER_CORE, {
             ratio: ['a1', 'm1'],
+            maxSize: Infinity
+        })
+    },
+
+    [ROLE_DISMANTLER]: {
+        default: new BeeSetup(ROLE_DISMANTLER, {
+            ratio: ['w1', 'm1'],
             maxSize: Infinity
         })
     }

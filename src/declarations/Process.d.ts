@@ -18,8 +18,10 @@ type ProcessTypes = 'filling'
     | 'carry'
     | 'colonize'
     | 'repair'
+    | 'defend'
     | 'defendInvader'
-    | 'defendInvaderCore';
+    | 'defendInvaderCore'
+    | 'dismantle';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -58,5 +60,9 @@ type protoProcessDefendInvader = protoProcess & {
 };
 
 type protoProcessDefendInvaderCore = protoProcess & {
+    target: string;
+};
+
+type protoProcessDismantle = protoProcess & {
     target: string;
 };
