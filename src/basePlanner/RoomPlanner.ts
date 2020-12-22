@@ -181,7 +181,10 @@ export class RoomPlanner {
     public static findBasePos(roomName: string): Coord | undefined {
         const candidatePoses = this.findCandidates(roomName, 2, 38, 11);
 
-        return _.max(candidatePoses, coord => this.scoreCandidate(roomName, coord));
+        const pos = _.max(candidatePoses, coord => this.scoreCandidate(roomName, coord));
+
+        if(pos as any == -Infinity) return;
+        return pos;
     }
 
     private static findCandidates(roomName: string, from: number, to: number, baseSize: number) {
