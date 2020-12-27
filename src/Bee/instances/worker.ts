@@ -38,8 +38,8 @@ export class BeeWorker extends Bee {
 
         let ramparts = room.find(FIND_MY_STRUCTURES)
             .filter(structure => structure.structureType == STRUCTURE_RAMPART && structure.hits < 1000);
-        if(ramparts.length)
-            if(this.repairAction(ramparts)) return;
+        if (ramparts.length)
+            if (this.repairAction(ramparts)) return;
 
         if (early) {
             let structures: fillingTargetType[] =
@@ -67,8 +67,8 @@ export class BeeWorker extends Bee {
 
         const planner = BarrierPlanner.get(room.name);
         ramparts = room.ramparts.filter(rampart => rampart.hits < planner.getBarrierHitsTarget(rampart.pos));
-        if(ramparts.length)
-            if(this.repairAction(ramparts)) return;
+        if (ramparts.length)
+            if (this.repairAction(ramparts)) return;
 
         if (this.upgradeAction()) return;
     }
