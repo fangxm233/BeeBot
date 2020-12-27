@@ -8,9 +8,8 @@ import {
     DEPOSITS,
     MINERAL_COMPOUNDS,
     MINERALS,
-    RESOURCE_IMPORTANCE,
+    RESOURCE_IMPORTANCE, ResourcesManager,
 } from 'resourceManagement/ResourcesManager';
-import { log } from 'console/log';
 
 export const STORAGE_ENERGY_BOTTOM = 10e3;
 export const STORAGE_ENERGY = 400e3;
@@ -67,7 +66,7 @@ export class BeeManager extends Bee {
                 }
             }
 
-            if(!this.nowFunc) {
+            if (!this.nowFunc) {
                 const functions = [this.runLink, this.runManageStock, this.runConsumeExtra];
 
                 functions.forEach(func => {
@@ -151,7 +150,7 @@ export class BeeManager extends Bee {
     }
 
     private runConsumeExtra(): boolean {
-        if(Game.time % 20 == 0 && !this.nowFunc) return false;
+        if (Game.time % 20 == 0 && !this.nowFunc) return false;
         if (this.storage.store.getUsedCapacity() < STORAGE_FULL_LINE
             && this.terminal.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
         return RESOURCE_IMPORTANCE.some(type => {
@@ -161,7 +160,7 @@ export class BeeManager extends Bee {
             }
 
             if (this.storage.store.getUsedCapacity() > STORAGE_FULL_LINE) {
-                const storageLimit = this.getResourceLimit(type, 'storage');
+                const storageLimit = ResourcesManager.getResourceLimit(type, 'storage');
                 if (this.storage.store.getUsedCapacity(type) > storageLimit) {
                     this.get(this.storage, type, storageLimit - this.storage.store.getUsedCapacity(type));
                     return true;
@@ -170,7 +169,7 @@ export class BeeManager extends Bee {
 
             if (!this.terminal) return false;
             if (this.terminal.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
-            const terminalLimit = this.getResourceLimit(type, 'terminal');
+            const terminalLimit = ResourcesManager.getResourceLimit(type, 'terminal');
             if (this.terminal.store.getUsedCapacity(type) > terminalLimit) {
                 this.get(this.terminal, type, terminalLimit - this.terminal.store.getUsedCapacity(type));
                 return true;
@@ -180,51 +179,8 @@ export class BeeManager extends Bee {
         });
     }
 
-    private resourceLimitCache: { [resource: string]: number } = {};
-
-    private getResourceLimit(resource: ResourceConstant, container: 'terminal' | 'storage'): number {
-        if (this.resourceLimitCache[`${resource}_${container}`])
-            return this.resourceLimitCache[`${resource}_${container}`];
-
-        let limit = 0;
-
-        if (resource == RESOURCE_ENERGY) {
-            if (container == 'storage') limit = STORAGE_ENERGY;
-            else limit = TERMINAL_ENERGY + TERMINAL_ENERGY_FLOAT;
-        } else if (resource == RESOURCE_POWER) {
-            if (container == 'terminal') limit = TERMINAL_POWER;
-            else limit = 0;
-        } else if (resource == RESOURCE_OPS) {
-            if (container == 'storage') limit = STORAGE_OPS;
-            else limit = 0;
-        } else if (_.contains(MINERALS, resource)) {
-            if (container == 'storage') limit = STORAGE_MINERAL;
-            else limit = TERMINAL_MINERAL;
-        } else if (_.contains(MINERAL_COMPOUNDS, resource)) {
-            if (container == 'terminal') limit = TERMINAL_COMPOUND;
-            else if (resource == RESOURCE_HYDROXIDE || resource == RESOURCE_ZYNTHIUM_KEANITE
-                || resource == RESOURCE_UTRIUM_LEMERGITE)
-                limit = 0;
-            else limit = STORAGE_COMPOUND;
-        } else if (_.contains(COMPRESSED_COMMODITIES, resource)) {
-            if (container == 'storage') limit = STORAGE_COMPRESSED_COMMODITIES;
-            else limit = 0;
-        } else if (_.contains(COMMODITIES_LEVEL_ZERO, resource)) {
-            if (container == 'terminal') limit = TERMINAL_COMMODITY_ZERO;
-            else limit = 0;
-        } else if (_.contains(COMMODITIES_WITHOUT_COMPRESSED, resource)) {
-            if (container == 'terminal') limit = TERMINAL_COMMODITY;
-            else limit = 0;
-        } else if (_.contains(DEPOSITS, resource)) {
-            if (container == 'terminal') limit = TERMINAL_DEPOSIT;
-            else limit = 0;
-        }
-
-        return this.resourceLimitCache[`${resource}_${container}`] = limit;
-    }
-
     private runManageStock(): boolean {
-        if(Game.time % 10 == 0 && !this.nowFunc) return false;
+        if (Game.time % 10 == 0 && !this.nowFunc) return false;
         if (!this.terminal) return false;
 
         let code = [RESOURCE_ENERGY, ...MINERALS].some(type => {
@@ -240,14 +196,14 @@ export class BeeManager extends Bee {
                 if (this.terminal.isFull) return false;
                 if (storageStored > bottom) {
                     this.setTask(this.storage, this.terminal,
-                        Math.min(min - terminalStored, storageStored - bottom));
+                        Math.min(min - terminalStored, storageStored - bottom), type);
                     return true;
                 }
             }
 
             if (terminalStored > max) {
                 if (this.storage.isFull) return false;
-                this.setTask(this.terminal, this.storage, terminalStored - max);
+                this.setTask(this.terminal, this.storage, terminalStored - max, type);
                 return true;
             }
 
@@ -260,7 +216,7 @@ export class BeeManager extends Bee {
             if (amount < TERMINAL_COMPOUND) {
                 if (this.terminal.isFull) return false;
                 if (!this.storage.store.getUsedCapacity(type)) return false;
-                this.setTask(this.storage, this.terminal, TERMINAL_COMPOUND - amount);
+                this.setTask(this.storage, this.terminal, TERMINAL_COMPOUND - amount, type);
                 return true;
             }
 
@@ -268,7 +224,7 @@ export class BeeManager extends Bee {
                 if (type == RESOURCE_HYDROXIDE || type == RESOURCE_ZYNTHIUM_KEANITE
                     || type == RESOURCE_UTRIUM_LEMERGITE) return false;
                 if (this.storage.isFull) return false;
-                this.setTask(this.terminal, this.storage, amount - TERMINAL_COMPOUND);
+                this.setTask(this.terminal, this.storage, amount - TERMINAL_COMPOUND, type);
                 return true;
             }
 

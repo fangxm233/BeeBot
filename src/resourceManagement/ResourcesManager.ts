@@ -5,6 +5,14 @@ import { profile } from 'profiler/decorator';
 import { withdrawTargetType } from 'tasks/instances/task_withdraw';
 import { Task } from 'tasks/Task';
 import { Tasks } from 'tasks/Tasks';
+import {
+    STORAGE_COMPOUND, STORAGE_COMPRESSED_COMMODITIES,
+    STORAGE_ENERGY, STORAGE_MINERAL,
+    STORAGE_OPS, TERMINAL_COMMODITY, TERMINAL_COMMODITY_ZERO, TERMINAL_COMPOUND, TERMINAL_DEPOSIT,
+    TERMINAL_ENERGY,
+    TERMINAL_ENERGY_FLOAT, TERMINAL_MINERAL,
+    TERMINAL_POWER,
+} from 'Bee/instances/manager';
 
 export const COMMODITIES = [
     RESOURCE_UTRIUM_BAR,
@@ -176,6 +184,48 @@ export const RESOURCE_IMPORTANCE: ResourceConstant[] = [
 @profile
 export class ResourcesManager {
 
+    private static resourceLimitCache: { [resource: string]: number } = {};
+
+    public static getResourceLimit(resource: ResourceConstant, container: 'terminal' | 'storage'): number {
+        if (this.resourceLimitCache[`${resource}_${container}`])
+            return this.resourceLimitCache[`${resource}_${container}`];
+
+        let limit = 0;
+
+        if (resource == RESOURCE_ENERGY) {
+            if (container == 'storage') limit = STORAGE_ENERGY;
+            else limit = TERMINAL_ENERGY + TERMINAL_ENERGY_FLOAT;
+        } else if (resource == RESOURCE_POWER) {
+            if (container == 'terminal') limit = TERMINAL_POWER;
+            else limit = 0;
+        } else if (resource == RESOURCE_OPS) {
+            if (container == 'storage') limit = STORAGE_OPS;
+            else limit = 0;
+        } else if (_.contains(MINERALS, resource)) {
+            if (container == 'storage') limit = STORAGE_MINERAL;
+            else limit = TERMINAL_MINERAL;
+        } else if (_.contains(MINERAL_COMPOUNDS, resource)) {
+            if (container == 'terminal') limit = TERMINAL_COMPOUND;
+            else if (resource == RESOURCE_HYDROXIDE || resource == RESOURCE_ZYNTHIUM_KEANITE
+                || resource == RESOURCE_UTRIUM_LEMERGITE)
+                limit = 0;
+            else limit = STORAGE_COMPOUND;
+        } else if (_.contains(COMPRESSED_COMMODITIES, resource)) {
+            if (container == 'storage') limit = STORAGE_COMPRESSED_COMMODITIES;
+            else limit = 0;
+        } else if (_.contains(COMMODITIES_LEVEL_ZERO, resource)) {
+            if (container == 'terminal') limit = TERMINAL_COMMODITY_ZERO;
+            else limit = 0;
+        } else if (_.contains(COMMODITIES_WITHOUT_COMPRESSED, resource)) {
+            if (container == 'terminal') limit = TERMINAL_COMMODITY;
+            else limit = 0;
+        } else if (_.contains(DEPOSITS, resource)) {
+            if (container == 'terminal') limit = TERMINAL_DEPOSIT;
+            else limit = 0;
+        }
+
+        return this.resourceLimitCache[`${resource}_${container}`] = limit;
+    }
 
     public static getEnergySource(bee: Bee, isFiller: boolean, minAmount?: number): Task | null {
         const early = BeeBot.getColonyStage(bee.room.name) == 'early';
