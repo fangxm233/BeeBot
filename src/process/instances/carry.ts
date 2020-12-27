@@ -1,13 +1,12 @@
-import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { BeeCarrier } from "Bee/instances/carrier";
-import { BeeSetup } from "beeSpawning/BeeSetup";
-import { setups } from "beeSpawning/setups";
-import { WishManager } from "beeSpawning/WishManager";
-import { ROLE_CARRIER } from "declarations/constantsExport";
-import { PROCESS_CARRY } from "declarations/constantsExport";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
-import { coordToRoomPosition } from "utilities/helpers";
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { BeeCarrier } from 'Bee/instances/carrier';
+import { BeeSetup } from 'beeSpawning/BeeSetup';
+import { setups } from 'beeSpawning/setups';
+import { WishManager } from 'beeSpawning/WishManager';
+import { PROCESS_CARRY, ROLE_CARRIER } from 'declarations/constantsExport';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
+import { coordToRoomPosition } from 'utilities/helpers';
 
 @profile
 export class ProcessCarry extends Process {
@@ -47,10 +46,10 @@ export class ProcessCarry extends Process {
         this.judgeCount();
         this.wishManager.clear();
 
-        this.wishManager.arrangeCyclingBees(ROLE_CARRIER, this.setup, Infinity, ['i']);
+        this.wishManager.arrangeCyclingBees(ROLE_CARRIER, this.setup, Infinity, ['i', 'pos', 'type']);
         this.poses.forEach((pos, i) => {
             if (_.find(this.bees[ROLE_CARRIER], (bee: BeeCarrier) => bee.memory.i == i)) return;
-            this.wishManager.wishBee({ setup: this.setup, extraMemory: { i } });
+            this.wishManager.wishBee({ setup: this.setup, extraMemory: { i, pos, type: RESOURCE_ENERGY } });
         });
     }
 

@@ -11,4 +11,5 @@ declare type ALL_ROLES =
     | 'claimer'
     | 'deInvader'
     | 'deInvaderCore'
-    | 'dismantler';
+    | 'dismantler'
+    | 'drone';

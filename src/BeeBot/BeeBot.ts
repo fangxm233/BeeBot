@@ -1,10 +1,15 @@
 import { BaseConstructor } from 'basePlanner/BaseConstructor';
 import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { PriorityManager } from 'beeSpawning/PriorityManager';
+import { log } from 'console/log';
+import { Intel } from 'dataManagement/Intel';
 import {
     PROCESS_BASE_WORK,
-    PROCESS_CARRY, PROCESS_DEFEND_INVADER, PROCESS_DEFEND_INVADER_CORE,
-    PROCESS_FILLING,
+    PROCESS_CARRY,
+    PROCESS_DEFEND_INVADER,
+    PROCESS_DEFEND_INVADER_CORE,
+    PROCESS_DEFEND_NUKE,
+    PROCESS_FILLING, PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
     PROCESS_TOWER,
@@ -16,6 +21,7 @@ import { ProcessCarry } from 'process/instances/carry';
 import { ProcessColonize } from 'process/instances/colonize';
 import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
+import { ProcessDefendNuke } from 'process/instances/defendNuke';
 import { ProcessFilling } from 'process/instances/filling';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessRepair } from 'process/instances/repair';
@@ -26,8 +32,8 @@ import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
 import { hasAggressiveParts } from 'utilities/helpers';
-import { getAllColonyRooms } from 'utilities/utils';
-import { Intel } from 'dataManagement/Intel';
+import { getAllColonyRooms, printRoomName } from 'utilities/utils';
+import { ProcessMineMineral } from 'process/instances/mineMineral';
 
 const EARLY_OUTPOST_DEPTH = 1;
 
@@ -58,6 +64,8 @@ export class BeeBot {
                 this.onColonyStageUpgrade(roomName, stage);
             if (arg.type == STRUCTURE_TOWER && !Process.getProcess<ProcessTower>(roomName, PROCESS_TOWER))
                 Process.startProcess(new ProcessTower(roomName));
+            if(arg.type == STRUCTURE_EXTRACTOR && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
+                Process.startProcess(new ProcessMineMineral(roomName));
         });
         clock.addAction(100, () => this.routineCheck(roomName));
         clock.addAction(10, () => this.checkOutpostInvaders(roomName));
@@ -68,7 +76,7 @@ export class BeeBot {
         if (_.contains(Memory.beebot.outposts[from], to)) return;
         Memory.beebot.outposts[from].push(to);
         const mineSource = Process.getProcess<ProcessMineSource>(from, PROCESS_MINE_SOURCE, 'target', to);
-        if(mineSource?.earlyOutpost) mineSource.setEarly(false);
+        if (mineSource?.earlyOutpost) mineSource.setEarly(false);
         if (!mineSource) Process.startProcess(new ProcessMineSource(from, to));
         if (!Process.getProcess<ProcessMineSource>(from, PROCESS_RESERVING, 'target', to))
             Process.startProcess(new ProcessReserving(from, to));
@@ -86,6 +94,9 @@ export class BeeBot {
         Process.getProcess<ProcessMineSource>(from, PROCESS_MINE_SOURCE, 'target', to)?.close();
         Process.getProcess<ProcessReserving>(from, PROCESS_RESERVING, 'target', to)?.close();
         Process.getProcess<ProcessCarry>(from, PROCESS_CARRY, 'target', to)?.close();
+        Process.getProcess<ProcessDefendInvader>(from, PROCESS_DEFEND_INVADER, 'target', to)?.close();
+        Process.getProcess<ProcessDefendInvaderCore>(from, PROCESS_DEFEND_INVADER_CORE, 'target', to)?.close();
+        _.forEach(Game.constructionSites, site => site.pos.roomName == to && site.remove());
         RoomPlanner.removeRoomData(to);
     }
 
@@ -120,7 +131,7 @@ export class BeeBot {
     public static cancelEarlyOutposts(roomName: string) {
         this.getEarlyOutposts(roomName).forEach(room => {
             const process = Process.getProcess<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE, 'target', room);
-            if(!process?.earlyOutpost) return;
+            if (!process?.earlyOutpost) return;
             process.close();
         });
     }
@@ -162,6 +173,24 @@ export class BeeBot {
         if (!room) return;
         if (!Process.getProcess<ProcessTower>(roomName, PROCESS_TOWER) && room.towers.length)
             Process.startProcess(new ProcessTower(roomName));
+        if(room.extractor && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
+            Process.startProcess(new ProcessMineMineral(roomName));
+
+        if (room.find(FIND_NUKES).length) {
+            if (!Process.getProcess<ProcessDefendNuke>(roomName, PROCESS_DEFEND_NUKE)) {
+                Process.startProcess(new ProcessDefendNuke(roomName));
+                const message = `Nuke detected!
+                room: ${roomName}
+                nukes: ${JSON.stringify(room.find(FIND_NUKES).map(
+                    nuke => ({
+                        pos: nuke.pos.print,
+                        launcher: printRoomName(nuke.launchRoomName),
+                        timeToLand: nuke.timeToLand,
+                    })))}`;
+                Game.notify(message);
+                log.warning(message);
+            }
+        }
     }
 
     private static judgeColonyStage(roomName: string): ColonyStage {
@@ -190,36 +219,43 @@ export class BeeBot {
     private static checkForSafeMode(room: Room) {
         const data = RoomPlanner.getRoomData(room.name);
         if (!data) return;
-        const danger = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep))
-            .filter(creep => creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
-            || creep.pos.inRangeTo(room.controller!, 1))
-            .filter(creep => creep.owner.username != 'Invader');
 
-        if (danger.length) {
+        const dangerHostiles = room.find(FIND_HOSTILE_CREEPS)
+            .filter(creep => hasAggressiveParts(creep, true)
+                && creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8));
+        const nearbyClaims = room.find(FIND_HOSTILE_CREEPS).filter(creep => creep.bodyCounts[CLAIM]
+            && creep.pos.isNearTo(room.controller!));
+
+        if (nearbyClaims.length || dangerHostiles.length) {
+            const danger = [...dangerHostiles, ...nearbyClaims];
             const code = room.controller!.activateSafeMode();
-            if(code === OK) Game.notify(`Room ${room.name} is under attacking! SafeMode activated.
+            const message = `Room ${room.name} is under attacking! SafeMode activated.
             tick: ${Game.time} owner: ${JSON.stringify(danger.map(creep => creep.owner.username))} 
-            part: ${JSON.stringify(danger.map(creep => creep.bodyCounts))}`);
+            part: ${JSON.stringify(danger.map(creep => creep.bodyCounts))}`;
+            if (code === OK) {
+                Game.notify(message);
+                log.warning(message);
+            }
         }
     }
 
     private static checkOutpostInvaders(roomName: string) {
         const outposts = Memory.beebot.outposts[roomName];
-        if(!outposts?.length) return;
+        if (!outposts?.length) return;
         outposts.forEach(outpost => {
             const room = Game.rooms[outpost];
-            if(!room) return;
-            if(room.invaderCore) {
+            if (!room) return;
+            if (room.invaderCore) {
                 const process = Process.getProcess<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE, 'target', outpost);
-                if(!process) Process.startProcess(new ProcessDefendInvaderCore(roomName, outpost));
+                if (!process) Process.startProcess(new ProcessDefendInvaderCore(roomName, outpost));
             }
 
             const invaders = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep, false));
-            if(invaders.length) {
+            if (invaders.length) {
                 const process = Process.getProcess<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER, 'target', outpost);
-                if(!process) Process.startProcess(new ProcessDefendInvader(roomName, outpost));
+                if (!process) Process.startProcess(new ProcessDefendInvader(roomName, outpost));
             }
-        })
+        });
     }
 }
 

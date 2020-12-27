@@ -7,6 +7,7 @@ import {
     PROCESS_DEFEND_NUKE,
     PROCESS_DISMANTLE,
     PROCESS_FILLING,
+    PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_REPAIR,
     PROCESS_RESERVING,
@@ -18,6 +19,7 @@ import {
     ROLE_DE_INVADER,
     ROLE_DE_INVADER_CORE,
     ROLE_DISMANTLER,
+    ROLE_DRONE,
     ROLE_FILLER,
     ROLE_MANAGER,
     ROLE_MINER,
@@ -31,6 +33,7 @@ import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { ProcessDefendNuke } from 'process/instances/defendNuke';
 import { ProcessDismantle } from 'process/instances/dismantle';
+import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessRepair } from 'process/instances/repair';
 import { ProcessBaseWork } from './instances/baseWork';
 import { ProcessCarry } from './instances/carry';
@@ -58,3 +61,4 @@ Process.registerProcess(PROCESS_DEFEND_INVADER, Bucket.level3, ProcessDefendInva
 Process.registerProcess(PROCESS_DEFEND_INVADER_CORE, Bucket.level3, ProcessDefendInvaderCore, 100, [ROLE_DE_INVADER_CORE]);
 Process.registerProcess(PROCESS_DISMANTLE, Bucket.level4, ProcessDismantle, 100, [ROLE_DISMANTLER]);
 Process.registerProcess(PROCESS_DEFEND_NUKE, Bucket.level2, ProcessDefendNuke, 100, [ROLE_WORKER]);
+Process.registerProcess(PROCESS_MINE_MINERAL, Bucket.level4, ProcessMineMineral, 100, [ROLE_DRONE, ROLE_CARRIER]);

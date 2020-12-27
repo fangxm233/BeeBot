@@ -21,7 +21,9 @@ type ProcessTypes = 'filling'
     | 'defend'
     | 'defendInvader'
     | 'defendInvaderCore'
-    | 'dismantle';
+    | 'dismantle'
+    | 'defendNuke'
+    | 'mineMineral';
 
 interface protoProcess {
     st: ShortProcessState;

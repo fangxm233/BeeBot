@@ -12,6 +12,7 @@ export const ROLE_DEFENDER = 'defender'
 export const ROLE_DE_INVADER = 'deInvader';
 export const ROLE_DE_INVADER_CORE = 'deInvaderCore';
 export const ROLE_DISMANTLER = 'dismantler'
+export const ROLE_DRONE = 'drone';
 
 export const PROCESS_FILLING = 'filling';
 export const PROCESS_MINE_SOURCE = 'mineSource';
@@ -28,3 +29,5 @@ export const PROCESS_DEFEND = 'defend';
 export const PROCESS_DEFEND_INVADER = 'defendInvader';
 export const PROCESS_DEFEND_INVADER_CORE = 'defendInvaderCore';
 export const PROCESS_DISMANTLE = 'dismantle';
+export const PROCESS_DEFEND_NUKE = 'defendNuke';
+export const PROCESS_MINE_MINERAL = 'mineMineral';

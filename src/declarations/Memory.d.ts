@@ -38,7 +38,9 @@ type BeeFillerMemory = CreepMemory & {
 }
 
 type BeeCarrierMemory = CreepMemory & {
-    i: number;
+    i: number,
+    pos: RoomPosition,
+    type: ResourceConstant,
 }
 
 type BeeMinerMemory = CreepMemory & {
