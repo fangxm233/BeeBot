@@ -1,4 +1,5 @@
 import { Bee, bees } from 'Bee/Bee';
+import { BeeFactorty } from 'Bee/BeeFactory';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { WishManager } from 'beeSpawning/WishManager';
 import { log } from 'console/log';
@@ -202,6 +203,20 @@ export class Process {
         log.debug(this.roomName, this.processName, this.id, 'remove', beeName);
     }
 
+    public passBee(newRole: ALL_ROLES, beeName: string, process: Process) {
+        if (!process) return;
+        if (!_.find(this.bees, bees => bees.find(bee => bee.name == beeName))) return;
+        this.removeBee(beeName);
+        bees[beeName] = BeeFactorty.getInstance(newRole, process, beeName);
+        process.registerBee(bees[beeName], newRole);
+    }
+
+    public passBees(originRole: ALL_ROLES, newRole: ALL_ROLES, process: Process) {
+        if (!process) return;
+        const beeNames = this.bees[originRole].map(bee => bee.name);
+        beeNames.forEach(beeName => this.passBee(newRole, beeName, process));
+    }
+
     public removeSubProcess(processId: string) {
         _.pull(this.subProcesses, processId);
         _.pull(this.memory.sp, processId);
@@ -235,7 +250,7 @@ export class Process {
 
     public sleep(targetTime: number) {
         if (targetTime < Game.time) {
-            if(this.state == STATE_SLEEPING) this.awake();
+            if (this.state == STATE_SLEEPING) this.awake();
             return;
         }
         this.state = STATE_SLEEPING;
@@ -265,7 +280,11 @@ export class Process {
         Process.processesByType[this.processName][this.fullId] = undefined as any;
         this.closed = true;
 
-        if (killAllCreep) _.forEach(this.bees, (bees, role) => this.foreachBee(role!, bee => bee.suicide()));
+        if (killAllCreep) _.forEach(this.bees,
+            (bees, role) => this.foreachBee(role!, bee => {
+                if (bee.spawning) _.find(Game.spawns, spawn => spawn.spawning?.name == bee.name)?.spawning?.cancel();
+                else bee.suicide();
+            }));
         if (this.subProcesses.length) this.subProcesses.map(
             id => Process.getProcess<Process>(id)).forEach(p => p && p.close(killAllCreep));
 
@@ -310,4 +329,5 @@ export class Process {
         this.memory.sp.push(processId);
     }
 }
+
 (global as any).Process = Process;
