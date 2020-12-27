@@ -92,11 +92,7 @@ export class ProcessColonize extends Process {
     public spawnCompleted() {
         BeeBot.initializeColony(this.roomName);
         const baseWork = Process.getProcess<ProcessBaseWork>(this.roomName, PROCESS_BASE_WORK);
-        if (baseWork) this.foreachBee(ROLE_PIONEER, bee => {
-            this.removeBee(bee.name);
-            bees[bee.name] = BeeFactorty.getInstance(ROLE_WORKER, baseWork, bee.name);
-            baseWork.registerBee(bees[bee.name], ROLE_WORKER);
-        });
+        if (baseWork) this.passBees(ROLE_PIONEER, ROLE_WORKER, baseWork);
         this.close();
     }
 }
