@@ -11,6 +11,7 @@ export const MAP_WALL = 255;
 export const MAP_ON = 1;
 
 const NUKE_BARRIER_CACHE_EXPIRATION = 50;
+const NUKE_EXT_RESERVE_COUNT = 48;
 const CONTROLLER_BARRIER_MULTIPLY = 10;
 
 const BARRIER_HITS_TARGET = {
@@ -20,8 +21,8 @@ const BARRIER_HITS_TARGET = {
     4: 5e4,
     6: 1e5,
     7: 1e6,
-    8: 6e6
-}
+    8: 6e6,
+};
 
 @profile
 export class BarrierPlanner {
@@ -65,6 +66,7 @@ export class BarrierPlanner {
         room.find(FIND_EXIT).forEach(pos => this.BFS(this.barrierMap, pos.x, pos.y, MAP_OUTSIDE));
         this.optimizeRamparts(this.barrierMap);
         this.coverDangerousBaseBuildings(this.barrierMap);
+        this.coverNukeBarriers(this.barrierMap);
 
         this.barrier.forEach(structure => new RoomVisual(this.roomName).structure(structure.x, structure.y, STRUCTURE_RAMPART));
         return this.barrier;
@@ -77,10 +79,18 @@ export class BarrierPlanner {
 
     public getBarrierHitsTarget(pos: RoomPosition): number {
         const room = Game.rooms[this.roomName];
-        if(!room) return 0;
-        if(pos.isNearTo(room.controller!))
-            return BARRIER_HITS_TARGET[room.controller!.level!] * CONTROLLER_BARRIER_MULTIPLY;
-        return BARRIER_HITS_TARGET[room.controller!.level!];
+        if (!room) return 0;
+        let targetHits = BARRIER_HITS_TARGET[room.controller!.level];
+
+        if (pos.isNearTo(room.controller!))
+            targetHits += BARRIER_HITS_TARGET[room.controller!.level!] * (CONTROLLER_BARRIER_MULTIPLY - 1);
+
+        const nukes = pos.findInRange(FIND_NUKES, 3);
+        const centerNukes = pos.lookFor(LOOK_NUKES);
+        targetHits += nukes.length * 5e6;
+        targetHits += centerNukes.length * 5e6;
+
+        return targetHits;
     }
 
     public getNukeBarriers(): RoomPosition[] {
@@ -110,7 +120,7 @@ export class BarrierPlanner {
                         }
 
                         if (structures[STRUCTURE_EXTENSION]) {
-                            if (extensionCount <= 48) {
+                            if (extensionCount <= NUKE_EXT_RESERVE_COUNT) {
                                 nukeBarriers.push(new RoomPosition(x, y, this.roomName));
                             } else extensionCount--;
                         }
@@ -118,9 +128,9 @@ export class BarrierPlanner {
                 }
             });
 
-            return nukeBarriers;
+            return this.nukeBarrier = nukeBarriers;
         }
-        return [];
+        return this.nukeBarrier = [];
     }
 
     private copyWallsToMap(map: CostMatrix) {
@@ -160,7 +170,7 @@ export class BarrierPlanner {
     }
 
     private setMap(map: CostMatrix, x: number, y: number, value: number) {
-        if(map.get(x, y) == MAP_WALL) return;
+        if (map.get(x, y) == MAP_WALL) return;
         if (map.get(x, y) == MAP_ON) {
             if (value == MAP_ON) return;
             _.remove(this.barrier, coord => coord.x == x && coord.y == y);
@@ -256,5 +266,9 @@ export class BarrierPlanner {
             if (map.get(x + ox, y + 2) == MAP_OUTSIDE) return true;
         }
         return false;
+    }
+
+    private coverNukeBarriers(map: CostMatrix) {
+
     }
 }

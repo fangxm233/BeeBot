@@ -35,6 +35,9 @@ export const ROAD_CONSTRUCT_RCL = 4;
 export const CONTAINER_CONSTRUCT_RCL = 4;
 export const RAMPART_CONSTRUCT_RCL = 3;
 
+export const SAFE_CONSTRUCT_ENERGY_LINE = 200e3;
+export const NEED_SAFE_CONSTRUCT_COST = 10e3;
+
 @profile
 export class BaseConstructor {
     private static constructors: { [roomName: string]: BaseConstructor } = {};
@@ -43,7 +46,6 @@ export class BaseConstructor {
     private roomName: string;
     private base: Coord;
     private filteredExtConstructingOrder: RoomPosition[];
-    private finishedRcl: number = 0;
 
     constructor(roomName: string) {
         if (!BeeBot.colonies().find(room => room.name == roomName)) {
@@ -77,7 +79,7 @@ export class BaseConstructor {
         // 等待RoomData更新
         event.addEventListener('onRclUpgrade',
             () => timer.callBackAtTick(timeAfterTick(1), () => this.constructBuildings()));
-        clock.addAction(100, () => this.constructBuildings());
+        clock.addAction(100, () => this.constructBuildings()); // TODO: 在建筑消失的时候放建筑点
     }
 
     public static get(roomName: string): BaseConstructor {
@@ -92,12 +94,6 @@ export class BaseConstructor {
         if (room.constructionSites.length) return;
 
         const rcl = controller.level;
-        if (this.finishedRcl < rcl) {
-            for (let i = this.finishedRcl + 1; i <= rcl; i++) {
-                if (this.finishedBuildingsAtRcl(i)) this.finishedRcl = i;
-            }
-        } else if (!this.finishedBuildingsAtRcl(rcl)) this.finishedRcl--;
-        if (this.finishedRcl == rcl) return;
 
         const checkAndConstructMissing = (coords: Coord[] | RoomPosition[],
                                           type: StructureConstant, transform: boolean) => {
@@ -142,8 +138,11 @@ export class BaseConstructor {
                 continue;
             }
 
-            const missing = checkAndConstructMissing(layout[type], type, true);
-            if (missing) return;
+            if (CONSTRUCTION_COST[type] < NEED_SAFE_CONSTRUCT_COST
+                || (room.storage?.store.energy || 0) > SAFE_CONSTRUCT_ENERGY_LINE) {
+                const missing = checkAndConstructMissing(layout[type], type, true);
+                if (missing) return;
+            }
 
             if (type == STRUCTURE_CONTAINER && rcl >= CONTAINER_CONSTRUCT_RCL) {
                 const coords = [
@@ -188,6 +187,12 @@ export class BaseConstructor {
                     coord => coordToRoomPosition(coord, outpost)), STRUCTURE_CONTAINER, false);
             }
         });
+    }
+
+    public constructNukeBarriers() {
+        const barriers = BarrierPlanner.get(this.roomName).getNukeBarriers();
+        const missing = this.checkMissingBuildings(STRUCTURE_RAMPART, barriers);
+        if (missing.length) this.createConstructionSites(STRUCTURE_RAMPART, barriers);
     }
 
     private checkMissingBuildings(type: StructureConstant, coords: Coord[], transform: boolean): Coord[];
@@ -255,27 +260,6 @@ export class BaseConstructor {
             }
             return false;
         }
-        return true;
-    }
-
-    private finishedBuildingsAtRcl(rcl: number): boolean {
-        const layout = structureLayout[rcl].buildings;
-        for (const type in layout) {
-            if (type == STRUCTURE_EXTENSION) continue;
-            const coords = layout[type];
-            for (const coord of coords) {
-                const structure = this.getForAt(type as StructureConstant,
-                    this.base.x + coord.x, this.base.y + coord.y) as any;
-                if (!structure || !structure.owner || structure.owner.username == USER_NAME) return false;
-            }
-        }
-
-        const count = Math.min(CONTROLLER_STRUCTURES.extension[rcl], this.filteredExtConstructingOrder.length);
-        for (let i = 0; i < count; i++) {
-            const structure = this.filteredExtConstructingOrder[i].lookForStructure(STRUCTURE_EXTENSION);
-            if (!structure || structure.owner.username != USER_NAME) return false;
-        }
-
         return true;
     }
 
