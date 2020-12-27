@@ -20,8 +20,8 @@ export class BeePioneer extends Bee {
                 const controller = this.room.controller!;
                 if (!controller.my) return;
                 if (!this.store.energy) {
-                    const source = this.room.sources.filter(source =>
-                        source.targetedBy.length < source.pos.availableNeighbors(true, false).length)[0];
+                    const source = this.pos.findClosestByPath(this.room.sources.filter(source =>
+                        source.targetedBy.length < source.pos.availableNeighbors(true, false).length));
                     if (source) this.task = Tasks.harvest(source);
                 } else {
                     if(controller.level < 2) this.task = Tasks.upgrade(controller);
