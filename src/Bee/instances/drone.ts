@@ -20,6 +20,8 @@ export class BeeDrone extends Bee {
             return;
         }
 
+        if(this.room.extractor?.cooldown) return;
+
         const container = this.pos.lookForStructure(STRUCTURE_CONTAINER);
         if (!container) return;
         if (!container.store.getFreeCapacity()) return;
