@@ -15,6 +15,13 @@ interface Memory {
             [roomName: string]: protoProcess[];
         };
     }
+    settings: {
+        log: {
+            level: number,
+            showSource: boolean,
+            showTick: boolean,
+        }
+    }
 }
 
 interface RoomMemory {

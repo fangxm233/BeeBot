@@ -13,7 +13,7 @@ export enum LogLevels {
 /**
  * Default debug level for log output
  */
-export const LOG_LEVEL: number = LogLevels.DEBUG;
+export const LOG_LEVEL: number = LogLevels.INFO;
 
 /**
  * Prepend log output with current tick number.
@@ -134,7 +134,7 @@ export class Log {
 	}
 
 	get level(): number {
-		return LOG_LEVEL;
+		return Memory.settings.log.level;
 	}
 
 	public setLogLevel(value: number) {
@@ -161,26 +161,26 @@ export class Log {
 				changeValue = false;
 				break;
 		}
-		// if (changeValue) {
-		// 	Memory.settings.log.level = value;
-		// }
+		if (changeValue) {
+			Memory.settings.log.level = value;
+		}
 	}
 
 	get showSource(): boolean {
-		return LOG_LOAD_SOURCE_MAP;
+		return Memory.settings.log.showSource;
 	}
 
-	// set showSource(value: boolean) {
-	// 	Memory.settings.log.showSource = value;
-	// }
+	set showSource(value: boolean) {
+		Memory.settings.log.showSource = value;
+	}
 
 	get showTick(): boolean {
-		return LOG_PRINT_TICK;
+		return Memory.settings.log.showTick;
 	}
 
-	// set showTick(value: boolean) {
-	// 	Memory.settings.log.showTick = value;
-	// }
+	set showTick(value: boolean) {
+		Memory.settings.log.showTick = value;
+	}
 
 	private _maxFileString: number = 0;
 
