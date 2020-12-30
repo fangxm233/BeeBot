@@ -32,7 +32,7 @@ export class ProcessMineMineral extends Process { // TODO: 将运输分离出来
             return;
         }
 
-        if (!mineral.mineralAmount) {
+        if (mineral.ticksToRegeneration > 150) {
             this.sleep(timeAfterTick(mineral.ticksToRegeneration - 150));
             return;
         }
