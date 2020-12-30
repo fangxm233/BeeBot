@@ -79,14 +79,14 @@ export class ProcessTower extends Process {
             if (creep.pos.isEdge) return false;
             const towerDamage = possibleTowerDamage(room, creep.pos);
             if (creep instanceof PowerCreep) {
-                const damage = possibleDamage([], creep.pos, false, USER_NAME, true, towerDamage);
+                const damage = possibleDamage([], creep.pos, USER_NAME, creep.owner.username, true, towerDamage);
                 if (damage < 0) return false;
                 if (!creep.powers[PWR_SHIELD]) return true;
                 const power = creep.powers[PWR_SHIELD];
                 const shield = POWER_INFO[PWR_SHIELD].effect[power.level] / POWER_INFO[PWR_SHIELD].cooldown;
                 return shield < damage;
             }
-            return possibleDamage(creep.body, creep.pos, false, USER_NAME, true, towerDamage)
+            return possibleDamage(creep.body, creep.pos, USER_NAME, creep.owner.username, true, towerDamage)
                 * creep.pos.rangeToEdge >= creep.hitsMax - creep.hits;
         });
 
@@ -155,7 +155,7 @@ export class ProcessTower extends Process {
 
         this.repairList = [...this.regularRepairList, ...room.find(FIND_MY_STRUCTURES).map(s => s.id)];
         this.regularRepairList.push(...room.ramparts.map(ram => ram.id));
-        
+
         return true;
     }
 

@@ -106,10 +106,10 @@ export function hitsOnTough(body: BodyPartDefinition[], damage: number): number 
     return hits + damageRemain;
 }
 
-export function possibleDamage(body: BodyPartDefinition[], pos: RoomPosition, my: boolean,
-                               username: string, heal?: boolean, towerDamage?: number, risk?: boolean): number {
+export function possibleDamage(body: BodyPartDefinition[], pos: RoomPosition, username: string,
+                               ownerName: string, heal?: boolean, towerDamage?: number, risk?: boolean): number {
     const attackers = pos.findInRange(FIND_CREEPS, risk ? 50 : 3, {
-        filter: creep => creep.owner.username != username
+        filter: creep => (username == ownerName ? creep.owner.username != username : creep.owner.username == ownerName)
             && (creep.bodyCounts[ATTACK] || creep.bodyCounts[RANGED_ATTACK]),
     });
 
@@ -119,16 +119,15 @@ export function possibleDamage(body: BodyPartDefinition[], pos: RoomPosition, my
     let possibleHeal = 0;
     if (heal) {
         const healers = pos.findInRange(FIND_CREEPS, 3, {
-            filter: creep => (my ? creep.owner.username == username : creep.owner.username != username)
-                && creep.bodyCounts[HEAL],
+            filter: creep => creep.owner.username == ownerName && !!creep.bodyCounts[HEAL],
         });
-        possibleHeal = (my ? 1 : -1) * possibleHealHits(pos, healers);
+        possibleHeal = possibleHealHits(pos, healers);
     }
 
-    return possibleDamage + possibleHeal;
+    return possibleDamage - possibleHeal;
 }
 
-export function wouldBreakDefend(body: BodyPartDefinition[], pos: RoomPosition, my: boolean,
-                                 username: string, towerDamage?: number, risk?: boolean): boolean {
-    return possibleDamage(body, pos, my, username, true, towerDamage, risk) > 0;
+export function wouldBreakDefend(body: BodyPartDefinition[], pos: RoomPosition, username: string,
+                                 ownerName: string, heal?: boolean, towerDamage?: number, risk?: boolean): boolean {
+    return possibleDamage(body, pos, username, ownerName, true, towerDamage, risk) > 0;
 }
