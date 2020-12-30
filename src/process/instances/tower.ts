@@ -1,12 +1,12 @@
-import { BaseConstructor } from "basePlanner/BaseConstructor";
-import { RoomPlanner } from "basePlanner/RoomPlanner";
-import { structureLayout } from "basePlanner/structurePreset";
-import { USER_NAME } from "config";
-import { PROCESS_FILLING, PROCESS_TOWER } from "declarations/constantsExport";
-import { Process } from "process/Process";
-import { possibleDamage, possibleRepairPower, possibleTowerDamage, wouldBreakDefend } from "utilities/powerCalculation";
-import { ProcessFilling } from "./filling";
+import { BaseConstructor } from 'basePlanner/BaseConstructor';
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
+import { structureLayout } from 'basePlanner/structurePreset';
+import { USER_NAME } from 'config';
+import { PROCESS_FILLING, PROCESS_TOWER } from 'declarations/constantsExport';
 import { event } from 'event/Event';
+import { Process } from 'process/Process';
+import { possibleDamage, possibleRepairPower, possibleTowerDamage } from 'utilities/powerCalculation';
+import { ProcessFilling } from './filling';
 
 const REPAIR_RAMPART_LINE = 100;
 
@@ -29,11 +29,11 @@ export class ProcessTower extends Process {
         this.center = new RoomPosition(data.basePos!.x, data.basePos!.y, this.roomName);
 
         event.addEventListener('onBuildComplete', (arg: OnBuildCompleteArg) => {
-            if(arg.pos.roomName != this.roomName) return;
+            if (arg.pos.roomName != this.roomName) return;
             this.genLists();
-        })
+        });
 
-        return this.genLists();
+        return this.inited = this.genLists();
     }
 
     public static getInstance(proto: protoProcess, roomName: string) {
@@ -76,7 +76,7 @@ export class ProcessTower extends Process {
         const hostileCreeps = [...room.find(FIND_HOSTILE_CREEPS), ...room.find(FIND_HOSTILE_POWER_CREEPS)];
 
         const targets = hostileCreeps.filter(creep => {
-            if(creep.pos.isEdge) return false;
+            if (creep.pos.isEdge) return false;
             const towerDamage = possibleTowerDamage(room, creep.pos);
             if (creep instanceof PowerCreep) {
                 const damage = possibleDamage([], creep.pos, false, USER_NAME, true, towerDamage);
@@ -149,13 +149,13 @@ export class ProcessTower extends Process {
 
         let poses = _.flatten([data.controllerPath!, ...data.sourcesPath, data.mineralPath!].map(path => path.path));
         poses.push(...structureLayout[room.controller!.level].buildings[STRUCTURE_ROAD].map(
-            coord => new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, this.roomName)))
+            coord => new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, this.roomName)));
         poses = _.uniq(poses);
         this.regularRepairList.push(..._.map(poses, pos => baseConstructor.getForAt(STRUCTURE_ROAD, pos)?.id!));
 
         this.repairList = [...this.regularRepairList, ...room.find(FIND_MY_STRUCTURES).map(s => s.id)];
         this.regularRepairList.push(...room.ramparts.map(ram => ram.id));
-
+        
         return true;
     }
 
