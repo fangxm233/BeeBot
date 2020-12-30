@@ -1,4 +1,5 @@
 import { ITask } from 'tasks';
+import { TaskAttackController } from 'tasks/instances/task_attackController';
 import { attackTargetType, TaskAttack } from './instances/task_attack';
 import { buildTargetType, TaskBuild } from './instances/task_build';
 import { claimTargetType, TaskClaim } from './instances/task_claim';
@@ -22,7 +23,6 @@ import { TaskTransferAll, transferAllTargetType } from './instances/task_transfe
 import { TaskUpgrade, upgradeTargetType } from './instances/task_upgrade';
 import { TaskWithdraw, withdrawTargetType } from './instances/task_withdraw';
 import { TaskWithdrawAll, withdrawAllTargetType } from './instances/task_withdrawAll';
-import { TaskAttackController } from 'tasks/instances/task_attackController';
 
 export class Tasks {
 
