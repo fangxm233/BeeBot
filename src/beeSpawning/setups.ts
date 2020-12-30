@@ -141,7 +141,7 @@ export const setups = {
 
     [ROLE_CLAIMER]: {
         default: new BeeSetup(ROLE_CLAIMER, {
-            ratio: ['C1', 'm5'],
+            ratio: ['m5', 'C1'],
             maxSize: 1
         })
     },
