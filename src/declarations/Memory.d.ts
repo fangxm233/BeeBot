@@ -22,6 +22,13 @@ interface Memory {
             showTick: boolean,
         }
     }
+    transport: {
+        [roomName: string]: {
+            des: string,
+            type: ResourceConstant,
+            amount: number,
+        }
+    }
 }
 
 interface RoomMemory {

@@ -1,38 +1,23 @@
 import { Bee } from 'Bee/Bee';
+import { log } from 'console/log';
 import { StoreStructure } from 'declarations/typeGuards';
 import { profile } from 'profiler/decorator';
 import {
-    COMMODITIES_LEVEL_ZERO,
-    COMMODITIES_WITHOUT_COMPRESSED,
     COMPRESSED_COMMODITIES,
-    DEPOSITS,
     MINERAL_COMPOUNDS,
     MINERALS,
-    RESOURCE_IMPORTANCE, ResourcesManager,
+    RESOURCE_IMPORTANCE,
+    ResourcesManager,
+    STORAGE_ENERGY_BOTTOM,
+    STORAGE_FULL_LINE,
+    TERMINAL_COMPOUND,
+    TERMINAL_ENERGY,
+    TERMINAL_ENERGY_FLOAT,
+    TERMINAL_FULL_LINE,
+    TERMINAL_MINERAL,
+    TERMINAL_MINERAL_FLOAT,
 } from 'resourceManagement/ResourcesManager';
-
-export const STORAGE_ENERGY_BOTTOM = 10e3;
-export const STORAGE_ENERGY = 400e3;
-export const TERMINAL_ENERGY = 20e3;
-export const TERMINAL_ENERGY_FLOAT = 5e3;
-
-export const STORAGE_COMPOUND = 30e3;
-export const TERMINAL_COMPOUND = 3e3;
-
-export const STORAGE_MINERAL = 5e3;
-export const TERMINAL_MINERAL = 5e3;
-export const TERMINAL_MINERAL_FLOAT = 1e3;
-
-export const TERMINAL_POWER = 30e3;
-export const STORAGE_OPS = 30e3;
-
-export const STORAGE_COMPRESSED_COMMODITIES = 5e3;
-export const TERMINAL_COMMODITY_ZERO = 10e3;
-export const TERMINAL_COMMODITY = 500;
-export const TERMINAL_DEPOSIT = 10e3;
-
-export const TERMINAL_FULL_LINE = 295e3;
-export const STORAGE_FULL_LINE = 900e3;
+import { TerminalManager } from 'resourceManagement/TerminalManager';
 
 @profile
 export class BeeManager extends Bee {
@@ -67,7 +52,7 @@ export class BeeManager extends Bee {
             }
 
             if (!this.nowFunc) {
-                const functions = [this.runLink, this.runManageStock, this.runConsumeExtra];
+                const functions = [this.runLink, this.runManageStock, this.runConsumeExtra, this.runTransport];
 
                 functions.forEach(func => {
                     const code = func.apply(this);
@@ -152,7 +137,7 @@ export class BeeManager extends Bee {
     private runConsumeExtra(): boolean {
         if (Game.time % 20 == 0 && !this.nowFunc) return false;
         if (this.storage.store.getUsedCapacity() < STORAGE_FULL_LINE
-            && this.terminal.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
+            && this.terminal?.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
         return RESOURCE_IMPORTANCE.some(type => {
             if (this.store.getUsedCapacity(type)) {
                 this.drop(type);
@@ -242,6 +227,71 @@ export class BeeManager extends Bee {
         });
 
         return code;
+    }
+
+    private runTransport(): boolean {
+        if (!this.terminal) return false;
+        const transport = TerminalManager.getTransport(this.room.name);
+        if (!transport) return false;
+
+        const des = Game.rooms[transport.des];
+        if (des && (!des.terminal || !des.terminal.store.getFreeCapacity())) {
+            TerminalManager.clearTransport(this.room.name);
+            return false;
+        }
+
+        // 将已经存在的货物和能量剔除，分配剩余空间
+        const energyStored = this.terminal.store.getUsedCapacity(RESOURCE_ENERGY);
+        const stored = this.terminal.store.getUsedCapacity(transport.type);
+        const free = this.terminal.store.getFreeCapacity()
+            + stored + (transport.type == RESOURCE_ENERGY ? 0 : energyStored);
+        let amount = Math.min(transport.amount,
+            ResourcesManager.getStock(this.room.name, transport.type), free);
+        let cost = Game.market.calcTransactionCost(amount, this.room.name, transport.des);
+        if (cost + amount > free) amount = free - cost;
+
+        cost = Game.market.calcTransactionCost(amount, this.room.name, transport.des);
+        if (!this.terminal.cooldown && this.terminal.store.energy >= cost
+            && this.terminal.store[transport.type] >= (transport.type == RESOURCE_ENERGY ? amount + cost : amount)) {
+            this.terminal.send(transport.type, amount, transport.des);
+            transport.amount -= amount;
+            if (transport.amount <= 0) TerminalManager.clearTransport(this.room.name);
+            return true;
+        }
+
+        const resourceRemain = Math.max(0, amount + (transport.type == RESOURCE_ENERGY ? cost : 0) - stored);
+        const energyRemain = transport.type == RESOURCE_ENERGY ? 0 : Math.max(0, cost - energyStored);
+
+        const freeCapacity = this.terminal.store.getFreeCapacity();
+        if (freeCapacity >= resourceRemain + energyRemain) {
+            if (resourceRemain) {
+                if(!this.storage.store.getUsedCapacity(transport.type)) {
+                    TerminalManager.clearTransport(this.room.name);
+                    return false;
+                }
+                this.setTask(this.storage, this.terminal, resourceRemain, transport.type);
+            }
+            else {
+                if(!this.storage.store.getUsedCapacity(RESOURCE_ENERGY)) {
+                    TerminalManager.clearTransport(this.room.name);
+                    return false;
+                }
+                this.setTask(this.storage, this.terminal, energyRemain);
+            }
+            return true;
+        }
+
+        if (resourceRemain && energyRemain) {
+            log.warning(`Wrong calculation! ${JSON.stringify(transport)}, resourceRemain: ${resourceRemain}, energyRemain: ${energyRemain}`);
+            return true;
+        }
+
+        // 由于总数相加小于等于空闲空间，此时一定是一多一少，如果运输的是能量，不可能到这一步
+        if (this.storage.isFull) return false;
+        if (resourceRemain) this.setTask(this.terminal, this.storage, resourceRemain - freeCapacity);
+        else this.setTask(this.terminal, this.storage, energyRemain - freeCapacity, transport.type);
+
+        return true;
     }
 
     private getEnergy(target: Structure, amount?: number) {
