@@ -23,7 +23,8 @@ type ProcessTypes = 'filling'
     | 'defendInvaderCore'
     | 'dismantle'
     | 'defendNuke'
-    | 'mineMineral';
+    | 'mineMineral'
+    | 'labReact';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -67,4 +68,10 @@ type protoProcessDefendInvaderCore = protoProcess & {
 
 type protoProcessDismantle = protoProcess & {
     target: string;
+};
+
+type protoProcessLabReact = protoProcess & {
+    state: 'none' | 'fill' | 'react' | 'take';
+    type?: MineralCompoundConstant;
+    amount?: number;
 };

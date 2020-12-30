@@ -6,7 +6,7 @@ import {
     PROCESS_DEFEND_INVADER_CORE,
     PROCESS_DEFEND_NUKE,
     PROCESS_DISMANTLE,
-    PROCESS_FILLING,
+    PROCESS_FILLING, PROCESS_LAB_REACT,
     PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_REPAIR,
@@ -45,6 +45,7 @@ import { ProcessScout } from './instances/scout';
 import { ProcessTower } from './instances/tower';
 import { ProcessUpgrade } from './instances/upgrade';
 import { Process } from './Process';
+import { ProcessLabReact } from 'process/instances/labReact';
 
 // 注册的顺序将决定优先级
 Process.registerProcess(PROCESS_FILLING, Bucket.bottom, ProcessFilling, 100, [ROLE_FILLER]);
@@ -62,3 +63,4 @@ Process.registerProcess(PROCESS_DEFEND_INVADER_CORE, Bucket.level3, ProcessDefen
 Process.registerProcess(PROCESS_DISMANTLE, Bucket.level4, ProcessDismantle, 100, [ROLE_DISMANTLER]);
 Process.registerProcess(PROCESS_DEFEND_NUKE, Bucket.level2, ProcessDefendNuke, 100, [ROLE_WORKER]);
 Process.registerProcess(PROCESS_MINE_MINERAL, Bucket.level4, ProcessMineMineral, 100, [ROLE_DRONE, ROLE_CARRIER]);
+Process.registerProcess(PROCESS_LAB_REACT, Bucket.level4, ProcessLabReact);

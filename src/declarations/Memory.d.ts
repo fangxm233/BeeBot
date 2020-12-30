@@ -65,6 +65,13 @@ type BeeScoutMemory = CreepMemory & {
     t?: string;
 }
 
+type BeeManagerMemory = CreepMemory & {
+    transferTask?: {
+        from: Id<StoreStructure>, to: Id<StoreStructure>,
+        type: ResourceConstant, amount: number, drop?: boolean
+    }
+}
+
 interface PowerCreepMemory {
     _trav: TravelData;
 }

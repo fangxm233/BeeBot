@@ -1,6 +1,6 @@
 import {Task} from '../Task';
 
-import { isStoreStructure, StoreStructure } from 'declarations/typeGuards';
+import { isStoreStructure } from 'declarations/typeGuards';
 import { getFreeCapacity } from 'utilities/helpers';
 
 export type transferTargetType =

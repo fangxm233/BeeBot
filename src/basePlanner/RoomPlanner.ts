@@ -9,7 +9,7 @@ import { isCoordEqual, printRoomName } from "utilities/utils";
 import { Visualizer } from "visuals/Visualizer";
 import { BaseConstructor } from "./BaseConstructor";
 import { RoadPlanner } from "./RoadPlanner";
-import { exits, fillingRouteCoords, structureLayout } from "./structurePreset";
+import { exits, fillingRouteCoords, reactionLabCoords, sourceLabCoords, structureLayout } from './structurePreset';
 
 const ROAD_COST = 1;
 const CONTAINER_COST = 5;
@@ -338,6 +338,28 @@ export class RoomPlanner {
         const data = this.getRoomData(roomName);
         if (!data) return;
         return new RoomPosition(data.basePos!.x + 6, data.basePos!.y + 4, roomName);
+    }
+
+    public static getLabs(roomName: string): StructureLab[] {
+        const room = Game.rooms[roomName];
+        if(!room) return [];
+        return room.labs;
+    }
+
+    public static getSourceLabs(roomName: string): StructureLab[] {
+        const data = this.getRoomData(roomName);
+        if(!data) return [];
+        return _.compact(sourceLabCoords.map(coord =>
+            new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, roomName)
+                .lookForStructure(STRUCTURE_LAB)!));
+    }
+
+    public static getReactionLabs(roomName: string): StructureLab[] {
+        const data = this.getRoomData(roomName);
+        if(!data) return [];
+        return _.compact(reactionLabCoords.map(coord =>
+            new RoomPosition(data.basePos!.x + coord.x, data.basePos!.y + coord.y, roomName)
+                .lookForStructure(STRUCTURE_LAB)!));
     }
 
     public static serializeData() {

@@ -10,6 +10,7 @@ import {
     PROCESS_DEFEND_INVADER_CORE,
     PROCESS_DEFEND_NUKE,
     PROCESS_FILLING,
+    PROCESS_LAB_REACT,
     PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
@@ -24,6 +25,7 @@ import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { ProcessDefendNuke } from 'process/instances/defendNuke';
 import { ProcessFilling } from 'process/instances/filling';
+import { ProcessLabReact } from 'process/instances/labReact';
 import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessRepair } from 'process/instances/repair';
@@ -68,6 +70,8 @@ export class BeeBot {
                 Process.startProcess(new ProcessTower(roomName));
             if (arg.type == STRUCTURE_EXTRACTOR && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
                 Process.startProcess(new ProcessMineMineral(roomName));
+            if (arg.type == STRUCTURE_LAB && !Process.getProcess<ProcessLabReact>(roomName, PROCESS_LAB_REACT))
+                Process.startProcess(new ProcessLabReact(roomName));
         });
         clock.addAction(100, () => this.routineCheck(roomName));
         clock.addAction(10, () => this.checkOutpostInvaders(roomName));
@@ -180,6 +184,8 @@ export class BeeBot {
             Process.startProcess(new ProcessTower(roomName));
         if (room.extractor && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
             Process.startProcess(new ProcessMineMineral(roomName));
+        if (room.labs.length && !Process.getProcess<ProcessLabReact>(roomName, PROCESS_LAB_REACT))
+            Process.startProcess(new ProcessLabReact(roomName));
 
         if (room.find(FIND_NUKES).length) {
             if (!Process.getProcess<ProcessDefendNuke>(roomName, PROCESS_DEFEND_NUKE)) {

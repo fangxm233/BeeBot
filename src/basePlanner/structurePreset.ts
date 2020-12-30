@@ -369,3 +369,13 @@ export const fillingRouteCoords: { [line: number]: Coord[] } = {
         { x: 9, y: 9 }, { x: 8, y: 10 }, { x: 7, y: 10 }, { x: 6, y: 9 }, { x: 5, y: 8 }, { x: 6, y: 7 },
     ]
 }
+
+export const sourceLabCoords: Coord[] = [
+    { "x": 8, "y": 1 }, { "x": 9, "y": 2 },
+];
+
+export const reactionLabCoords: Coord[] = [
+    { "x": 7, "y": 2 }, { "x": 7, "y": 1 }, { "x": 8, "y": 0 },
+    { "x": 9, "y": 0 }, { "x": 8, "y": 3 }, { "x": 9, "y": 3 },
+    { "x": 10, "y": 2 }, { "x": 10, "y": 1 }
+];

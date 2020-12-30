@@ -1,6 +1,9 @@
+import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { Bee } from 'Bee/Bee';
 import { log } from 'console/log';
-import { StoreStructure } from 'declarations/typeGuards';
+import { PROCESS_LAB_REACT } from 'declarations/constantsExport';
+import { ProcessLabReact } from 'process/instances/labReact';
+import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import {
     COMPRESSED_COMMODITIES,
@@ -9,6 +12,7 @@ import {
     RESOURCE_IMPORTANCE,
     ResourcesManager,
     STORAGE_ENERGY_BOTTOM,
+    STORAGE_EXCLUDED_COMPOUND,
     STORAGE_FULL_LINE,
     TERMINAL_COMPOUND,
     TERMINAL_ENERGY,
@@ -21,6 +25,10 @@ import { TerminalManager } from 'resourceManagement/TerminalManager';
 
 @profile
 export class BeeManager extends Bee {
+    public get memory(): BeeManagerMemory {
+        return this.creep.memory as BeeManagerMemory;
+    }
+
     private centerLinkId: Id<StructureLink>;
     private upgradeLinkId: Id<StructureLink>;
     private initialized: boolean;
@@ -29,10 +37,17 @@ export class BeeManager extends Bee {
     private terminal: StructureTerminal;
 
     private nowFunc: () => boolean;
-    private transferTask?: {
+
+    private get transferTask() {
+        return this.memory.transferTask;
+    }
+
+    private set transferTask(task: {
         from: Id<StoreStructure>, to: Id<StoreStructure>,
         type: ResourceConstant, amount: number, drop?: boolean
-    };
+    } | undefined) {
+        this.memory.transferTask = task;
+    }
 
     public runCore() {
         this.arriveTick = 1;
@@ -52,7 +67,14 @@ export class BeeManager extends Bee {
             }
 
             if (!this.nowFunc) {
-                const functions = [this.runLink, this.runManageStock, this.runConsumeExtra, this.runTransport];
+                const functions = [
+                    this.runLink,
+                    this.runManageStock,
+                    this.runConsumeExtra,
+                    this.runTransport,
+                    this.runFillLab,
+                    this.runTakeLab,
+                ];
 
                 functions.forEach(func => {
                     const code = func.apply(this);
@@ -85,13 +107,13 @@ export class BeeManager extends Bee {
         if (stored) {
             const to = Game.getObjectById(task.to);
             if (to) {
-                if (!to.store.getFreeCapacity()) {
+                if (!to.store.getFreeCapacity(this.transferTask.type)) {
                     if (task.drop) this.drop(task.type);
                     this.clearTask();
                 }
-                this.transferTo(to, task.type);
+                const code = this.transferTo(to, task.type);
+                if (code === OK) task.amount -= stored;
             } else this.clearTask();
-            task.amount -= stored;
             if (task.amount <= 0) this.clearTask();
             return;
         }
@@ -206,8 +228,7 @@ export class BeeManager extends Bee {
             }
 
             if (amount > TERMINAL_COMPOUND) {
-                if (type == RESOURCE_HYDROXIDE || type == RESOURCE_ZYNTHIUM_KEANITE
-                    || type == RESOURCE_UTRIUM_LEMERGITE) return false;
+                if (_.contains(STORAGE_EXCLUDED_COMPOUND, type)) return false;
                 if (this.storage.isFull) return false;
                 this.setTask(this.terminal, this.storage, amount - TERMINAL_COMPOUND, type);
                 return true;
@@ -265,14 +286,13 @@ export class BeeManager extends Bee {
         const freeCapacity = this.terminal.store.getFreeCapacity();
         if (freeCapacity >= resourceRemain + energyRemain) {
             if (resourceRemain) {
-                if(!this.storage.store.getUsedCapacity(transport.type)) {
+                if (!this.storage.store.getUsedCapacity(transport.type)) {
                     TerminalManager.clearTransport(this.room.name);
                     return false;
                 }
                 this.setTask(this.storage, this.terminal, resourceRemain, transport.type);
-            }
-            else {
-                if(!this.storage.store.getUsedCapacity(RESOURCE_ENERGY)) {
+            } else {
+                if (!this.storage.store.getUsedCapacity(RESOURCE_ENERGY)) {
                     TerminalManager.clearTransport(this.room.name);
                     return false;
                 }
@@ -294,6 +314,55 @@ export class BeeManager extends Bee {
         return true;
     }
 
+    private runFillLab(): boolean {
+        const labProcess = Process.getProcess<ProcessLabReact>(this.room.name, PROCESS_LAB_REACT);
+        if (!labProcess) return false;
+        if (labProcess.reactState != 'fill') return false;
+
+        const sourceLabs = RoomPlanner.getSourceLabs(this.room.name);
+        if (sourceLabs.length < 2) return false;
+
+        const amount = labProcess.amount;
+        const components = labProcess.components;
+        for (let i = 0; i < sourceLabs.length; i++) {
+            if (sourceLabs[i].mineralType && sourceLabs[i].mineralType != components[i]) {
+                labProcess.reactState = 'take';
+                return false;
+            }
+            const stored = sourceLabs[i].store.getUsedCapacity(components[i])!;
+            if (ResourcesManager.getStock(this.room.name, components[i]) + stored < amount) {
+                labProcess.reactState = 'take';
+                return false;
+            }
+            if (sourceLabs[i].store.getUsedCapacity(components[i])! < amount) {
+                // 这里做了个假设，terminal已经在前面的程序中准备好了资源
+                this.setTask(this.terminal, sourceLabs[i], amount - stored, components[i]);
+                return true;
+            }
+        }
+
+        labProcess.reactState = 'react';
+        return false;
+    }
+
+    private runTakeLab(): boolean {
+        const labProcess = Process.getProcess<ProcessLabReact>(this.room.name, PROCESS_LAB_REACT);
+        if (!labProcess) return false;
+        if (labProcess.reactState != 'take') return false;
+
+        const labs = RoomPlanner.getLabs(this.room.name);
+        if (!labs.length) return false;
+
+        for (const lab of labs) {
+            if (!lab.mineralType) continue;
+            this.setTask(lab, this.terminal, undefined, lab.mineralType!);
+            return true;
+        }
+
+        labProcess.reactState = 'none';
+        return false;
+    }
+
     private getEnergy(target: Structure, amount?: number) {
         if (!this.pos.isNearTo(target)) this.travelTo(target);
         else this.withdraw(target, RESOURCE_ENERGY, amount);
@@ -304,13 +373,17 @@ export class BeeManager extends Bee {
         else this.transfer(target, RESOURCE_ENERGY, amount);
     }
 
-    private get(target: Structure, type: ResourceConstant, amount?: number) {
-        if (!this.pos.isNearTo(target)) this.travelTo(target);
-        else this.withdraw(target, type, amount);
+    private get(target: Structure, type: ResourceConstant, amount?: number): ScreepsReturnCode {
+        if (!this.pos.isNearTo(target)) {
+            this.travelTo(target);
+            return ERR_NOT_IN_RANGE;
+        } else return this.withdraw(target, type, amount);
     }
 
-    private transferTo(target: Structure, type: ResourceConstant, amount?: number) {
-        if (!this.pos.isNearTo(target)) this.travelTo(target);
-        else this.transfer(target, type, amount);
+    private transferTo(target: Structure, type: ResourceConstant, amount?: number): ScreepsReturnCode {
+        if (!this.pos.isNearTo(target)) {
+            this.travelTo(target);
+            return ERR_NOT_IN_RANGE;
+        } else return this.transfer(target, type, amount);
     }
 }
