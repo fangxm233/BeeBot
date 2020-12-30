@@ -5,7 +5,7 @@ import { PROCESS_FILLING, ROLE_FILLER } from 'declarations/constantsExport';
 import { repeater } from 'event/Repeater';
 import { timer } from 'event/Timer';
 import { ProcessFilling } from 'process/instances/filling';
-import { Process, STATE_ACTIVE } from 'process/Process';
+import { Process, STATE_ACTIVE, STATE_SLEEPING } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { calBodyCost, timeAfterTick } from 'utilities/helpers';
 import { getFreeKey } from 'utilities/utils';
@@ -88,7 +88,7 @@ export class BeeManager {
                 if (bee.cyclingCallbackId) timer.cancelCallBack(bee.cyclingCallbackId);
                 if (!bee.process.closed) {
                     bee.process.removeBee(beeName);
-                    processToRefresh[bee.process.fullId] = bee.process;
+                    if (bee.process.state != STATE_SLEEPING) processToRefresh[bee.process.fullId] = bee.process;
                 }
                 if (!_.contains(roomsToArrange, bee.process.roomName)) roomsToArrange.push(bee.process.roomName);
                 bees[beeName] = undefined as any;
@@ -180,8 +180,7 @@ export class ProcessWishInvoker {
         this.processId = this.processId.filter(id => !!Process.getProcess(id));
         this.processId.forEach(id => {
             const process = Process.getProcess<Process>(id);
-            if (process?.sleepTime) return;
-            if (process) process.wishCreeps();
+            if (process && process.state != STATE_SLEEPING) process.wishCreeps();
         });
         return OK;
     }
@@ -191,6 +190,7 @@ export class ProcessWishInvoker {
         if (!process) return;
         this.processId.push(id);
         // 将请求延后到下一tick来防止初始化未完成
+        if (process.state == STATE_SLEEPING) return;
         timer.callBackAtTick(timeAfterTick(1), () => process.wishCreeps());
     }
 }
