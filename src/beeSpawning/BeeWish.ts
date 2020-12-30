@@ -53,7 +53,7 @@ export class BeeWish {
         _.remove(BeeManager.wishes[this.spawnRoom][this.role], w => w.id == this.id);
     }
 
-    public get proto() {
+    public get proto(): protoBeeWish {
         return {
             id: this.id,
             budget: this.budget,
