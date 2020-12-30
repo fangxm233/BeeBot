@@ -9,7 +9,8 @@ import {
     PROCESS_DEFEND_INVADER,
     PROCESS_DEFEND_INVADER_CORE,
     PROCESS_DEFEND_NUKE,
-    PROCESS_FILLING, PROCESS_MINE_MINERAL,
+    PROCESS_FILLING,
+    PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
     PROCESS_TOWER,
@@ -23,6 +24,7 @@ import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { ProcessDefendNuke } from 'process/instances/defendNuke';
 import { ProcessFilling } from 'process/instances/filling';
+import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessRepair } from 'process/instances/repair';
 import { ProcessReserving } from 'process/instances/reserving';
@@ -30,10 +32,10 @@ import { ProcessTower } from 'process/instances/tower';
 import { ProcessUpgrade } from 'process/instances/upgrade';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
+import { ResourcesManager } from 'resourceManagement/ResourcesManager';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
 import { hasAggressiveParts } from 'utilities/helpers';
 import { getAllColonyRooms, printRoomName } from 'utilities/utils';
-import { ProcessMineMineral } from 'process/instances/mineMineral';
 
 const EARLY_OUTPOST_DEPTH = 1;
 
@@ -64,7 +66,7 @@ export class BeeBot {
                 this.onColonyStageUpgrade(roomName, stage);
             if (arg.type == STRUCTURE_TOWER && !Process.getProcess<ProcessTower>(roomName, PROCESS_TOWER))
                 Process.startProcess(new ProcessTower(roomName));
-            if(arg.type == STRUCTURE_EXTRACTOR && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
+            if (arg.type == STRUCTURE_EXTRACTOR && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
                 Process.startProcess(new ProcessMineMineral(roomName));
         });
         clock.addAction(100, () => this.routineCheck(roomName));
@@ -151,7 +153,10 @@ export class BeeBot {
     }
 
     public static run() {
-        this.colonies().forEach(room => this.checkForSafeMode(room));
+        this.colonies().forEach(room => {
+            this.checkForSafeMode(room);
+            ResourcesManager.balanceResources();
+        });
     }
 
     public static initializeColony(roomName: string) {
@@ -173,7 +178,7 @@ export class BeeBot {
         if (!room) return;
         if (!Process.getProcess<ProcessTower>(roomName, PROCESS_TOWER) && room.towers.length)
             Process.startProcess(new ProcessTower(roomName));
-        if(room.extractor && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
+        if (room.extractor && !Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL))
             Process.startProcess(new ProcessMineMineral(roomName));
 
         if (room.find(FIND_NUKES).length) {

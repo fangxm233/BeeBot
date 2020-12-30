@@ -2,17 +2,10 @@ import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { Bee } from 'Bee/Bee';
 import { BeeBot } from 'BeeBot/BeeBot';
 import { profile } from 'profiler/decorator';
+import { TerminalManager } from 'resourceManagement/TerminalManager';
 import { withdrawTargetType } from 'tasks/instances/task_withdraw';
 import { Task } from 'tasks/Task';
 import { Tasks } from 'tasks/Tasks';
-import {
-    STORAGE_COMPOUND, STORAGE_COMPRESSED_COMMODITIES,
-    STORAGE_ENERGY, STORAGE_MINERAL,
-    STORAGE_OPS, TERMINAL_COMMODITY, TERMINAL_COMMODITY_ZERO, TERMINAL_COMPOUND, TERMINAL_DEPOSIT,
-    TERMINAL_ENERGY,
-    TERMINAL_ENERGY_FLOAT, TERMINAL_MINERAL,
-    TERMINAL_POWER,
-} from 'Bee/instances/manager';
 
 export const COMMODITIES = [
     RESOURCE_UTRIUM_BAR,
@@ -58,7 +51,7 @@ export const COMMODITIES_LEVEL_ZERO = [
     RESOURCE_CELL,
     RESOURCE_ALLOY,
     RESOURCE_CONDENSATE,
-]
+];
 
 export const COMMODITIES_WITHOUT_COMPRESSED = [
     RESOURCE_COMPOSITE,
@@ -107,7 +100,7 @@ export const DEPOSITS = [
     RESOURCE_BIOMASS,
     RESOURCE_SILICON,
     RESOURCE_MIST,
-]
+];
 
 export const MINERALS = [
     RESOURCE_OXYGEN,
@@ -181,14 +174,97 @@ export const RESOURCE_IMPORTANCE: ResourceConstant[] = [
     RESOURCE_ENERGY,
 ].reverse();
 
+export const STORAGE_ENERGY_BOTTOM = 10e3;
+export const STORAGE_ENERGY = 400e3;
+export const TERMINAL_ENERGY = 20e3;
+export const TERMINAL_ENERGY_FLOAT = 5e3;
+
+export const STORAGE_COMPOUND = 30e3;
+export const TERMINAL_COMPOUND = 3e3;
+
+export const STORAGE_MINERAL = 5e3;
+export const TERMINAL_MINERAL = 5e3;
+export const TERMINAL_MINERAL_FLOAT = 1e3;
+
+export const TERMINAL_POWER = 30e3;
+export const STORAGE_OPS = 30e3;
+
+export const STORAGE_COMPRESSED_COMMODITIES = 5e3;
+export const TERMINAL_COMMODITY_ZERO = 10e3;
+export const TERMINAL_COMMODITY = 500;
+export const TERMINAL_DEPOSIT = 10e3;
+
+export const TERMINAL_FULL_LINE = 295e3;
+export const STORAGE_FULL_LINE = 900e3;
+
 @profile
 export class ResourcesManager {
 
+    public static balanceResources() {
+        const rooms = BeeBot.colonies().filter(room => !!room.terminal
+            && !TerminalManager.hasOutgoingTransport(room.name) && !TerminalManager.hasIncomingTransport(room.name));
+        if (rooms.length < 2) return;
+
+        RESOURCES_ALL.forEach(resourceType => {
+            if (rooms.length < 2) return;
+            const min = this.getResourceMinimum(resourceType, 'all');
+            const max = this.getResourceLimit(resourceType, 'all');
+            const lacks = rooms.filter(room => this.getStock(room.name, resourceType) < min);
+            const extra = rooms.filter(room => this.getStock(room.name, resourceType) > max);
+            const normal = rooms.filter(room => !lacks.find(r => r.name == room.name) && !extra.find(r => r.name == room.name));
+
+            if (lacks.length) {
+                lacks.forEach(room => {
+                    if (!normal.length && !extra.length) return;
+                    const remain = min - this.getStock(room.name, resourceType);
+                    const source = _.max([...normal, ...extra], room => this.getStock(room.name, resourceType));
+                    const amount = Math.min(remain, this.getStock(source.name, resourceType) - min);
+                    if (amount <= 0) return;
+                    TerminalManager.setTransport(source.name, room.name, resourceType, amount);
+                    _.remove(normal, room => TerminalManager.hasOutgoingTransport(room.name));
+                    _.remove(extra, room => TerminalManager.hasOutgoingTransport(room.name));
+                });
+            }
+
+            if (extra.length) {
+                extra.forEach(room => {
+                    if(!normal.length) return;
+                    const remain = this.getStock(room.name, resourceType) - max;
+                    const to = _.min(normal, room => this.getStock(room.name, resourceType));
+                    const amount = Math.min(remain, max - this.getStock(to.name, resourceType));
+                    if (amount <= 0) return;
+                    TerminalManager.setTransport(room.name, to.name, resourceType, amount);
+                    _.remove(normal, room => TerminalManager.hasOutgoingTransport(room.name));
+                });
+            }
+
+            _.remove(rooms, room => TerminalManager.hasOutgoingTransport(room.name)
+                || TerminalManager.hasIncomingTransport(room.name));
+        });
+    }
+
+    public static getStock(roomName: string, resource: ResourceConstant, factory: boolean = false): number {
+        let stock = 0;
+        const room = Game.rooms[roomName];
+        if (!room) return stock;
+
+        stock += room.storage?.store.getUsedCapacity(resource) || 0;
+        stock += room.terminal?.store.getUsedCapacity(resource) || 0;
+        if (factory) stock += room.factory?.store.getUsedCapacity(resource) || 0;
+
+        return stock;
+    }
+
     private static resourceLimitCache: { [resource: string]: number } = {};
 
-    public static getResourceLimit(resource: ResourceConstant, container: 'terminal' | 'storage'): number {
-        if (this.resourceLimitCache[`${resource}_${container}`])
-            return this.resourceLimitCache[`${resource}_${container}`];
+    public static getResourceLimit(resource: ResourceConstant, container: 'terminal' | 'storage' | 'all'): number {
+        const key = `${resource}_${container}`;
+        if (this.resourceLimitCache[key] !== undefined)
+            return this.resourceLimitCache[key];
+
+        if (container == 'all')
+            return this.resourceLimitCache[key] =
+                this.getResourceLimit(resource, 'terminal') + this.getResourceLimit(resource, 'storage');
 
         let limit = 0;
 
@@ -203,7 +279,7 @@ export class ResourcesManager {
             else limit = 0;
         } else if (_.contains(MINERALS, resource)) {
             if (container == 'storage') limit = STORAGE_MINERAL;
-            else limit = TERMINAL_MINERAL;
+            else limit = TERMINAL_MINERAL + TERMINAL_MINERAL_FLOAT;
         } else if (_.contains(MINERAL_COMPOUNDS, resource)) {
             if (container == 'terminal') limit = TERMINAL_COMPOUND;
             else if (resource == RESOURCE_HYDROXIDE || resource == RESOURCE_ZYNTHIUM_KEANITE
@@ -225,6 +301,28 @@ export class ResourcesManager {
         }
 
         return this.resourceLimitCache[`${resource}_${container}`] = limit;
+    }
+
+    private static resourceMinimumCache: { [resource: string]: number } = {};
+
+    public static getResourceMinimum(resource: ResourceConstant, container: 'terminal' | 'storage' | 'all'): number {
+        const key = `${resource}_${container}`;
+        if (this.resourceMinimumCache[key] !== undefined)
+            return this.resourceMinimumCache[key];
+
+        if (container == 'all')
+            return this.resourceMinimumCache[key] =
+                this.getResourceMinimum(resource, 'terminal') + this.getResourceMinimum(resource, 'storage');
+
+        let min = 0;
+
+        if (resource == RESOURCE_ENERGY) {
+            if (container == 'storage') min = STORAGE_ENERGY_BOTTOM;
+        } else if (_.contains(MINERALS, resource)) {
+            if (container == 'terminal') min = TERMINAL_MINERAL - TERMINAL_MINERAL_FLOAT;
+        }
+
+        return this.resourceMinimumCache[`${resource}_${container}`] = min;
     }
 
     public static getEnergySource(bee: Bee, isFiller: boolean, minAmount?: number): Task | null {
