@@ -15,7 +15,7 @@
 import { Bee, toBee } from 'Bee/Bee';
 import { ITask } from 'tasks';
 import {deref, derefRoomPosition} from '../utilities/helpers';
-import {initializeTask} from './initializer';
+// import {initializeTask} from './initializer';
 
 export interface TargetType { ref: string, pos: RoomPosition } // overwrite this variable in derived classes to specify more precise typing
 
@@ -127,7 +127,7 @@ export abstract class Task implements ITask {
 
 	// Getter/setter for task parent
 	get parent(): Task | null {
-		return (this._parent ? initializeTask(this._parent) : null);
+		return null;
 	}
 
 	set parent(parentTask: Task | null) {
