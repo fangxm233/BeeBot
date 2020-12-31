@@ -1,10 +1,6 @@
 // Type guards library: this allows for instanceof - like behavior for much lower CPU cost. Each type guard
 // differentiates an ambiguous input by recognizing one or more unique properties.
 
-export interface StoreStructure extends Structure {
-	store: StoreDefinition;
-}
-
 export function isStoreStructure(obj: RoomObject): obj is StoreStructure {
 	return (obj as StoreStructure).store !== undefined;
 }
