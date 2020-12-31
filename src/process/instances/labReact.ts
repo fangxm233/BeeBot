@@ -1,11 +1,10 @@
 import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { log } from 'console/log';
 import { PROCESS_LAB_REACT } from 'declarations/constantsExport';
+import { BASE_RESOURCES, REAGENTS } from 'declarations/resourcesMap';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import {
-    BASE_RESOURCES,
-    REAGENTS,
     ResourcesManager,
     STORAGE_COMPOUND,
     STORAGE_EXCLUDED_COMPOUND,
@@ -112,7 +111,7 @@ export class ProcessLabReact extends Process {
         if (sourceLabs.length < 2 || !reactLabs.length) return;
 
         if (this.reactState == 'react') {
-            if(!sourceLabs.find(lab => !!lab.mineralType)) {
+            if (!sourceLabs.find(lab => !!lab.mineralType)) {
                 this.reactState = 'take';
                 return;
             }
@@ -126,9 +125,9 @@ export class ProcessLabReact extends Process {
             let hasOK = false;
             reactLabs.forEach(lab => {
                 const code = lab.runReaction(sourceLabs[0], sourceLabs[1]);
-                if(code === OK) hasOK = true;
+                if (code === OK) hasOK = true;
             });
-            if(hasOK) return;
+            if (hasOK) return;
             else {
                 this.reactState = 'take';
                 return;

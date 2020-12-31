@@ -2,13 +2,11 @@ import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { Bee } from 'Bee/Bee';
 import { log } from 'console/log';
 import { PROCESS_LAB_REACT } from 'declarations/constantsExport';
+import { COMPRESSED_COMMODITIES, MINERAL_COMPOUNDS, MINERALS } from 'declarations/resourcesMap';
 import { ProcessLabReact } from 'process/instances/labReact';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import {
-    COMPRESSED_COMMODITIES,
-    MINERAL_COMPOUNDS,
-    MINERALS,
     RESOURCE_IMPORTANCE,
     ResourcesManager,
     STORAGE_ENERGY_BOTTOM,
