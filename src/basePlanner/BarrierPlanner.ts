@@ -12,7 +12,7 @@ export const MAP_ON = 1;
 
 const NUKE_BARRIER_CACHE_EXPIRATION = 50;
 const NUKE_EXT_RESERVE_COUNT = 48;
-const CONTROLLER_BARRIER_MULTIPLY = 10;
+const CONTROLLER_BARRIER_MULTIPLY = 5;
 
 const BARRIER_HITS_TARGET = {
     1: 1e3,
@@ -20,7 +20,7 @@ const BARRIER_HITS_TARGET = {
     3: 1e4,
     4: 5e4,
     6: 1e5,
-    7: 1e6,
+    7: 2e6,
     8: 6e6,
 };
 
