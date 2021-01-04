@@ -16,9 +16,10 @@ const CONTAINER_COST = 5;
 const WALL_OCCUPIED_COUNT = 3;          // 允许基地内被墙占据的格子最大数目
 const PERIPHERY_WIDTH = 3;              // 边缘宽度
 const ROAD_SWAMP_SCORE = -0.6;          // 在路上的沼泽得分
-const BUILDING_SWAMP_SCORE = -0.3;      // 在建筑底下的沼泽得分
-const PERIPHERY_SWAMP_SCORE = -0.3;     // 边缘沼泽得分
+const BUILDING_SWAMP_SCORE = -0.2;      // 在建筑底下的沼泽得分
+const PERIPHERY_SWAMP_SCORE = -0.2;     // 边缘沼泽得分
 const PERIPHERY_WALL_SCORE = -1;        // 边缘墙壁得分
+const PERIPHERY_EXIT_SCORE = -1 / 4;    // 靠近边缘距离得分
 const OCCUPIED_EXIT_SCORE = -1.5;       // 被堵住出口得分
 const OCCUPIED_EXTENSION_SCORE = -2;    // 无效建筑得分
 const SOURCE_DISTANCE_SCORE = -0.3;     // source距离得分
@@ -82,7 +83,7 @@ export class RoomPlanner {
 
         const getReturn = (result: GeneratePathResult): PlanRoomResult => {
             if (result.incomplete) {
-                log.error('Failed to plan room: path incomplete.');
+                log.warning('Failed to plan room: path incomplete.');
                 return { failed: true };
             }
             if (result.matrixMissing) return { matrixMissing: true };
@@ -180,6 +181,7 @@ export class RoomPlanner {
 
     public static findBasePos(roomName: string): Coord | undefined {
         const candidatePoses = this.findCandidates(roomName, 2, 38, 11);
+        log.debug(JSON.stringify(candidatePoses.map(p => ([p,this.scoreCandidate(roomName, p)]))));
 
         const pos = _.max(candidatePoses, coord => this.scoreCandidate(roomName, coord));
 
@@ -218,6 +220,7 @@ export class RoomPlanner {
         const terrain = Game.map.getRoomTerrain(roomName);
         const room = Game.rooms[roomName];
         const { x, y } = coord;
+        const center = new RoomPosition(x + 5, y + 5, roomName);
         const swamps: Coord[] = [];
         const walls: Coord[] = [];
         const peripherySwamps: Coord[] = [];
@@ -256,23 +259,26 @@ export class RoomPlanner {
             if (bx < 2 || bx > 47 || by < 2 || by > 47) score += OCCUPIED_EXTENSION_SCORE;
             else if (peripheryWalls.find(c => c.x == bx && c.y == by))
                 score += OCCUPIED_EXTENSION_SCORE - PERIPHERY_WALL_SCORE;
-        })
+        });
+
+        const roomExits = room.find(FIND_EXIT);
+        roomExits.forEach(exit => score += Math.max(11 - exit.getRangeTo(center), 0) * PERIPHERY_EXIT_SCORE);
 
         const swampMap = _.countBy(swamps, coord => this.getLayoutStructureType(8, coord) === STRUCTURE_ROAD);
         score += (swampMap.true || 0) * ROAD_SWAMP_SCORE;
         score += (swampMap.false || 0) * BUILDING_SWAMP_SCORE;
 
-        const martix = new PathFinder.CostMatrix();
+        const matrix = new PathFinder.CostMatrix();
         for (const structureType in finalBase) {
             const coords = finalBase[structureType];
             const cost = structureType === STRUCTURE_ROAD ? ROAD_COST : 0xff;
-            coords.forEach(coord => martix.set(x + coord.x, y + coord.y, cost));
+            coords.forEach(coord => matrix.set(x + coord.x, y + coord.y, cost));
         }
 
         const findPath = structure => PathFinder.search(new RoomPosition(x + 5, y + 5, roomName),
             { pos: structure.pos, range: 1 }, {
             maxOps: 1e4, heuristicWeight: 1,
-            roomCallback: room => room == roomName ? martix : false
+            roomCallback: room => room == roomName ? matrix : false,
         });
         room.sources.forEach(source => score += findPath(source).path.length * SOURCE_DISTANCE_SCORE);
         score += findPath(room.mineral).path.length * MINERAL_DISTANCE_SCORE;
