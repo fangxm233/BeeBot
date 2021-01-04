@@ -222,6 +222,7 @@ export class ResourcesManager {
 
         if (resource == RESOURCE_ENERGY) {
             if (container == 'storage') min = STORAGE_ENERGY_BOTTOM;
+            else min = TERMINAL_ENERGY - TERMINAL_ENERGY_FLOAT;
         } else if (_.contains(MINERALS, resource)) {
             if (container == 'terminal') min = TERMINAL_MINERAL - TERMINAL_MINERAL_FLOAT;
         } else if (_.contains(MINERAL_COMPOUNDS, resource)) {
