@@ -49,9 +49,11 @@ export class BeeManager extends Bee {
 
     public runCore() {
         this.arriveTick = 1;
+        const room = Game.rooms[this.process.roomName];
+        if(!room) return;
 
-        this.storage = this.room.storage!;
-        this.terminal = this.room.terminal!;
+        this.storage = room.storage!;
+        this.terminal = room.terminal!;
         if (!this.storage) return;
 
         if (!this.initialized && !this.init()) return;
@@ -88,12 +90,15 @@ export class BeeManager extends Bee {
     }
 
     private init(): boolean {
-        const controller = this.room.controller!;
+        const room = Game.rooms[this.process.roomName];
+        if(!room) return false;
+
+        const controller = room.controller!;
 
         if (!this.centerLinkId)
-            this.centerLinkId = this.room.links.filter(link => link.pos.inRangeTo(this.storage, 2))[0]?.id!;
+            this.centerLinkId = room.links.filter(link => link.pos.inRangeTo(this.storage, 2))[0]?.id!;
         if (!this.upgradeLinkId)
-            this.upgradeLinkId = this.room.links.filter(link => link.pos.inRangeTo(controller, 2))[0]?.id!;
+            this.upgradeLinkId = room.links.filter(link => link.pos.inRangeTo(controller, 2))[0]?.id!;
 
         return this.initialized = true;
     }

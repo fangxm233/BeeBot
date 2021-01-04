@@ -7,7 +7,10 @@ import { coordToRoomPosition } from 'utilities/helpers';
 export class BeeDrone extends Bee {
 
     protected runCore(): number | void {
-        const mineral = this.room.find(FIND_MINERALS)[0];
+        const room = Game.rooms[this.process.roomName];
+        if(!room) return;
+
+        const mineral = room.find(FIND_MINERALS)[0];
         if (!mineral) return;
         if (!mineral.mineralAmount) return;
 
@@ -20,7 +23,7 @@ export class BeeDrone extends Bee {
             return;
         }
 
-        if(this.room.extractor?.cooldown) return;
+        if(room.extractor?.cooldown) return;
 
         const container = this.pos.lookForStructure(STRUCTURE_CONTAINER);
         if (!container) return;
