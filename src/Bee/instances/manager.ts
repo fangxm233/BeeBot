@@ -2,22 +2,14 @@ import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { Bee } from 'Bee/Bee';
 import { log } from 'console/log';
 import { PROCESS_LAB_REACT } from 'declarations/constantsExport';
-import { COMPRESSED_COMMODITIES, MINERAL_COMPOUNDS, MINERALS } from 'declarations/resourcesMap';
 import { ProcessLabReact } from 'process/instances/labReact';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import {
     RESOURCE_IMPORTANCE,
     ResourcesManager,
-    STORAGE_ENERGY_BOTTOM,
-    STORAGE_EXCLUDED_COMPOUND,
     STORAGE_FULL_LINE,
-    TERMINAL_COMPOUND,
-    TERMINAL_ENERGY,
-    TERMINAL_ENERGY_FLOAT,
     TERMINAL_FULL_LINE,
-    TERMINAL_MINERAL,
-    TERMINAL_MINERAL_FLOAT,
 } from 'resourceManagement/ResourcesManager';
 import { TerminalManager } from 'resourceManagement/TerminalManager';
 
@@ -50,7 +42,7 @@ export class BeeManager extends Bee {
     public runCore() {
         this.arriveTick = 1;
         const room = Game.rooms[this.process.roomName];
-        if(!room) return;
+        if (!room) return;
 
         this.storage = room.storage!;
         this.terminal = room.terminal!;
@@ -91,7 +83,7 @@ export class BeeManager extends Bee {
 
     private init(): boolean {
         const room = Game.rooms[this.process.roomName];
-        if(!room) return false;
+        if (!room) return false;
 
         const controller = room.controller!;
 
@@ -193,63 +185,40 @@ export class BeeManager extends Bee {
         if (Game.time % 10 == 0 && !this.nowFunc) return false;
         if (!this.terminal) return false;
 
-        let code = [RESOURCE_ENERGY, ...MINERALS].some(type => {
-            const min = type == RESOURCE_ENERGY ? TERMINAL_ENERGY - TERMINAL_ENERGY_FLOAT
-                : TERMINAL_MINERAL - TERMINAL_MINERAL_FLOAT;
-            const max = type == RESOURCE_ENERGY ? TERMINAL_ENERGY + TERMINAL_ENERGY_FLOAT
-                : TERMINAL_MINERAL + TERMINAL_MINERAL_FLOAT;
-            const bottom = type == RESOURCE_ENERGY ? STORAGE_ENERGY_BOTTOM : 0;
-            const storageStored = this.storage.store.getUsedCapacity(type);
-            const terminalStored = this.terminal.store.getUsedCapacity(type);
+        const manageStock = (type: ResourceConstant, c1: StructureStorage | StructureTerminal,
+                             c2: StructureStorage | StructureTerminal) => {
+            const container = c1 instanceof StructureTerminal ? 'terminal' : 'storage';
+            const c2Container = container == 'terminal' ? 'storage' : 'terminal';
+            const c1Min = ResourcesManager.getResourceMinimum(type, container);
+            const c1Max = container == 'storage' ? Infinity : ResourcesManager.getResourceLimit(type, container);
+            const c2Min = ResourcesManager.getResourceMinimum(type, c2Container);
+            const c2Max = c2Container == 'storage' ? Infinity : ResourcesManager.getResourceLimit(type, c2Container);
+            const c1Stored = c1.store.getUsedCapacity(type);
+            const c2Stored = c2.store.getUsedCapacity(type);
 
-            if (terminalStored < min) {
-                if (this.terminal.isFull) return false;
-                if (storageStored > bottom) {
-                    this.setTask(this.storage, this.terminal,
-                        Math.min(min - terminalStored, storageStored - bottom), type);
+            if (c1Stored < c1Min) {
+                if (c1.isFull) return false;
+                if (c2Stored > c2Min) {
+                    this.setTask(c2, c1, Math.min(c1Min - c1Stored, c2Stored - c2Min), type);
                     return true;
                 }
             }
 
-            if (terminalStored > max) {
-                if (this.storage.isFull) return false;
-                this.setTask(this.terminal, this.storage, terminalStored - max, type);
-                return true;
+            if (c1Stored > c1Max) {
+                if (c2.isFull) return false;
+                if (c2Stored < c2Max) {
+                    this.setTask(c1, c2, Math.min(c2Max - c2Stored, c1Stored - c1Max), type);
+                    return true;
+                }
             }
 
             return false;
-        });
+        };
+
+        let code = RESOURCE_IMPORTANCE.some(type => manageStock(type, this.terminal, this.storage));
         if (code) return true;
 
-        code = MINERAL_COMPOUNDS.some(type => {
-            const amount = this.terminal.store.getUsedCapacity(type);
-            if (amount < TERMINAL_COMPOUND) {
-                if (this.terminal.isFull) return false;
-                if (!this.storage.store.getUsedCapacity(type)) return false;
-                this.setTask(this.storage, this.terminal, TERMINAL_COMPOUND - amount, type);
-                return true;
-            }
-
-            if (amount > TERMINAL_COMPOUND) {
-                if (_.contains(STORAGE_EXCLUDED_COMPOUND, type)) return false;
-                if (this.storage.isFull) return false;
-                this.setTask(this.terminal, this.storage, amount - TERMINAL_COMPOUND, type);
-                return true;
-            }
-
-            return false;
-        });
-        if (code) return true;
-
-        code = [...COMPRESSED_COMMODITIES, RESOURCE_OPS].some(type => {
-            if (this.storage.isFull) return false;
-            if (this.terminal.store.getUsedCapacity(type)) {
-                this.setTask(this.terminal, this.storage, undefined, type);
-                return true;
-            }
-            return false;
-        });
-
+        code = RESOURCE_IMPORTANCE.some(type => manageStock(type, this.storage, this.terminal));
         return code;
     }
 
