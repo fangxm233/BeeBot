@@ -177,6 +177,20 @@ export class BeeBot {
         BaseConstructor.get(roomName).clearRoom();
     }
 
+    public static unclaimColony(roomName: string) {
+        _.forEach(Process.processes[roomName], process => process && process.close());
+        Memory.beebot.outposts[roomName] = undefined!;
+        Memory.beebot.colonies[roomName] = undefined!;
+        Memory.transport[roomName] = undefined!;
+        const room = Game.rooms[roomName];
+        if(!room) return;
+        room.find(FIND_STRUCTURES).forEach(structure => structure.destroy());
+        room.find(FIND_MY_CREEPS).forEach(creep => creep.suicide());
+        room.find(FIND_MY_POWER_CREEPS).forEach(pc => pc.suicide());
+        room.find(FIND_MY_CONSTRUCTION_SITES).forEach(site => site.remove()); // 移除外矿的建筑点
+        room.find(FIND_FLAGS).forEach(flag => flag.remove());
+    }
+
     public static routineCheck(roomName: string) {
         const room = Game.rooms[roomName];
         if (!room) return;

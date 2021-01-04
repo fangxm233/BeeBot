@@ -36,6 +36,11 @@ export class Command {
                     Process.startProcess(new ProcessDismantle(snips[1], flag.pos.roomName));
                 continue;
             }
+            if(snips[0] == 'unclaim') {
+                BeeBot.unclaimColony(flag.pos.roomName);
+                flag.remove();
+                continue;
+            }
         }
     }
 }
