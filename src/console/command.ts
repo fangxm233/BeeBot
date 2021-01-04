@@ -36,8 +36,22 @@ export class Command {
                     Process.startProcess(new ProcessDismantle(snips[1], flag.pos.roomName));
                 continue;
             }
-            if(snips[0] == 'unclaim') {
+            if (snips[0] == 'unclaim') {
                 BeeBot.unclaimColony(flag.pos.roomName);
+                flag.remove();
+                continue;
+            }
+            if (snips[0] == 'disable') {
+                const processes = Process.getProcesses<Process>(flag.pos.roomName, snips[1] as ProcessTypes);
+                if (!processes.length) continue;
+                processes.forEach(process => process.suspend());
+                flag.remove();
+                continue;
+            }
+            if (snips[0] == 'enable') {
+                const processes = Process.getProcesses<Process>(flag.pos.roomName, snips[1] as ProcessTypes);
+                if (!processes.length) continue;
+                processes.forEach(process => process.awake());
                 flag.remove();
                 continue;
             }
