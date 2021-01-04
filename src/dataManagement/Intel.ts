@@ -114,7 +114,8 @@ export class Intel {
             const request = this.requests[i];
             const room = Game.rooms[request.roomName];
             if (!room) {
-                if (BeeBot.getObservers().length) {
+                if (BeeBot.getObservers()
+                    .find(ob => Game.map.getRoomLinearDistance(request.roomName, ob.pos.roomName) <= 10)) {
                     this.requestObserve(request.roomName);
                 } else {
                     const room = _.min(BeeBot.colonies(), room => Game.map.getRoomLinearDistance(room.name, request.roomName));
@@ -137,7 +138,15 @@ export class Intel {
 
     private static handleObserves() {
         this.observeRequests = _.uniq(this.observeRequests);
+        const observers = [...BeeBot.getObservers()];
 
+        this.observeRequests.forEach(request => {
+            if(!observers.length) return;
+            const observer = observers.find(ob => Game.map.getRoomLinearDistance(request, ob.pos.roomName) <= 10);
+            if(!observer) return;
+            observer.observeRoom(request);
+            _.remove(observers, ob => ob.id == observer.id);
+        });
     }
 
     private static scanRoom(room: Room) {
