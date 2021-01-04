@@ -13,7 +13,7 @@ export class Timer {
     public checkForTimesUp() {
         const timer = this.timers[Game.time];
         if (timer) {
-            timer.forEach((func) => func.apply(undefined));
+            timer.forEach((func) => func && func.apply(undefined));
             this.timers[Game.time] = undefined as any;
         }
     }
@@ -28,7 +28,7 @@ export class Timer {
             return '';
         }
         if (!this.timers[targetTick]) this.timers[targetTick] = [];
-        const index = this.timers[targetTick].push(func);
+        const index = this.timers[targetTick].push(func) - 1;
         return targetTick + '_' + index;
     }
 
