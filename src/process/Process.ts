@@ -257,9 +257,10 @@ export class Process {
             if (this.state == STATE_SLEEPING) this.awake();
             return;
         }
+        if (this.memory.slpId) timer.cancelCallBack(this.memory.slpId);
         this.state = STATE_SLEEPING;
         this.memory.slt = targetTime;
-        timer.callBackAtTick(targetTime, () => this.awake());
+        this.memory.slpId = timer.callBackAtTick(targetTime, () => this.awake());
         log.debug(this.roomName, this.processName, this.id, 'slept until', targetTime);
     }
 

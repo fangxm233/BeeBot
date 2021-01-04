@@ -29,6 +29,7 @@ type ProcessTypes = 'filling'
 interface protoProcess {
     st: ShortProcessState;
     slt?: number;
+    slpId?: string;
     p: string;
     sp: string[];
     bees: { [role: string]: string[] };
