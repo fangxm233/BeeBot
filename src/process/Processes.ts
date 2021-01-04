@@ -1,14 +1,13 @@
 import { Bee, bees } from "Bee/Bee";
 import { BeeFactorty } from "Bee/BeeFactory";
 import { log } from "console/log";
-import { profile } from "../profiler/decorator";
-import { Visualizer } from "../visuals/Visualizer";
+import { profile } from 'profiler/decorator';
+import { Visualizer } from 'visuals/Visualizer';
 import { Process, STATE_ACTIVE, STATE_WAITING } from "./Process";
 
 @profile
 export class Processes {
     private static restoreProcess(proto: protoProcess, processName: string, roomName: string, id: number) {
-        if (!proto) return;
         const registration = Process.getProcessRegistration(processName);
         if (!registration) {
             throw new Error(`The process ${processName} has not been registered.`);
@@ -16,7 +15,6 @@ export class Processes {
         const process = registration.constructor.getInstance(proto, roomName);
 
         process.id = id;
-        process.memory = proto;
         process.state = proto.st;
         process.parent = proto.p;
         process.bees = !proto.bees ? {} : _.mapValues(proto.bees, (creepNames, role) => {
@@ -50,6 +48,7 @@ export class Processes {
                 if (!Process.processes[roomName]) Process.processes[roomName] = {};
                 for (const id in roomProcesses) {
                     const protoProcess = roomProcesses[id];
+                    if(!protoProcess) continue;
                     try {
                         this.restoreProcess(protoProcess, processName, roomName, Number(id));
                     } catch (error) {
@@ -80,6 +79,7 @@ export class Processes {
                             return;
                     }
                 } catch (e) {
+                    log.error(`Error occurred in process ${process.fullId}`);
                     log.throw(e);
                     log.trace(e);
                 }
