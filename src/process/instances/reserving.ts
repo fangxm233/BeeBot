@@ -52,7 +52,8 @@ export class ProcessReserving extends Process {
         }
 
         this.maxCount = room.controller!.pos.availableNeighbors(true, false).length;
-        return this.inited = this.calReserverCount(room.controller!.reservation?.ticksToEnd || 0);
+        return this.inited = this.calReserverCount((room.controller?.reservedByMe ? 1 : -1)
+            * (room.controller!.reservation?.ticksToEnd || 0));
     }
 
     public run() {
