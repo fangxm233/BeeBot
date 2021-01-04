@@ -183,7 +183,7 @@ export class BeeBot {
         Memory.beebot.colonies[roomName] = undefined!;
         Memory.transport[roomName] = undefined!;
         const room = Game.rooms[roomName];
-        if(!room) return;
+        if (!room) return;
         room.find(FIND_STRUCTURES).forEach(structure => structure.destroy());
         room.find(FIND_MY_CREEPS).forEach(creep => creep.suicide());
         room.find(FIND_MY_POWER_CREEPS).forEach(pc => pc.suicide());
@@ -247,7 +247,8 @@ export class BeeBot {
 
         const dangerHostiles = room.find(FIND_HOSTILE_CREEPS)
             .filter(creep => hasAggressiveParts(creep, true)
-                && creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8));
+                && creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
+                && creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48);
         const nearbyClaims = room.find(FIND_HOSTILE_CREEPS).filter(creep => creep.bodyCounts[CLAIM]
             && creep.pos.isNearTo(room.controller!));
 
