@@ -70,6 +70,7 @@ function globalReset() {
     log.info('global reset');
     RoomPlanner.deserializeData();
     Intel.deserializeData();
+    BeeManager.deserializeBeeConfig();
     Processes.restoreProcesses();
 
     clock.addAction(10, () => {

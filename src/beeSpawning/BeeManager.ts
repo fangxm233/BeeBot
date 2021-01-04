@@ -55,15 +55,17 @@ export class BeeManager {
             wish.spawned = true;
             let name = wish.name;
             if (!name) name = wish.role + '_' + getFreeKey(Game.creeps, wish.role + '_');
-            const code = spawn.spawnCreep(body, name, { memory: wish.extraMemory }); // TODO: 使用消耗顺序
+            const code = spawn.spawnCreep(body, name, { memory: _.clone(wish.extraMemory) }); // TODO: 使用消耗顺序
             if (code === OK) {
                 wish.bee.creep = Game.creeps[name];
                 bees[name] = wish.bee;
                 process.registerBee(wish.bee, wish.role);
                 PriorityManager.arrangePriority(roomName);
                 Process.getProcess<ProcessFilling>(room.name, PROCESS_FILLING)?.awake();
+                this.beeConfigs[name] = wish.proto;
+                this.serializeBeeConfig();
             } else {
-                log.error(`can't spawn creep! code: ${code} name: ${name} body: ${body}`);
+                log.error(`Can't spawn creep! code: ${code} name: ${name} body: ${body}`);
             }
         }
     }
@@ -79,6 +81,7 @@ export class BeeManager {
     public static clearDiedBees() {
         const processToRefresh: { [name: string]: Process } = {};
         const roomsToArrange: string[] = [];
+        let shouldSerialize = false;
 
         for (const beeName in bees) {
             const bee = bees[beeName];
@@ -92,12 +95,15 @@ export class BeeManager {
                         processToRefresh[bee.process.fullId] = bee.process;
                 }
                 if (!_.contains(roomsToArrange, bee.process.roomName)) roomsToArrange.push(bee.process.roomName);
-                bees[beeName] = undefined as any;
+                bees[beeName] = undefined!;
+                this.beeConfigs[beeName] = undefined!;
+                shouldSerialize = true;
                 if (Memory.creeps[beeName]) Memory.creeps[beeName] = undefined as any;
             }
         }
         _.forEach(processToRefresh, process => process.wishCreeps());
         roomsToArrange.forEach(roomName => PriorityManager.arrangePriority(roomName));
+        if(shouldSerialize) this.serializeBeeConfig();
 
         // 只是检查下没有漏掉的项
         if (Game.time % 100 == 0) {
@@ -159,7 +165,7 @@ export class BeeManager {
     }
 
     public static deserializeBeeConfig() {
-        this.beeConfigs = JSON.parse(SegmentManager.getSegment(BEE_CONFIG_SEGMENT) || '');
+        this.beeConfigs = JSON.parse(SegmentManager.getSegment(BEE_CONFIG_SEGMENT) || '{}');
     }
 }
 

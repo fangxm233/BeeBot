@@ -3,17 +3,27 @@ import { profile } from "profiler/decorator";
 import { BeeManager } from "./BeeManager";
 import { BeeSetup } from "./BeeSetup";
 
+export const WISH_ID = 'i';
+export const WISH_BUDGET = 'b';
+export const WISH_SETUP = 's';
+export const WISH_ROLE = 'r';
+export const WISH_ROOM = 'rm';
+export const WISH_SPAWN_ROOM = 'sRm';
+export const WISH_PROCESS_ID = 'pId';
+export const WISH_EXTRA_MEMORY = 'eM';
+export const WISH_EMERGENCY = 'e';
+
 // tslint:disable-next-line:class-name
 export interface protoBeeWish {
-    id: number;
-    budget: number;
-    setup: number;
-    role: ALL_ROLES;
-    room: string;
-    spawnRoom: string;
-    processId: string;
-    extraMemory: any;
-    emergency: boolean;
+    [WISH_ID]: number;
+    [WISH_BUDGET]: number;
+    [WISH_SETUP]: number;
+    [WISH_ROLE]: ALL_ROLES;
+    [WISH_ROOM]: string;
+    [WISH_SPAWN_ROOM]: string;
+    [WISH_PROCESS_ID]: string;
+    [WISH_EXTRA_MEMORY]: any;
+    [WISH_EMERGENCY]: number;
 }
 
 @profile
@@ -55,15 +65,15 @@ export class BeeWish {
 
     public get proto(): protoBeeWish {
         return {
-            id: this.id,
-            budget: this.budget,
-            setup: this.setup.id,
-            role: this.role,
-            room: this.room,
-            spawnRoom: this.spawnRoom,
-            processId: this.processId,
-            extraMemory: this.extraMemory,
-            emergency: this.emergency,
+            [WISH_ID]: this.id,
+            [WISH_BUDGET]: this.budget,
+            [WISH_SETUP]: this.setup.id,
+            [WISH_ROLE]: this.role,
+            [WISH_ROOM]: this.room,
+            [WISH_SPAWN_ROOM]: this.spawnRoom,
+            [WISH_PROCESS_ID]: this.processId,
+            [WISH_EXTRA_MEMORY]: this.emergency,
+            [WISH_EMERGENCY]: this.emergency ? 1 : 0,
         }
     }
 }
