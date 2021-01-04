@@ -6,7 +6,6 @@ import { profile } from 'profiler/decorator';
 
 @profile
 export class ProcessDefendInvaderCore extends Process {
-    public memory: protoProcessDefendInvaderCore;
     public target: string;
     public complete: boolean;
 
@@ -17,6 +16,10 @@ export class ProcessDefendInvaderCore extends Process {
         this.wishManager.setDefault('role', ROLE_DE_INVADER_CORE);
         this.wishManager.setDefault('budget', Infinity);
         this.wishManager.setDefault('setup', setups[ROLE_DE_INVADER_CORE].default);
+    }
+
+    public get memory(): protoProcessDefendInvaderCore {
+        return super.memory as protoProcessDefendInvaderCore;
     }
 
     public static getInstance(proto: protoProcessDefendInvaderCore, roomName: string) {

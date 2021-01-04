@@ -20,7 +20,6 @@ const PIONEER_COUNT = 3;
 
 @profile
 export class ProcessColonize extends Process {
-    public memory: protoProcessColonize;
     public from: string;
     public claimed: boolean;
 
@@ -29,6 +28,10 @@ export class ProcessColonize extends Process {
         this.wishManager = new WishManager(from, roomName, this);
         this.wishManager.setDefault('budget', Infinity);
         this.from = from;
+    }
+
+    public get memory(): protoProcessColonize {
+        return super.memory as protoProcessColonize;
     }
 
     protected getProto(): any {

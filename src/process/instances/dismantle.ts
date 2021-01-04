@@ -6,7 +6,6 @@ import { profile } from 'profiler/decorator';
 
 @profile
 export class ProcessDismantle extends Process {
-    public memory: protoProcessDismantle;
     public target: string;
 
     constructor(roomName: string, target: string) {
@@ -16,6 +15,10 @@ export class ProcessDismantle extends Process {
         this.wishManager.setDefault('role', ROLE_DISMANTLER);
         this.wishManager.setDefault('budget', Infinity);
         this.wishManager.setDefault('setup', setups[ROLE_DISMANTLER].default);
+    }
+
+    public get memory(): protoProcessDismantle {
+        return super.memory as protoProcessDismantle;
     }
 
     public static getInstance(proto: protoProcessDismantle, roomName: string) {

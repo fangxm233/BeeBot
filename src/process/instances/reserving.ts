@@ -13,7 +13,6 @@ const AWAKE_AT_REMAINING = 1000;
 
 @profile
 export class ProcessReserving extends Process {
-    public memory: protoProcessReserving;
     public ticksToArrive: number;
     public target: string;
     private setup: BeeSetup;
@@ -31,6 +30,10 @@ export class ProcessReserving extends Process {
 
         this.target = target;
         this.setup = setups[ROLE_RESERVER].default;
+    }
+
+    public get memory(): protoProcessReserving {
+        return super.memory as protoProcessReserving;
     }
 
     public static getInstance(proto: protoProcessReserving, roomName: string) {

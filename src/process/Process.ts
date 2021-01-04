@@ -48,7 +48,6 @@ export class Process {
     public bees: { [role: string]: Bee[] };
     public id: number;
     public closed: boolean;
-    public memory: protoProcess;
     public wishManager: WishManager;
 
     constructor(roomName: string, processName: ProcessTypes) {
@@ -63,6 +62,10 @@ export class Process {
             }
         }
         this._state = STATE_ACTIVE;
+    }
+
+    public get memory(): protoProcess {
+        return Memory.processes[this.processName][this.roomName][this.id];
     }
 
     private _state: ProcessState;
@@ -161,7 +164,6 @@ export class Process {
         this.processesById[process.fullId] = process;
         this.processesByType[process.processName][process.fullId] = process;
         Memory.processes[process.processName][process.roomName][free] = process.protoProcess;
-        process.memory = Memory.processes[process.processName][process.roomName][free];
 
         const registration = this.processRegistry.find(r => r.processName == process.processName);
         if (registration && registration.wishListInterval != -1)
@@ -176,6 +178,7 @@ export class Process {
         this.processes[process.roomName][process.fullId] = process;
         this.processesById[process.fullId] = process;
         this.processesByType[process.processName][process.fullId] = process;
+        Memory.processes[process.processName][process.roomName][process.id] = process.protoProcess;
 
         const registration = this.processRegistry.find(r => r.processName == process.processName);
         if (registration && registration.wishListInterval != -1)
@@ -249,6 +252,7 @@ export class Process {
     }
 
     public sleep(targetTime: number) {
+        targetTime--; // 由于timer在运行process之后调用，需要提前1tick唤醒
         if (targetTime < Game.time) {
             if (this.state == STATE_SLEEPING) this.awake();
             return;
@@ -306,7 +310,7 @@ export class Process {
         _.forEach(this.bees[role], callbackFn);
     }
 
-    public boostedCreep(creepName: string, compoundTypes: ResourceConstant[]) {
+    public boostedCreep(creepName: string, compoundTypes: ResourceConstant[], succeed: boolean) {
         return;
     }
 

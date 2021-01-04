@@ -14,7 +14,6 @@ import { coordToRoomPosition, partCount } from 'utilities/helpers';
 
 @profile
 export class ProcessMineSource extends Process {
-    public memory: protoProcessMineSource;
     public sources: RoomPosition[];
     public target: string;
     public earlyOutpost: boolean;
@@ -28,6 +27,10 @@ export class ProcessMineSource extends Process {
         this.wishManager = new WishManager(roomName, targetRoom, this);
         this.target = targetRoom;
         this.earlyOutpost = !!earlyOutpost;
+    }
+
+    public get memory(): protoProcessMineSource {
+        return super.memory as protoProcessMineSource;
     }
 
     protected getProto() {
