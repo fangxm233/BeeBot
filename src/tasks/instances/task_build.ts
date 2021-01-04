@@ -7,13 +7,16 @@ export type buildTargetType = ConstructionSite;
 export class TaskBuild extends Task {
 
 	public static taskName = 'build';
-	public target: buildTargetType;
 
 	constructor(target: buildTargetType, options = {} as TaskOptions) {
 		super(TaskBuild.taskName, target, options);
 		// Settings
 		this.settings.targetRange = 3;
 		this.settings.workOffRoad = true;
+	}
+
+	public get target() {
+		return super.target as buildTargetType;
 	}
 
 	public isValidTask() {

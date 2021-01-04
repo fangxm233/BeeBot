@@ -8,12 +8,15 @@ export type attackTargetType = Creep | Structure;
 export class TaskAttack extends Task {
 
 	public static taskName = 'attack';
-	public target: attackTargetType;
 
 	constructor(target: attackTargetType, options = {} as TaskOptions) {
 		super(TaskAttack.taskName, target, options);
 		// Settings
 		this.settings.targetRange = 3;
+	}
+
+	public get target() {
+		return super.target as attackTargetType;
 	}
 
 	public isValidTask() {

@@ -6,11 +6,14 @@ export type claimTargetType = StructureController;
 
 export class TaskClaim extends Task {
 	public static taskName = 'claim';
-	public target: claimTargetType;
 
 	constructor(target: claimTargetType, options = {} as TaskOptions) {
 		super(TaskClaim.taskName, target, options);
 		// Settings
+	}
+
+	public get target() {
+		return super.target as claimTargetType;
 	}
 
 	public isValidTask() {

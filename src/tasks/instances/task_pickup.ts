@@ -5,11 +5,14 @@ export type pickupTargetType = Resource;
 export class TaskPickup extends Task {
 
 	public static taskName = 'pickup';
-	public target: pickupTargetType;
 
 	constructor(target: pickupTargetType, options = {} as TaskOptions) {
 		super(TaskPickup.taskName, target, options);
 		this.settings.oneShot = true;
+	}
+
+	public get target() {
+		return super.target as pickupTargetType;
 	}
 
 	public isValidTask() {

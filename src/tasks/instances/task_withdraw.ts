@@ -15,7 +15,6 @@ export type withdrawTargetType =
 export class TaskWithdraw extends Task {
 
 	public static taskName = 'withdraw';
-	public target: withdrawTargetType;
 	public data: {
 		resourceType: ResourceConstant,
 		amount: number | undefined,
@@ -30,6 +29,10 @@ export class TaskWithdraw extends Task {
 		this.settings.oneShot = true;
 		this.data.resourceType = resourceType;
 		this.data.amount = amount;
+	}
+
+	public get target() {
+		return super.target as withdrawTargetType;
 	}
 
 	public isValidTask() {

@@ -5,12 +5,15 @@ export type healTargetType = Creep;
 export class TaskHeal extends Task {
 
 	public static taskName = 'heal';
-	public target: healTargetType;
 
 	constructor(target: healTargetType, options = {} as TaskOptions) {
 		super(TaskHeal.taskName, target, options);
 		// Settings
 		this.settings.targetRange = 3;
+	}
+
+	public get target() {
+		return super.target as healTargetType;
 	}
 
 	public isValidTask() {

@@ -4,10 +4,13 @@ export type getRenewedTargetType = StructureSpawn;
 
 export class TaskGetRenewed extends Task {
 	public static taskName = 'getRenewed';
-	public target: getRenewedTargetType;
 
 	constructor(target: getRenewedTargetType, options = {} as TaskOptions) {
 		super(TaskGetRenewed.taskName, target, options);
+	}
+
+	public get target() {
+		return super.target as getRenewedTargetType;
 	}
 
 	public isValidTask() {

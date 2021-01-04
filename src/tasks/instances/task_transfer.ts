@@ -14,7 +14,6 @@ export class TaskTransfer extends Task {
 
 	public static taskName = 'transfer';
 
-	public target: transferTargetType;
 	public data: {
 		resourceType: ResourceConstant
 		amount: number | undefined
@@ -29,6 +28,10 @@ export class TaskTransfer extends Task {
 		this.settings.oneShot = true;
 		this.data.resourceType = resourceType;
 		this.data.amount = amount;
+	}
+
+	public get target() {
+		return super.target as transferTargetType;
 	}
 
 	public isValidTask() {

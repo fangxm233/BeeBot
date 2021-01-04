@@ -9,10 +9,13 @@ function isSource(obj: Source | Mineral): obj is Source {
 export class TaskHarvest extends Task {
 
 	public static taskName = 'harvest';
-	public target: harvestTargetType;
 
 	constructor(target: harvestTargetType, options = {} as TaskOptions) {
 		super(TaskHarvest.taskName, target, options);
+	}
+
+	public get target() {
+		return super.target as harvestTargetType;
 	}
 
 	public isValidTask() {

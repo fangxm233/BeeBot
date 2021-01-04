@@ -5,13 +5,16 @@ export type upgradeTargetType = StructureController;
 export class TaskUpgrade extends Task {
 
 	public static taskName = 'upgrade';
-	public target: upgradeTargetType;
 
 	constructor(target: upgradeTargetType, options = {} as TaskOptions) {
 		super(TaskUpgrade.taskName, target, options);
 		// Settings
 		this.settings.targetRange = 3;
 		this.settings.workOffRoad = true;
+	}
+
+	public get target() {
+		return super.target as upgradeTargetType;
 	}
 
 	public isValidTask() {

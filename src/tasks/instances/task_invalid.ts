@@ -5,10 +5,13 @@ import {Task} from '../Task';
 export class TaskInvalid extends Task {
 
 	public static taskName = 'invalid';
-	public target: any;
 
 	constructor(target: any, options = {} as TaskOptions) {
 		super('INVALID', target, options);
+	}
+
+	public get target() {
+		return super.target as any;
 	}
 
 	public isValidTask() {

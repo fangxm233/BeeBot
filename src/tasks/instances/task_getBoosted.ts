@@ -43,7 +43,6 @@ const boostParts: { [boostType: string]: BodyPartConstant } = {
 
 export class TaskGetBoosted extends Task {
 	public static taskName = 'getBoosted';
-	public target: getBoostedTargetType;
 
 	public data: {
 		resourceType: _ResourceConstantSansEnergy;
@@ -59,6 +58,10 @@ export class TaskGetBoosted extends Task {
 		this.data.resourceType = boostType;
 		this.data.amount = partCount;
 
+	}
+
+	public get target() {
+		return super.target as getBoostedTargetType;
 	}
 
 	public isValidTask() {

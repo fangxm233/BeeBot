@@ -7,7 +7,6 @@ export type dropTargetType = { pos: RoomPosition } | RoomPosition;
 export class TaskDrop extends Task {
 
 	public static taskName = 'drop';
-	public target: null;
 	public data: {
 		resourceType: ResourceConstant
 		amount: number | undefined
@@ -28,6 +27,10 @@ export class TaskDrop extends Task {
 		// Data
 		this.data.resourceType = resourceType;
 		this.data.amount = amount;
+	}
+
+	public get target() {
+		return super.target as null;
 	}
 
 	public isValidTask() {

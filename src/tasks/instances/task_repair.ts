@@ -5,12 +5,15 @@ export type repairTargetType = Structure;
 export class TaskRepair extends Task {
 
 	public static taskName = 'repair';
-	public target: repairTargetType;
 
 	constructor(target: repairTargetType, options = {} as TaskOptions) {
 		super(TaskRepair.taskName, target, options);
 		// Settings
 		this.settings.targetRange = 3;
+	}
+
+	public get target() {
+		return super.target as repairTargetType;
 	}
 
 	public isValidTask() {

@@ -5,7 +5,6 @@ export type signControllerTargetType = StructureController;
 export class TaskSignController extends Task {
 
 	public static taskName = 'signController';
-	public target: signControllerTargetType;
 	public data: {
 		signature: string;
 	};
@@ -14,6 +13,10 @@ export class TaskSignController extends Task {
 				options                                     = {} as TaskOptions) {
 		super(TaskSignController.taskName, target, options);
 		this.data.signature = signature;
+	}
+
+	public get target() {
+		return super.target as signControllerTargetType;
 	}
 
 	public isValidTask() {

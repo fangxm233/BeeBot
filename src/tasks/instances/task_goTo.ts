@@ -8,7 +8,6 @@ function hasPos(obj: { pos: RoomPosition } | RoomPosition): obj is { pos: RoomPo
 
 export class TaskGoTo extends Task {
 	public static taskName = 'goTo';
-	public target: null;
 
 	constructor(target: goToTargetType, options = {} as TaskOptions) {
 		if (hasPos(target)) {
@@ -18,6 +17,10 @@ export class TaskGoTo extends Task {
 		}
 		// Settings
 		this.settings.targetRange = 1;
+	}
+
+	public get target() {
+		return super.target as null;
 	}
 
 	public isValidTask() {
