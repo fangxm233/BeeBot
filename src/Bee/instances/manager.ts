@@ -95,7 +95,7 @@ export class BeeManager extends Bee {
         if (!this.upgradeLinkId)
             this.upgradeLinkId = this.room.links.filter(link => link.pos.inRangeTo(controller, 2))[0]?.id!;
 
-        return true;
+        return this.initialized = true;
     }
 
     private executeTask() {
@@ -334,6 +334,7 @@ export class BeeManager extends Bee {
             }
             if (sourceLabs[i].store.getUsedCapacity(components[i])! < amount) {
                 // 这里做了个假设，terminal已经在前面的程序中准备好了资源
+                if (!this.terminal.store.getUsedCapacity(components[i])) return false;
                 this.setTask(this.terminal, sourceLabs[i], amount - stored, components[i]);
                 return true;
             }
