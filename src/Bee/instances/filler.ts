@@ -23,10 +23,9 @@ export class BeeFiller extends Bee {
 
     public runCore() {
         if (!this.arriveTick) this.arriveTick = 1;
-        if (!this.memory.i) this.memory.i = 0;
         if (!this.fillingRoute) {
             const data = RoomPlanner.getRoomData(this.process.roomName);
-            if (data) this.fillingRoute = RoomPlanner.getFillingRoute(data.basePos!, this.room.name, this.memory.i);
+            if (data) this.fillingRoute = RoomPlanner.getFillingRoute(data.basePos!, this.process.roomName, this.memory.i);
             else return;
         }
         if (!this.targetList) {
