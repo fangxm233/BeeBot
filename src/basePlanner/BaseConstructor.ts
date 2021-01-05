@@ -267,18 +267,15 @@ export class BaseConstructor {
         const room = Game.rooms[this.roomName];
         if (!room) return;
 
-        if (clean)
-            room.structures.forEach(structure => !isOwner(structure) && structure.destroy());
-        else {
-            room.structures.forEach(structure => {
-                if (isOwner(structure)) return;
-                if (structure.structureType != STRUCTURE_STORAGE && structure.structureType != STRUCTURE_TERMINAL) {
-                    structure.destroy();
-                    return;
-                }
-                if (isStoreStructure(structure) && !structure.store.energy) structure.destroy();
-            });
-        }
+        room.structures.forEach(structure => {
+            if (isOwner(structure)) return;
+            if (clean || structure.structureType != STRUCTURE_STORAGE
+                && structure.structureType != STRUCTURE_TERMINAL) {
+                structure.destroy();
+                return;
+            }
+            if (isStoreStructure(structure) && !structure.store.energy) structure.destroy();
+        });
     }
 
     public getAtBase(x: number, y: number): StructureAtPos;
