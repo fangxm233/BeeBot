@@ -82,7 +82,11 @@ export class ProcessMineSource extends Process {
     private calMinerCount(): boolean {
         const baseRoom = Game.rooms[this.roomName];
         const targetRoom = Game.rooms[this.target];
-        if (!baseRoom || !targetRoom || !this.setup) return false;
+        if (!targetRoom) {
+            Intel.requestSight(this.target);
+            return false;
+        }
+        if (!baseRoom || !this.setup) return false;
 
         this.minerCount = [];
         const count = partCount(this.setup.generateCreepBody(BeeManager.getRoomEnergyCapacity(baseRoom)), WORK);
