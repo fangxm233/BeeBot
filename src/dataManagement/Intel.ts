@@ -61,6 +61,7 @@ export class Intel {
     private static roomCostMatrix: { [roomName: string]: CostMatrix } = {};
     private static requests: { roomName: string, requestType: 'intel' | 'costMatrix' }[] = [];
     private static observeRequests: string[] = [];
+    private static sightRequests: string[] = [];
     private static dirty: boolean = false;
 
     public static getRoomIntel(roomName: string, requestWhenMissing: boolean = true): RoomIntel | undefined {
@@ -105,6 +106,10 @@ export class Intel {
         if (room) this.generateCostMatrix(room);
     }
 
+    public static requestSight(roomName: string) {
+        this.sightRequests.push(roomName);
+    }
+
     public static requestObserve(roomName: string) {
         this.observeRequests.push(roomName);
     }
@@ -114,18 +119,7 @@ export class Intel {
             const request = this.requests[i];
             const room = Game.rooms[request.roomName];
             if (!room) {
-                if (BeeBot.getObservers()
-                    .find(ob => Game.map.getRoomLinearDistance(request.roomName, ob.pos.roomName) <= 10)) {
-                    this.requestObserve(request.roomName);
-                } else {
-                    const room = _.min(BeeBot.colonies(), room => Game.map.getRoomLinearDistance(room.name, request.roomName));
-                    let scout = Process.getProcess<ProcessScout>(room.name, PROCESS_SCOUT);
-                    if (!scout) {
-                        scout = new ProcessScout(room.name);
-                        Process.startProcess(scout);
-                    }
-                    scout.requestScout(request.roomName);
-                }
+                this.requestSight(request.roomName);
             } else {
                 this.scanRoom(room);
                 if (request.requestType == 'costMatrix') this.generateCostMatrix(room);
@@ -133,7 +127,25 @@ export class Intel {
             }
         }
 
+        this.handleSights();
         this.handleObserves();
+    }
+
+    private static handleSights() {
+        this.sightRequests.forEach(roomName => {
+            if (BeeBot.getObservers()
+                .find(ob => Game.map.getRoomLinearDistance(roomName, ob.pos.roomName) <= 10)) {
+                this.requestObserve(roomName);
+            } else {
+                const room = _.min(BeeBot.colonies(), room => Game.map.getRoomLinearDistance(room.name, roomName));
+                let scout = Process.getProcess<ProcessScout>(room.name, PROCESS_SCOUT);
+                if (!scout) {
+                    scout = new ProcessScout(room.name);
+                    Process.startProcess(scout);
+                }
+                scout.requestScout(roomName);
+            }
+        })
     }
 
     private static handleObserves() {
