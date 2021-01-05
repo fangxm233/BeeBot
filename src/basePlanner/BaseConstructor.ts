@@ -36,7 +36,7 @@ export const CONTAINER_CONSTRUCT_RCL = 4;
 export const RAMPART_CONSTRUCT_RCL = 3;
 
 export const SAFE_CONSTRUCT_ENERGY_LINE = 200e3;
-export const NEED_SAFE_CONSTRUCT_COST = 10e3;
+export const NEED_SAFE_CONSTRUCT_COST = 50e3;
 
 @profile
 export class BaseConstructor {
