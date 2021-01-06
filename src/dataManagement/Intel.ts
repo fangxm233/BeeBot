@@ -115,17 +115,16 @@ export class Intel {
     }
 
     public static handleRequests() {
-        for (let i = 0; i < this.requests.length; i++) {
-            const request = this.requests[i];
+        this.requests.forEach(request => {
             const room = Game.rooms[request.roomName];
             if (!room) {
                 this.requestSight(request.roomName);
             } else {
                 this.scanRoom(room);
                 if (request.requestType == 'costMatrix') this.generateCostMatrix(room);
-                this.requests.splice(i--);
             }
-        }
+        });
+        this.requests = [];
 
         this.handleSights();
         this.handleObserves();
@@ -145,20 +144,23 @@ export class Intel {
                 }
                 scout.requestScout(roomName);
             }
-        })
+        });
+        this.sightRequests = [];
     }
 
     private static handleObserves() {
         this.observeRequests = _.uniq(this.observeRequests);
         const observers = [...BeeBot.getObservers()];
 
-        this.observeRequests.forEach(request => {
+        for (let i = 0; i < this.observeRequests.length; i++) {
+            const request = this.observeRequests[i];
             if(!observers.length) return;
             const observer = observers.find(ob => Game.map.getRoomLinearDistance(request, ob.pos.roomName) <= 10);
             if(!observer) return;
             observer.observeRoom(request);
             _.remove(observers, ob => ob.id == observer.id);
-        });
+            this.requests.splice(i--);
+        }
     }
 
     private static scanRoom(room: Room) {
