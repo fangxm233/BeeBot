@@ -14,10 +14,10 @@ import { timeAfterTick } from 'utilities/helpers';
 
 const COMPOUND_ORDER: MineralCompoundConstant[] = [
     RESOURCE_CATALYZED_LEMERGIUM_ACID,
+    RESOURCE_CATALYZED_KEANIUM_ALKALIDE,
     RESOURCE_CATALYZED_GHODIUM_ALKALIDE,
     RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE,
     RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE,
-    RESOURCE_CATALYZED_KEANIUM_ALKALIDE,
     RESOURCE_CATALYZED_UTRIUM_ACID,
     RESOURCE_CATALYZED_GHODIUM_ACID,
     RESOURCE_CATALYZED_ZYNTHIUM_ACID,
@@ -58,10 +58,13 @@ export const MIN_AMOUNT = 1500;
 
 @profile
 export class ProcessLabReact extends Process {
-    public memory: protoProcessLabReact;
 
     constructor(roomName: string) {
         super(roomName, PROCESS_LAB_REACT);
+    }
+
+    public get memory(): protoProcessLabReact {
+        return super.memory as protoProcessLabReact;
     }
 
     public static getInstance(proto: protoProcess, roomName: string) {
@@ -124,6 +127,7 @@ export class ProcessLabReact extends Process {
 
             let hasOK = false;
             reactLabs.forEach(lab => {
+                if (this.locked(lab.id)) return;
                 const code = lab.runReaction(sourceLabs[0], sourceLabs[1]);
                 if (code === OK) hasOK = true;
             });
@@ -156,9 +160,10 @@ export class ProcessLabReact extends Process {
         let type = COMPOUND_ORDER.find(type => ResourcesManager.getStock(this.roomName, type) < TERMINAL_COMPOUND
             && !!this.findTarget(type, AMOUNT_PER_REACTION, MIN_AMOUNT));
         if (type) return type;
-        type = COMPOUND_ORDER.find(type => !_.contains(STORAGE_EXCLUDED_COMPOUND, type)
+        const lacks = COMPOUND_ORDER.filter(type => !_.contains(STORAGE_EXCLUDED_COMPOUND, type)
             && ResourcesManager.getStock(this.roomName, type) < STORAGE_COMPOUND + TERMINAL_COMPOUND
             && !!this.findTarget(type, AMOUNT_PER_REACTION, MIN_AMOUNT));
+        if(lacks.length) type = _.min(lacks, type => ResourcesManager.getStock(this.roomName, type));
         return type;
     }
 
@@ -176,6 +181,22 @@ export class ProcessLabReact extends Process {
                 this.ceilToMultiplesOf5(amount - minStock), minAmount);
 
         return { target: final, amount: this.floorToMultiplesOf5(Math.min(minStock, amount)) };
+    }
+
+    public lockLab(lab: Id<StructureLab>) {
+        if (!this.memory.locked) this.memory.locked = [];
+        if (_.contains(this.memory.locked, lab)) return;
+        this.memory.locked.push(lab);
+    }
+
+    public freeLab(lab: Id<StructureLab>) {
+        if (!this.memory.locked) return;
+        _.remove(this.memory.locked, l => l == lab);
+        if (!this.memory.locked.length) this.memory.locked = undefined;
+    }
+
+    public locked(lab: Id<StructureLab>): boolean {
+        return _.contains(this.memory.locked!, lab);
     }
 
     private floorToMultiplesOf5(amount: number): number {
