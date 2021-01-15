@@ -87,7 +87,7 @@ export class ProcessTower extends Process {
                 return shield < damage;
             }
             return possibleDamage(creep.body, creep.pos, USER_NAME, creep.owner.username, true, towerDamage)
-                * creep.pos.rangeToEdge >= creep.hitsMax - creep.hits;
+                * creep.pos.rangeToEdge >= (creep.owner.username == "Invader" ? 0 : creep.hitsMax - creep.hits);
         });
 
         if (targets.length) {
