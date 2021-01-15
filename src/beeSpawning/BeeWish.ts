@@ -10,7 +10,7 @@ export const WISH_ROLE = 'r';
 export const WISH_ROOM = 'rm';
 export const WISH_SPAWN_ROOM = 'sRm';
 export const WISH_PROCESS_ID = 'pId';
-export const WISH_EXTRA_MEMORY = 'eM';
+export const WISH_EXTRA_MEMORY = 'm';
 export const WISH_EMERGENCY = 'e';
 
 // tslint:disable-next-line:class-name
@@ -72,7 +72,7 @@ export class BeeWish {
             [WISH_ROOM]: this.room,
             [WISH_SPAWN_ROOM]: this.spawnRoom,
             [WISH_PROCESS_ID]: this.processId,
-            [WISH_EXTRA_MEMORY]: this.emergency,
+            [WISH_EXTRA_MEMORY]: this.extraMemory,
             [WISH_EMERGENCY]: this.emergency ? 1 : 0,
         }
     }
