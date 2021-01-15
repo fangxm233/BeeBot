@@ -42,8 +42,18 @@ type protoProcessMineSource = protoProcess & {
     EO: number;
 };
 
+interface BoostConfig {
+    mineralType?: MineralCompoundConstant[],
+    partCount?: { [part: string]: number },
+
+    partType?: BodyPartConstant[],
+
+    lasting?: boolean;
+}
+
 type protoProcessBoost = protoProcess & {
-    type: 'single' | 'lasting';
+    type: 'once' | 'lasting';
+    configs: { [name: string]: BoostConfig }
 };
 
 type protoProcessReserving = protoProcess & {
@@ -73,6 +83,7 @@ type protoProcessDismantle = protoProcess & {
 
 type protoProcessLabReact = protoProcess & {
     state: 'none' | 'fill' | 'react' | 'take';
+    locked?: Id<StructureLab>[];
     type?: MineralCompoundConstant;
     amount?: number;
 };
