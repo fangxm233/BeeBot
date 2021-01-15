@@ -7,6 +7,7 @@ interface Memory {
         colonies: {
             [roomName: string]: {
                 stage: ColonyStage,
+                defending: boolean,
             }
         }
     }
@@ -45,6 +46,11 @@ interface CreepMemory {
      * arriveTick
      */
     AT?: number;
+
+    /**
+     * boosted
+     */
+    b?: number;
 }
 
 type BeeFillerMemory = CreepMemory & {
