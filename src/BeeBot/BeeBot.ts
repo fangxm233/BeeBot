@@ -15,6 +15,7 @@ import {
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
     PROCESS_TOWER,
+    PROCESS_UPGRADE,
 } from 'declarations/constantsExport';
 import { clock } from 'event/Clock';
 import { event } from 'event/Event';
@@ -36,7 +37,7 @@ import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { ResourcesManager } from 'resourceManagement/ResourcesManager';
 import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
-import { hasAggressiveParts } from 'utilities/helpers';
+import { hasAggressiveParts, timeAfterTick } from 'utilities/helpers';
 import { getAllColonyRooms, printRoomName } from 'utilities/utils';
 
 const EARLY_OUTPOST_DEPTH = 1;
@@ -74,7 +75,7 @@ export class BeeBot {
                 Process.startProcess(new ProcessLabReact(roomName));
         });
         clock.addAction(100, () => this.routineCheck(roomName));
-        clock.addAction(10, () => this.checkOutpostInvaders(roomName));
+        clock.addAction(10, () => this.checkOutpostEnemies(roomName));
     }
 
     public static goOutpost(from: string, to: string) {
@@ -158,7 +159,7 @@ export class BeeBot {
 
     public static run() {
         this.colonies().forEach(room => {
-            this.checkForSafeMode(room);
+            this.checkColonyEnemies(room);
             ResourcesManager.balanceResources();
         });
     }
@@ -237,35 +238,46 @@ export class BeeBot {
     }
 
     public static setColonyStage(roomName: string, stage: ColonyStage) {
-        if (!Memory.beebot.colonies[roomName]) Memory.beebot.colonies[roomName] = { stage };
+        if (!Memory.beebot.colonies[roomName]) Memory.beebot.colonies[roomName] = { stage, defending: false };
         else Memory.beebot.colonies[roomName].stage = stage;
     }
 
-    private static checkForSafeMode(room: Room) {
+    private static checkColonyEnemies(room: Room) {
         const data = RoomPlanner.getRoomData(room.name);
         if (!data) return;
 
-        const dangerHostiles = room.find(FIND_HOSTILE_CREEPS)
-            .filter(creep => hasAggressiveParts(creep, true)
-                && creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
-                && creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48);
-        const nearbyClaims = room.find(FIND_HOSTILE_CREEPS).filter(creep => creep.bodyCounts[CLAIM]
-            && creep.pos.isNearTo(room.controller!));
+        const hostiles = room.find(FIND_HOSTILE_CREEPS).filter(creep => hasAggressiveParts(creep, true)
+            && creep.owner.username != 'Invader');
+        if (hostiles.length) {
+            if (!BeeBot.isDefending(room.name)) BeeBot.activateDefendMode(room.name);
+        }
 
-        if (nearbyClaims.length || dangerHostiles.length) {
-            const danger = [...dangerHostiles, ...nearbyClaims];
+        const enteredHostiles = room.find(FIND_HOSTILE_CREEPS).filter(creep =>
+            hasAggressiveParts(creep, true)
+            && creep.pos.inRangeTo(data.basePos!.x + 5, data.basePos!.y + 5, 8)
+            && creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48);
+        const nearbyClaims = room.find(FIND_HOSTILE_CREEPS).filter(creep => !!creep.bodyCounts[CLAIM]
+            && creep.pos.inRangeTo(room.controller!, 2));
+
+        let activate = false;
+        if (nearbyClaims.length && room.controller!.pos
+            .availableNeighbors(true, false).length) activate = true; // TODO:不对
+        if (enteredHostiles.length) activate = true;
+
+        if (activate) {
+            const danger = [...enteredHostiles, ...nearbyClaims];
             const code = room.controller!.activateSafeMode();
-            const message = `Room ${room.name} is under attacking! SafeMode activated.
+            if (code === OK) {
+                const message = `Room ${room.name} is under attacking! SafeMode activated.
             tick: ${Game.time} owner: ${JSON.stringify(danger.map(creep => creep.owner.username))} 
             part: ${JSON.stringify(danger.map(creep => creep.bodyCounts))}`;
-            if (code === OK) {
                 Game.notify(message);
                 log.warning(message);
             }
         }
     }
 
-    private static checkOutpostInvaders(roomName: string) {
+    private static checkOutpostEnemies(roomName: string) {
         const outposts = Memory.beebot.outposts[roomName];
         if (!outposts?.length) return;
         outposts.forEach(outpost => {
@@ -282,6 +294,34 @@ export class BeeBot {
                 if (!process) Process.startProcess(new ProcessDefendInvader(roomName, outpost));
             }
         });
+    }
+
+    public static activateDefendMode(roomName: string) {
+        if (!Memory.beebot.colonies[roomName]) return;
+        Process.getProcesses<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE).forEach(process => process.suspend());
+        Process.getProcesses<ProcessCarry>(roomName, PROCESS_CARRY).forEach(process => process.suspend());
+        Process.getProcesses<ProcessReserving>(roomName, PROCESS_RESERVING).forEach(process => process.suspend());
+        Process.getProcesses<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER).forEach(process => process.suspend());
+        Process.getProcesses<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE).forEach(process => process.suspend());
+        Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL)?.suspend();
+        Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)?.suspend();
+        Memory.beebot.colonies[roomName].defending = true;
+    }
+
+    public static cancelDefendMode(roomName: string) {
+        if (!Memory.beebot.colonies[roomName]) return;
+        Process.getProcesses<ProcessMineSource>(roomName, PROCESS_MINE_SOURCE).forEach(process => process.awake());
+        Process.getProcesses<ProcessCarry>(roomName, PROCESS_CARRY).forEach(process => process.awake());
+        Process.getProcesses<ProcessReserving>(roomName, PROCESS_RESERVING).forEach(process => process.awake());
+        Process.getProcesses<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER).forEach(process => process.awake());
+        Process.getProcesses<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE).forEach(process => process.awake());
+        Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL)?.awake();
+        Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)?.awake();
+        Memory.beebot.colonies[roomName].defending = false;
+    }
+
+    public static isDefending(roomName: string) {
+        return Memory.beebot.colonies[roomName] || false;
     }
 }
 
