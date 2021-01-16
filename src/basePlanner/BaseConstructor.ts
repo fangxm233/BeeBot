@@ -270,7 +270,8 @@ export class BaseConstructor {
         room.structures.forEach(structure => {
             if (isOwner(structure)) return;
             if (clean || structure.structureType != STRUCTURE_STORAGE
-                && structure.structureType != STRUCTURE_TERMINAL) {
+                && structure.structureType != STRUCTURE_TERMINAL
+                && structure.structureType != STRUCTURE_FACTORY) {
                 structure.destroy();
                 return;
             }
