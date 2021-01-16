@@ -37,8 +37,8 @@ export class Command {
                 continue;
             }
             if (snips[0] == 'unclaim') {
-                BeeBot.unclaimColony(flag.pos.roomName);
                 flag.remove();
+                BeeBot.unclaimColony(flag.pos.roomName);
                 continue;
             }
             if (snips[0] == 'disable') {
