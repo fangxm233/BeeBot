@@ -1,6 +1,7 @@
 import { BaseConstructor } from 'basePlanner/BaseConstructor';
 import { RoomPlanner } from 'basePlanner/RoomPlanner';
 import { PriorityManager } from 'beeSpawning/PriorityManager';
+import { USER_NAME } from 'config';
 import { log } from 'console/log';
 import { Intel } from 'dataManagement/Intel';
 import {
@@ -14,6 +15,7 @@ import {
     PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
+    PROCESS_TAKE_SCORE,
     PROCESS_TOWER,
     PROCESS_UPGRADE,
 } from 'declarations/constantsExport';
@@ -31,12 +33,13 @@ import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessRepair } from 'process/instances/repair';
 import { ProcessReserving } from 'process/instances/reserving';
+import { ProcessTakeScore } from 'process/instances/takeScore';
 import { ProcessTower } from 'process/instances/tower';
 import { ProcessUpgrade } from 'process/instances/upgrade';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { ResourcesManager } from 'resourceManagement/ResourcesManager';
-import { Cartographer, ROOMTYPE_CONTROLLER } from 'utilities/Cartographer';
+import { Cartographer, ROOMTYPE_CONTROLLER, ROOMTYPE_HIGHEAY } from 'utilities/Cartographer';
 import { hasAggressiveParts, timeAfterTick } from 'utilities/helpers';
 import { getAllColonyRooms, printRoomName } from 'utilities/utils';
 
@@ -244,6 +247,38 @@ export class BeeBot {
     public static setColonyStage(roomName: string, stage: ColonyStage) {
         if (!Memory.beebot.colonies[roomName]) Memory.beebot.colonies[roomName] = { stage, defending: false };
         else Memory.beebot.colonies[roomName].stage = stage;
+    }
+
+    public static getScoreDetectRooms(roomName: string) {
+        const rooms = Cartographer.findRoomsInRange(roomName, 1)
+            .filter(room => Cartographer.roomType(room) == ROOMTYPE_CONTROLLER);
+        rooms.push(...Cartographer.findRoomsInRange(roomName, 5)
+            .filter(room => Cartographer.roomType(room) == ROOMTYPE_HIGHEAY));
+        return rooms.filter(room => !Intel.getRoomIntel(room)?.owner || Intel.getRoomIntel(room)?.owner == USER_NAME);
+    }
+
+    public static detectScoreRooms(roomName: string) {
+        const roomNames = this.getScoreDetectRooms(roomName);
+        roomNames.forEach(r => {
+            const room = Game.rooms[r];
+            if (room) {
+                const amount = _.sum(room.find(FIND_SCORE_CONTAINERS),
+                    container => container.store.getUsedCapacity(RESOURCE_SCORE));
+                if (amount) {
+                    if (Process.getProcess<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE, 'target', r)) return;
+                    log.info(`Room ${roomName} detected score in ${r}. amount: ${amount}`);
+                    if (Process.getProcess<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE, 'target', 'none'))
+                        Process.getProcess<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE, 'target', 'none')!.target = r;
+                    else Process.startProcess(new ProcessTakeScore(roomName, r));
+                }
+                return;
+            }
+            Intel.refreshRoomIntel(r);
+            const intel = Intel.getRoomIntel(r);
+            if (!intel || Game.time - intel.time > 1500) {
+                Intel.requestRoomIntel(r);
+            }
+        });
     }
 
     private static checkColonyEnemies(room: Room) {

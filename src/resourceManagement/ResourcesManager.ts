@@ -17,6 +17,7 @@ import { Task } from 'tasks/Task';
 import { Tasks } from 'tasks/Tasks';
 
 export const RESOURCE_IMPORTANCE: ResourceConstant[] = [
+    RESOURCE_SCORE,
     ...[...COMMODITIES].reverse(),
 
     RESOURCE_CATALYZED_GHODIUM_ALKALIDE,

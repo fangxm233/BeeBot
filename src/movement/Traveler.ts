@@ -23,7 +23,7 @@ export class Traveler {
     public static travelTo(bee: Bee, destination: HasPos | RoomPosition, options: TravelToOptions = {}): number {
 
         // uncomment if you would like to register hostile rooms entered
-        // this.updateRoomStatus(creep.room);
+        this.updateRoomStatus(bee.room);
 
         if (!destination) {
             return ERR_INVALID_ARGS;

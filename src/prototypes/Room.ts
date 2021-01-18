@@ -223,3 +223,23 @@ Object.defineProperty(Room.prototype, 'droppedPower', {
 	},
 	configurable: true,
 });
+
+Object.defineProperty(Room.prototype, 'scoreContainers', {
+	get() {
+		if(!this._scoreContainers) {
+			this._scoreContainers = this.find(FIND_SCORE_CONTAINERS);
+		}
+		return this._scoreContainers;
+	},
+	configurable: true,
+});
+
+Object.defineProperty(Room.prototype, 'scoreCollector', {
+	get() {
+		if(!this._scoreCollector) {
+			this._scoreCollector = this.find(FIND_SCORE_COLLECTORS)[0];
+		}
+		return this._scoreCollector;
+	},
+	configurable: true,
+});

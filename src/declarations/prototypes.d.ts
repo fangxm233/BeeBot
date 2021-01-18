@@ -85,6 +85,9 @@ interface Room {
 	mineral: Mineral | undefined;
 	deposits: Deposit[];
 	constructionSites: ConstructionSite[];
+
+	scoreContainers: ScoreContainer[];
+	scoreCollector: ScoreCollector | undefined;
 }
 
 interface RoomObject {

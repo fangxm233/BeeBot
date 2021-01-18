@@ -103,7 +103,7 @@ export class BeeSetup {
         // 添加前缀
         if (this.bodySetup.prefix) {
             for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
-                body.concat(this.bodySetup.prefix);
+                body.push(...this.bodySetup.prefix);
             }
         }
 
@@ -126,7 +126,7 @@ export class BeeSetup {
             if (this.bodySetup.suffix) budgetRemaining -= calBodyCost(this.bodySetup.suffix) * (this.bodySetup.scaleWithBodySize ? multiple : 1);
 
             while (sizeRemaining >= paddingCount && budgetRemaining >= paddingCost) {
-                body.concat(this.bodySetup.padding);
+                body.push(...this.bodySetup.padding);
                 sizeRemaining -= paddingCount;
                 budgetRemaining -= paddingCost;
             }
@@ -135,7 +135,7 @@ export class BeeSetup {
         // 添加后缀
         if (this.bodySetup.suffix) {
             for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
-                body.concat(this.bodySetup.suffix);
+                body.push(...this.bodySetup.suffix);
             }
         }
 
