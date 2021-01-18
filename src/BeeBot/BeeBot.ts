@@ -250,9 +250,9 @@ export class BeeBot {
     }
 
     public static getScoreDetectRooms(roomName: string) {
-        const rooms = Cartographer.findRoomsInRange(roomName, 1)
+        const rooms = Cartographer.findRoomsInRange(roomName, 2)
             .filter(room => Cartographer.roomType(room) == ROOMTYPE_CONTROLLER);
-        rooms.push(...Cartographer.findRoomsInRange(roomName, 5)
+        rooms.push(...Cartographer.findRoomsInRange(roomName, 7)
             .filter(room => Cartographer.roomType(room) == ROOMTYPE_HIGHEAY));
         return rooms.filter(room => !Intel.getRoomIntel(room)?.owner || Intel.getRoomIntel(room)?.owner == USER_NAME);
     }
