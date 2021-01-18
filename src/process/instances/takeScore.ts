@@ -35,7 +35,10 @@ export class ProcessTakeScore extends Process {
 
         const room = Game.rooms[this.target];
         if (room && !room.scoreContainers.length) {
-            if (!this.bees[ROLE_TAKE_SCORE].find(bee => !!bee.store.getUsedCapacity())) this.target = 'none';
+            if (!this.bees[ROLE_TAKE_SCORE].find(bee => !!bee.store.getUsedCapacity())) {
+                this.target = 'none';
+                this.memory.target = 'none';
+            }
             if (!this.getCreepAndWishCount(ROLE_TAKE_SCORE)) this.close();
         }
     }
