@@ -24,7 +24,7 @@ export class BeeScout extends Bee {
     public runCore() {
         this.task?.isValid();
         if (!this.task) {
-            if (this.target) this.task = Tasks.goToRoom(this.target);
+            if (this.target) this.task = Tasks.goToRoom(this.target, {moveOptions: {allowHostile: false}});
             else {
                 this.target = undefined;
                 this.lock();
