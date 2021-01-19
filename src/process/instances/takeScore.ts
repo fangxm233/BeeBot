@@ -34,7 +34,7 @@ export class ProcessTakeScore extends Process {
         if (this.target && this.target != 'none') this.foreachBee(ROLE_TAKE_SCORE, bee => bee.run());
 
         const room = Game.rooms[this.target];
-        if (room && !room.scoreContainers.length) {
+        if (room && !room.scoreContainers.length || this.target == 'none') {
             if (!this.bees[ROLE_TAKE_SCORE].find(bee => !!bee.store.getUsedCapacity())) {
                 this.target = 'none';
                 this.memory.target = 'none';
