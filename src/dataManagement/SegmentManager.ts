@@ -22,4 +22,10 @@ export class SegmentManager {
         RawMemory.segments[id] = data;
         this.segmentsCache[id] = data;
     }
+
+    public static clearSegments() {
+        for (let i = 0; i < 100; i++) {
+            RawMemory.segments[i] = '';
+        }
+    }
 }

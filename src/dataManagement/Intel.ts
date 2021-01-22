@@ -154,12 +154,12 @@ export class Intel {
 
         for (let i = 0; i < this.observeRequests.length; i++) {
             const request = this.observeRequests[i];
-            if(!observers.length) return;
+            if (!observers.length) return;
             const observer = observers.find(ob => Game.map.getRoomLinearDistance(request, ob.pos.roomName) <= 10);
-            if(!observer) return;
+            if (!observer) continue;
             observer.observeRoom(request);
             _.remove(observers, ob => ob.id == observer.id);
-            this.requests.splice(i--);
+            this.observeRequests.splice(i--, 1);
         }
     }
 
@@ -208,7 +208,7 @@ export class Intel {
             Traveler.addStructuresToMatrix(room, new PathFinder.CostMatrix(), 1);
     }
 
-    public static checkDirty(){
+    public static checkDirty() {
         return this.dirty;
     }
 

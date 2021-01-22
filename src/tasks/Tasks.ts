@@ -80,7 +80,7 @@ export class Tasks {
 
 	public static getBoosted(target: getBoostedTargetType,
 		boostType: _ResourceConstantSansEnergy,
-		amount: number | undefined,
+		amount?: number,
 		options = {} as TaskOptions): TaskGetBoosted {
 		return new TaskGetBoosted(target, boostType, amount, options);
 	}

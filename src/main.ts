@@ -31,8 +31,11 @@ import { Processes } from 'process/Processes';
 import { sandBox } from 'sandBox';
 
 export const loop = ErrorMapper.wrapLoop(() => {
+    BeeBot.checkHalt();
+
     stats.reset();
     if (USE_ACTION_COUNTER) actionsCounter.init(true);
+    if(BeeBot.checkSpawned()) BeeBot.InitializeBeeBot();
     Mem.tryInitSameMemory();
     Mem.checkAndInit();
     if (reset) globalReset();

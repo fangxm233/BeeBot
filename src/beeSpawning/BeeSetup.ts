@@ -6,7 +6,8 @@ export interface BodySetup {
     maxSize: number;
     prefix?: BodyPartConstant[];
     suffix?: BodyPartConstant[];
-    scaleWithBodySize?: boolean;
+    prefixScaleWithBodySize?: boolean;
+    suffixScaleWithBodySize?: boolean;
     padding?: BodyPartConstant[];
     boost?: MineralBoostConstant[];
 }
@@ -49,10 +50,8 @@ export class BeeSetup {
             return BODYPART_COST[part] * num;
         });
 
-        if (this.bodySetup.scaleWithBodySize) {
-            if (this.bodySetup.prefix) this.minCostCache += calBodyCost(this.bodySetup.prefix);
-            if (this.bodySetup.suffix) this.minCostCache += calBodyCost(this.bodySetup.suffix);
-        }
+        if (this.bodySetup.prefix) this.minCostCache += calBodyCost(this.bodySetup.prefix);
+        if (this.bodySetup.suffix) this.minCostCache += calBodyCost(this.bodySetup.suffix);
 
         return this.minCostCache;
     }
@@ -68,29 +67,25 @@ export class BeeSetup {
         });
         let countPerUnit = _.sum(this.bodySetup.ratio, ratio => BeeSetup.decodeRatio(ratio).num);
         // 计算前置后置
-        if (this.bodySetup.scaleWithBodySize) {
-            if (this.bodySetup.prefix) {
-                countPerUnit += this.bodySetup.prefix.length;
-                costPerUnit += calBodyCost(this.bodySetup.prefix);
-            }
-            if (this.bodySetup.suffix) {
-                countPerUnit += this.bodySetup.suffix.length;
-                costPerUnit += calBodyCost(this.bodySetup.suffix);
-            }
+        if (this.bodySetup.prefixScaleWithBodySize && this.bodySetup.prefix) {
+            countPerUnit += this.bodySetup.prefix.length;
+            costPerUnit += calBodyCost(this.bodySetup.prefix);
+        }
+        if (this.bodySetup.suffixScaleWithBodySize && this.bodySetup.suffix) {
+            countPerUnit += this.bodySetup.suffix.length;
+            costPerUnit += calBodyCost(this.bodySetup.suffix);
         }
 
         // 计算用于缩放的最大数目和预算
         let maxSize = MAX_CREEP_SIZE;
         let availableBudget = budget;
-        if (!this.bodySetup.scaleWithBodySize) {
-            if (this.bodySetup.prefix) {
-                maxSize -= this.bodySetup.prefix.length;
-                availableBudget -= calBodyCost(this.bodySetup.prefix);
-            }
-            if (this.bodySetup.suffix) {
-                maxSize -= this.bodySetup.suffix.length;
-                availableBudget -= calBodyCost(this.bodySetup.suffix);
-            }
+        if (!this.bodySetup.prefixScaleWithBodySize && this.bodySetup.prefix) {
+            maxSize -= this.bodySetup.prefix.length;
+            availableBudget -= calBodyCost(this.bodySetup.prefix);
+        }
+        if (!this.bodySetup.suffixScaleWithBodySize && this.bodySetup.suffix) {
+            maxSize -= this.bodySetup.suffix.length;
+            availableBudget -= calBodyCost(this.bodySetup.suffix);
         }
         maxSize = Math.min(maxSize, this.bodySetup.maxSize * countPerUnit);
 
@@ -102,7 +97,7 @@ export class BeeSetup {
         const body: BodyPartConstant[] = [];
         // 添加前缀
         if (this.bodySetup.prefix) {
-            for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
+            for (let i = 0; i < (this.bodySetup.prefixScaleWithBodySize ? multiple : 1); i++) {
                 body.push(...this.bodySetup.prefix);
             }
         }
@@ -121,9 +116,11 @@ export class BeeSetup {
             const paddingCount = this.bodySetup.padding.length;
 
             let sizeRemaining = maxSize - body.length;
-            if (this.bodySetup.suffix) sizeRemaining -= this.bodySetup.suffix.length * (this.bodySetup.scaleWithBodySize ? multiple : 1);
+            if (this.bodySetup.suffix) sizeRemaining -= this.bodySetup.suffix.length
+                * (this.bodySetup.suffixScaleWithBodySize ? multiple : 1);
             let budgetRemaining = budget - calBodyCost(body);
-            if (this.bodySetup.suffix) budgetRemaining -= calBodyCost(this.bodySetup.suffix) * (this.bodySetup.scaleWithBodySize ? multiple : 1);
+            if (this.bodySetup.suffix) budgetRemaining -= calBodyCost(this.bodySetup.suffix)
+                * (this.bodySetup.suffixScaleWithBodySize ? multiple : 1);
 
             while (sizeRemaining >= paddingCount && budgetRemaining >= paddingCost) {
                 body.push(...this.bodySetup.padding);
@@ -134,7 +131,7 @@ export class BeeSetup {
 
         // 添加后缀
         if (this.bodySetup.suffix) {
-            for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
+            for (let i = 0; i < (this.bodySetup.suffixScaleWithBodySize ? multiple : 1); i++) {
                 body.push(...this.bodySetup.suffix);
             }
         }

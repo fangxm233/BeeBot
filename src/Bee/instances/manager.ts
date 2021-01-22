@@ -135,7 +135,7 @@ export class BeeManager extends Bee {
         const centerLink = Game.getObjectById(this.centerLinkId);
         if (centerLink) {
             const upgradeLink = Game.getObjectById(this.upgradeLinkId);
-            if (upgradeLink && upgradeLink.store.energy < 600) {
+            if (upgradeLink && upgradeLink.store.energy < 600 && this.storage.store.energy) {
                 const remain = upgradeLink.store.getFreeCapacity(RESOURCE_ENERGY) - centerLink.store.energy;
                 if (remain <= 0) {
                     return centerLink.transferEnergy(upgradeLink) != OK;

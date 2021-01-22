@@ -4,6 +4,8 @@ import { PriorityManager } from 'beeSpawning/PriorityManager';
 import { USER_NAME } from 'config';
 import { log } from 'console/log';
 import { Intel } from 'dataManagement/Intel';
+import { Mem } from 'dataManagement/Memory';
+import { SegmentManager } from 'dataManagement/SegmentManager';
 import {
     PROCESS_BASE_WORK,
     PROCESS_CARRY,
@@ -47,6 +49,8 @@ const EARLY_OUTPOST_DEPTH = 1;
 
 @profile
 export class BeeBot {
+    private static shouldHalt = false;
+
     public static getObservers(): StructureObserver[] {
         return _.compact(this.colonies().map(room => room.observer!));
     }
@@ -62,6 +66,25 @@ export class BeeBot {
             PriorityManager.arrangePriority(roomName);
             this.setupColonyEvents(roomName);
         });
+    }
+
+    public static InitializeBeeBot() {
+        this.colonies().filter(room => !this.getColonyStage(room.name))
+            .forEach(room => this.initializeColony(room.name));
+    }
+
+    public static checkHalt() {
+        if (this.shouldHalt && Game.cpu.halt) Game.cpu.halt();
+    }
+
+    public static checkSpawned(): boolean {
+        return !Memory.MemVer;
+    }
+
+    public static respawned() {
+        Mem.initMemory();
+        SegmentManager.clearSegments();
+        this.shouldHalt = true;
     }
 
     public static setupColonyEvents(roomName: string) {
@@ -164,6 +187,7 @@ export class BeeBot {
         this.colonies().forEach(room => {
             this.checkColonyEnemies(room);
             ResourcesManager.balanceResources();
+            if (this.getColonyStage(room.name) != 'early') this.detectScoreRooms(room.name);
         });
     }
 
@@ -183,7 +207,7 @@ export class BeeBot {
 
     public static unclaimColony(roomName: string) {
         _.forEach(Process.processes[roomName], process => process && process.close());
-        Memory.beebot.outposts[roomName].forEach(outpost => this.cancelOutpost(roomName, outpost));
+        Memory.beebot.outposts[roomName]?.forEach(outpost => this.cancelOutpost(roomName, outpost));
         Memory.beebot.outposts[roomName] = undefined!;
         Memory.beebot.colonies[roomName] = undefined!;
         Memory.transport[roomName] = undefined!;
@@ -195,8 +219,9 @@ export class BeeBot {
         room.find(FIND_MY_POWER_CREEPS).forEach(pc => pc.suicide());
         room.find(FIND_MY_CONSTRUCTION_SITES).forEach(site => site.remove());
         room.find(FIND_FLAGS).forEach(flag => flag.remove());
+        room.controller!.unclaim();
         log.info(`Unclaim colony ${roomName} complete. Will halt CPU to reset global.`);
-        if (Game.cpu.halt) Game.cpu.halt();
+        this.shouldHalt = true;
     }
 
     public static routineCheck(roomName: string) {
