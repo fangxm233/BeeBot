@@ -249,7 +249,7 @@ export class BaseConstructor {
             if (code === ERR_INVALID_TARGET) {
                 const structure = room.lookForAt(LOOK_STRUCTURES, x, y)[0];
                 if (!structure) continue;
-                if (structure.structureType == type && isOwner(structure)) continue;
+                if (isOwner(structure)) continue;
                 if (structure && structure.destroy) structure.destroy();
             }
             if (code === ERR_RCL_NOT_ENOUGH) {
