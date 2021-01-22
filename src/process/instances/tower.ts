@@ -94,7 +94,7 @@ export class ProcessTower extends Process {
             this.aimAt(room.towers, _.min(targets, target => target.pos.getRangeTo(this.center)));
             return;
         } else if (hostileCreeps.length && Game.time % 5 == 0) {
-            room.towers.forEach(tower => tower.attack(_.sample(hostileCreeps)));
+            room.towers.forEach(tower => tower.attack(_.sample(hostileCreeps.filter(creep => !creep.pos.isEdge))));
             return;
         }
 
