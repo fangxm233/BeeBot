@@ -532,8 +532,8 @@ export class Traveler {
                         return 1;
                     }
                 }
-                // SK rooms are avoided when there is no vision in the room, harvested-from SK rooms are allowed
-                if (!options.allowSK && !Game.rooms[roomName]) {
+                // SK rooms are avoided, harvested-from SK rooms are allowed
+                if (!options.allowSK) {
                     if (!parsed) {
                         parsed = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName) as any;
                     }
