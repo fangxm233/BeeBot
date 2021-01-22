@@ -191,7 +191,7 @@ export const boostParts: { [boostType: string]: BodyPartConstant } = {
     XGHO2: TOUGH,
 };
 
-export const boostResources: { [actionName: string]: { [boostLevel: number]: _ResourceConstantSansEnergy } } = {
+export const boostResources: { [actionName: string]: { [boostLevel: number]: MineralCompoundConstant } } = {
     attack: {
         1: 'UH',
         2: 'UH2O',
