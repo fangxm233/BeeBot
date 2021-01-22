@@ -216,8 +216,9 @@ export class BeeBot {
         room.find(FIND_MY_POWER_CREEPS).forEach(pc => pc.suicide());
         room.find(FIND_MY_CONSTRUCTION_SITES).forEach(site => site.remove());
         room.find(FIND_FLAGS).forEach(flag => flag.remove());
+        room.controller!.unclaim();
         log.info(`Unclaim colony ${roomName} complete. Will halt CPU to reset global.`);
-        if (Game.cpu.halt) Game.cpu.halt();
+        this.shouldHalt = true;
     }
 
     public static routineCheck(roomName: string) {
