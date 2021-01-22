@@ -250,11 +250,12 @@ export class BeeBot {
     }
 
     public static getScoreDetectRooms(roomName: string) {
-        const rooms = Cartographer.findRoomsInRange(roomName, 2)
+        const rooms = Cartographer.findRoomsInRange(roomName, 3)
             .filter(room => Cartographer.roomType(room) == ROOMTYPE_CONTROLLER);
         rooms.push(...Cartographer.findRoomsInRange(roomName, 7)
             .filter(room => Cartographer.roomType(room) == ROOMTYPE_HIGHEAY));
-        return rooms.filter(room => !Intel.getRoomIntel(room)?.owner || Intel.getRoomIntel(room)?.owner == USER_NAME);
+        return rooms.filter(room => Game.map.getRoomStatus(room).status == 'normal' &&
+            (!Intel.getRoomIntel(room)?.owner || Intel.getRoomIntel(room)?.owner == USER_NAME));
     }
 
     public static detectScoreRooms(roomName: string) {
@@ -262,11 +263,15 @@ export class BeeBot {
         roomNames.forEach(r => {
             const room = Game.rooms[r];
             if (room) {
-                const amount = _.sum(room.find(FIND_SCORE_CONTAINERS),
+                Intel.refreshRoomIntel(r);
+                if (room.controller?.owner && room.controller.owner?.username != USER_NAME) return;
+                const amount = _.sum(room.scoreContainers,
                     container => container.store.getUsedCapacity(RESOURCE_SCORE));
                 if (amount) {
-                    if (Process.getProcess<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE, 'target', r)) return;
-                    log.info(`Room ${roomName} detected score in ${r}. amount: ${amount}`);
+                    if (this.colonies().find(room =>
+                        !!Process.getProcess<ProcessTakeScore>(room.name, PROCESS_TAKE_SCORE, 'target', r))) return;
+                    const message = `Room ${roomName} detected score in ${r}. amount: ${amount}`;
+                    log.info(message);
                     if (Process.getProcess<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE, 'target', 'none'))
                         Process.getProcess<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE, 'target', 'none')!.target = r;
                     else Process.startProcess(new ProcessTakeScore(roomName, r));
@@ -365,3 +370,6 @@ export class BeeBot {
 }
 
 (global as any).BeeBot = BeeBot;
+(global as any).stored = (type = RESOURCE_SCORE) =>
+    _.sum(BeeBot.colonies(), room => (room.storage?.store.getUsedCapacity(type) || 0)
+        + (room.terminal?.store.getUsedCapacity(type) || 0));

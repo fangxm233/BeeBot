@@ -1,13 +1,16 @@
 import { BeeClaimer } from 'Bee/instances/claimer';
+import { BeeCollectorGuard } from 'Bee/instances/collectorGuard';
 import { BeeDefendInvader } from 'Bee/instances/defendInvader';
 import { BeeDefendInvaderCore } from 'Bee/instances/defendInvaderCore';
 import { BeeDismantler } from 'Bee/instances/dismantler';
 import { BeeDrone } from 'Bee/instances/drone';
 import { BeePioneer } from 'Bee/instances/pioneer';
+import { BeeSendScore } from 'Bee/instances/sendScore';
 import { BeeTakeScore } from 'Bee/instances/takeScore';
 import {
     ROLE_CARRIER,
     ROLE_CLAIMER,
+    ROLE_COLLECTOR_GUARD,
     ROLE_DE_INVADER,
     ROLE_DE_INVADER_CORE,
     ROLE_DISMANTLER,
@@ -18,6 +21,7 @@ import {
     ROLE_PIONEER,
     ROLE_RESERVER,
     ROLE_SCOUT,
+    ROLE_SEND_SCORE,
     ROLE_TAKE_SCORE,
     ROLE_UPGRADER,
     ROLE_WORKER,
@@ -47,4 +51,6 @@ BeeFactorty.registerBee(ROLE_WORKER, BeeWorker);
 BeeFactorty.registerBee(ROLE_UPGRADER, BeeUpgrader);
 BeeFactorty.registerBee(ROLE_SCOUT, BeeScout);
 BeeFactorty.registerBee(ROLE_DISMANTLER, BeeDismantler);
+BeeFactorty.registerBee(ROLE_COLLECTOR_GUARD, BeeCollectorGuard);
 BeeFactorty.registerBee(ROLE_TAKE_SCORE, BeeTakeScore);
+BeeFactorty.registerBee(ROLE_SEND_SCORE, BeeSendScore);

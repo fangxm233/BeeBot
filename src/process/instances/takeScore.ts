@@ -3,7 +3,7 @@ import { WishManager } from 'beeSpawning/WishManager';
 import { PROCESS_TAKE_SCORE, ROLE_TAKE_SCORE } from 'declarations/constantsExport';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
-import { log } from 'console/log';
+import { USER_NAME } from 'config';
 
 @profile
 export class ProcessTakeScore extends Process {
@@ -40,6 +40,10 @@ export class ProcessTakeScore extends Process {
                 this.memory.target = 'none';
             }
             if (!this.getCreepAndWishCount(ROLE_TAKE_SCORE)) this.close();
+        }
+        if (room?.controller?.owner && room.controller.owner?.username != USER_NAME) {
+            this.target = 'none';
+            this.memory.target = 'none';
         }
     }
 

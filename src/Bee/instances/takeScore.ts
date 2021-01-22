@@ -13,6 +13,7 @@ export class BeeTakeScore extends Bee {
         freshMatrix: true,
         stuckValue: 1,
         repath: 0.1,
+        useFindRoute: true
     };
 
     protected runCore(): number | void {
@@ -35,7 +36,15 @@ export class BeeTakeScore extends Bee {
             this.travelToRoom(this.process.target, this.ops);
             return;
         }
-        const containers = this.room.find(FIND_SCORE_CONTAINERS).filter(container => !!container.store.getUsedCapacity(RESOURCE_SCORE));
+        const drops = this.room.drops[RESOURCE_SCORE];
+        const drop = this.pos.findClosestByRange(drops);
+        if (drop) {
+            if (this.pos.isNearTo(drop)) this.pickup(drop);
+            else this.travelTo(drop, this.ops);
+            return;
+        }
+
+        const containers = this.room.scoreContainers.filter(container => !!container.store.getUsedCapacity(RESOURCE_SCORE));
         const container = this.pos.findClosestByRange(containers);
         if (container) {
             if (this.pos.isNearTo(container)) this.withdraw(container, RESOURCE_SCORE);

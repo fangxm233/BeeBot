@@ -25,7 +25,8 @@ type ProcessTypes = 'filling'
     | 'defendNuke'
     | 'mineMineral'
     | 'labReact'
-    | 'takeScore';
+    | 'takeScore'
+    | 'sendScore';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -91,4 +92,9 @@ type protoProcessLabReact = protoProcess & {
 
 type protoProcessTakeScore = protoProcess & {
     target: string;
+}
+
+type protoProcessSendScore = protoProcess & {
+    target: string;
+    sources: string[];
 }

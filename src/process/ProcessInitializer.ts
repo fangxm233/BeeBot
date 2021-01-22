@@ -12,11 +12,13 @@ import {
     PROCESS_REPAIR,
     PROCESS_RESERVING,
     PROCESS_SCOUT,
+    PROCESS_SEND_SCORE,
     PROCESS_TAKE_SCORE,
     PROCESS_TOWER,
     PROCESS_UPGRADE,
     ROLE_CARRIER,
     ROLE_CLAIMER,
+    ROLE_COLLECTOR_GUARD,
     ROLE_DE_INVADER,
     ROLE_DE_INVADER_CORE,
     ROLE_DISMANTLER,
@@ -27,6 +29,7 @@ import {
     ROLE_PIONEER,
     ROLE_RESERVER,
     ROLE_SCOUT,
+    ROLE_SEND_SCORE,
     ROLE_TAKE_SCORE,
     ROLE_UPGRADER,
     ROLE_WORKER,
@@ -38,6 +41,7 @@ import { ProcessDismantle } from 'process/instances/dismantle';
 import { ProcessLabReact } from 'process/instances/labReact';
 import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessRepair } from 'process/instances/repair';
+import { ProcessSendScore } from 'process/instances/sendScore';
 import { ProcessTakeScore } from 'process/instances/takeScore';
 import { ProcessBaseWork } from './instances/baseWork';
 import { ProcessCarry } from './instances/carry';
@@ -68,3 +72,4 @@ Process.registerProcess(PROCESS_DEFEND_NUKE, Bucket.level2, ProcessDefendNuke, 1
 Process.registerProcess(PROCESS_MINE_MINERAL, Bucket.level4, ProcessMineMineral, 100, [ROLE_DRONE, ROLE_CARRIER]);
 Process.registerProcess(PROCESS_LAB_REACT, Bucket.level4, ProcessLabReact);
 Process.registerProcess(PROCESS_TAKE_SCORE, Bucket.level3, ProcessTakeScore, 100, [ROLE_TAKE_SCORE]);
+Process.registerProcess(PROCESS_SEND_SCORE, Bucket.level3, ProcessSendScore, 50, [ROLE_SEND_SCORE, ROLE_COLLECTOR_GUARD]);

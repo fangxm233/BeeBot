@@ -226,20 +226,14 @@ Object.defineProperty(Room.prototype, 'droppedPower', {
 
 Object.defineProperty(Room.prototype, 'scoreContainers', {
 	get() {
-		if(!this._scoreContainers) {
-			this._scoreContainers = this.find(FIND_SCORE_CONTAINERS);
-		}
-		return this._scoreContainers;
+		return this.find(FIND_SCORE_CONTAINERS);
 	},
 	configurable: true,
 });
 
 Object.defineProperty(Room.prototype, 'scoreCollector', {
 	get() {
-		if(!this._scoreCollector) {
-			this._scoreCollector = this.find(FIND_SCORE_COLLECTORS)[0];
-		}
-		return this._scoreCollector;
+		return this.find(FIND_SCORE_COLLECTORS)[0];
 	},
 	configurable: true,
 });

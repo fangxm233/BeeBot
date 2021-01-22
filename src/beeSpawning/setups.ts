@@ -1,5 +1,6 @@
 import {
     ROLE_CARRIER, ROLE_CLAIMER, ROLE_DE_INVADER, ROLE_DE_INVADER_CORE, ROLE_DISMANTLER, ROLE_DRONE,
+    ROLE_COLLECTOR_GUARD,
     ROLE_FILLER,
     ROLE_MANAGER,
     ROLE_MINER,
@@ -189,7 +190,14 @@ export const setups = {
         default: new BeeSetup(ROLE_SEND_SCORE, {
             ratio: [],
             prefix: [CARRY, MOVE],
-            scaleWithBodySize: true,
+            prefixScaleWithBodySize: true,
+            maxSize: Infinity,
+        }),
+    },
+
+    [ROLE_COLLECTOR_GUARD]: {
+        default: new BeeSetup(ROLE_COLLECTOR_GUARD, {
+            ratio: ['r1', 'm2', 'h1'],
             maxSize: Infinity,
         }),
     },

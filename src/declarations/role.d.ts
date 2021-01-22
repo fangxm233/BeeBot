@@ -14,4 +14,5 @@ declare type ALL_ROLES =
     | 'dismantler'
     | 'drone'
     | 'ts'
-    | 'ss';
+    | 'ss'
+    | 'cg';

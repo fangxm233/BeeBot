@@ -309,7 +309,7 @@ export class Bee {
         return this.creep.suicide();
     }
 
-    public transfer(target: AnyCreep | Structure, resourceType: ResourceConstant, amount?: number) {
+    public transfer(target: AnyCreep | Structure | ScoreCollector, resourceType: ResourceConstant, amount?: number) {
         // 确定amount
         if (amount) {
             let free = 0;
@@ -332,7 +332,7 @@ export class Bee {
         return this.creep.upgradeController(target);
     }
 
-    public withdraw(target: Structure | Tombstone | Ruin, resourceType: ResourceConstant, amount?: number) {
+    public withdraw(target: Structure | Tombstone | Ruin | ScoreContainer, resourceType: ResourceConstant, amount?: number) {
         // 确定amount
         if (amount) {
             let store = 0;

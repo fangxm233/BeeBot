@@ -104,6 +104,8 @@ export const TERMINAL_DEPOSIT = 10e3;
 export const TERMINAL_FULL_LINE = 295e3;
 export const STORAGE_FULL_LINE = 950e3;
 
+export const STORAGE_SCORE = 500e3;
+
 @profile
 export class ResourcesManager {
 
@@ -202,6 +204,9 @@ export class ResourcesManager {
             else limit = 0;
         } else if (_.contains(DEPOSITS, resource)) {
             if (container == 'terminal') limit = TERMINAL_DEPOSIT;
+            else limit = 0;
+        } else if (resource == RESOURCE_SCORE) {
+            if (container == 'storage') limit = STORAGE_SCORE;
             else limit = 0;
         }
 
