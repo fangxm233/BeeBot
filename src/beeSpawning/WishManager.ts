@@ -34,7 +34,7 @@ export class WishManager {
     }
 
     public wishBee(config: WishConfig) {
-        _.assign(config, this.defaultConfigs);
+        _.defaults(config, this.defaultConfigs);
         const { setup, budget, extraMemory, name, emergency } = config;
 
         if (config.role) {
