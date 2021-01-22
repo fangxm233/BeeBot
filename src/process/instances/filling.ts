@@ -71,7 +71,7 @@ export class ProcessFilling extends Process {
         if (!this.initialized && !this.init()) return;
         this.wishManager.clear();
 
-        this.wishManager.arrangeCyclingBees(ROLE_FILLER, this.setup, Infinity, ['i']);
+        this.wishManager.arrangeCyclingBees(ROLE_FILLER, this.setup, 1650, ['i']);
         for (let i = 0; i < this.count; i++) {
             if (!_.find(this.bees[ROLE_FILLER], (bee: BeeFiller) => bee.memory.i == i)) {
                 this.wishManager.wishBee({ setup: this.setup, extraMemory: { i } });
