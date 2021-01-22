@@ -12,7 +12,7 @@ export class BeeClaimer extends Bee {
 
         if (!this.task) {
             if (this.room.name != this.process.roomName) {
-                this.task = Tasks.goToRoom(this.process.roomName, { moveOptions: { preferHighway: true } });
+                this.task = Tasks.goToRoom(this.process.roomName, { moveOptions: { preferHighway: true, allowSK: false, useFindRoute: true } });
             } else {
                 const controller = this.room.controller!;
                 if (!controller.my) {
