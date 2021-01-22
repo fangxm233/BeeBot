@@ -1,18 +1,18 @@
 import { BaseConstructor } from 'basePlanner/BaseConstructor';
 import { RoomPlanner } from 'basePlanner/RoomPlanner';
-import { bees } from 'Bee/Bee';
-import { BeeFactorty } from 'Bee/BeeFactory';
 import { BeeBot } from 'BeeBot/BeeBot';
 import { setups } from 'beeSpawning/setups';
 import { WishManager } from 'beeSpawning/WishManager';
 import {
     PROCESS_BASE_WORK,
     PROCESS_COLONIZE,
+    PROCESS_DEFEND_INVADER_CORE,
     ROLE_CLAIMER,
     ROLE_PIONEER,
     ROLE_WORKER,
 } from 'declarations/constantsExport';
 import { ProcessBaseWork } from 'process/instances/baseWork';
+import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 
@@ -71,6 +71,10 @@ export class ProcessColonize extends Process {
         if (!room) return;
         if (room.spawns.filter(spawn => spawn.my).length) {
             this.spawnCompleted();
+        }
+        if (room.invaderCore && !Process.getProcess
+            < ProcessDefendInvaderCore > (this.from, PROCESS_DEFEND_INVADER_CORE, 'target', this.roomName)) {
+            Process.startProcess(new ProcessDefendInvaderCore(this.from, this.roomName));
         }
     }
 
