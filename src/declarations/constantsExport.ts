@@ -1,3 +1,4 @@
+export const ROLE_NONE = 'none';
 export const ROLE_FILLER = 'filler';
 export const ROLE_MINER = 'miner';
 export const ROLE_UPGRADER = 'upgrader';
@@ -8,10 +9,10 @@ export const ROLE_SCOUT = 'scout';
 export const ROLE_RESERVER = 'reserver';
 export const ROLE_PIONEER = 'pioneer';
 export const ROLE_CLAIMER = 'claimer';
-export const ROLE_DEFENDER = 'defender'
+export const ROLE_DEFENDER = 'defender';
 export const ROLE_DE_INVADER = 'deInvader';
 export const ROLE_DE_INVADER_CORE = 'deInvaderCore';
-export const ROLE_DISMANTLER = 'dismantler'
+export const ROLE_DISMANTLER = 'dismantler';
 export const ROLE_DRONE = 'drone';
 
 export const PROCESS_FILLING = 'filling';
