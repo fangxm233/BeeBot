@@ -35,6 +35,7 @@ export class Traveler {
         }
 
         destination = this.normalizePos(destination);
+        options = _.clone(options);
 
         // Fixes bug that causes creeps to idle on the other side of a room
         const distanceToEdge = destination.rangeToEdge;
@@ -177,6 +178,7 @@ export class Traveler {
     }
 
     public static travelToRoom(bee: Bee, roomName: string, options: TravelToOptions = {}): number {
+        options = _.clone(options);
         options.range = 23;
         return this.travelTo(bee, new RoomPosition(25, 25, roomName), options);
     }
