@@ -1,9 +1,9 @@
 import { setups } from 'beeSpawning/setups';
 import { WishManager } from 'beeSpawning/WishManager';
+import { USER_NAME } from 'config';
 import { PROCESS_TAKE_SCORE, ROLE_TAKE_SCORE } from 'declarations/constantsExport';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
-import { USER_NAME } from 'config';
 
 @profile
 export class ProcessTakeScore extends Process {
@@ -48,7 +48,11 @@ export class ProcessTakeScore extends Process {
     }
 
     public wishCreeps() {
-        if (!this.target || this.target == 'none') return;
+        if (!this.target || this.target == 'none') {
+            this.wishManager.clear();
+            return;
+        }
+
         const room = Game.rooms[this.target];
         if (room && !room.scoreContainers.length) return;
 
