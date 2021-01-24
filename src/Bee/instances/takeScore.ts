@@ -1,4 +1,5 @@
 import { Bee } from 'Bee/Bee';
+import { log } from 'console/log';
 import { ProcessTakeScore } from 'process/instances/takeScore';
 import { profile } from 'profiler/decorator';
 
@@ -13,7 +14,7 @@ export class BeeTakeScore extends Bee {
         freshMatrix: true,
         stuckValue: 1,
         repath: 0.1,
-        useFindRoute: true
+        useFindRoute: true,
     };
 
     protected runCore(): number | void {
@@ -32,10 +33,6 @@ export class BeeTakeScore extends Bee {
     }
 
     private runTake() {
-        if (this.room.name != this.process.target || this.pos.isEdge) {
-            this.travelToRoom(this.process.target, this.ops);
-            return;
-        }
         const drops = this.room.drops[RESOURCE_SCORE];
         const drop = this.pos.findClosestByRange(drops);
         if (drop) {
@@ -44,11 +41,18 @@ export class BeeTakeScore extends Bee {
             return;
         }
 
-        const containers = this.room.scoreContainers.filter(container => !!container.store.getUsedCapacity(RESOURCE_SCORE));
+        if (this.room.name != this.process.target || this.pos.isEdge) {
+            this.travelToRoom(this.process.target, this.ops);
+            return;
+        }
+
+        const containers = this.room.find(FIND_SCORE_CONTAINERS).filter(container => !!container.store.getUsedCapacity(RESOURCE_SCORE));
         const container = this.pos.findClosestByRange(containers);
         if (container) {
             if (this.pos.isNearTo(container)) this.withdraw(container, RESOURCE_SCORE);
-            else this.travelTo(container, this.ops);
+            else {
+                this.travelTo(container, this.ops);
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ export const ROLE_DRONE = 'drone';
 export const ROLE_TAKE_SCORE = 'ts';
 export const ROLE_SEND_SCORE = 'ss';
 export const ROLE_COLLECTOR_GUARD = 'cg';
+export const ROLE_BREAKER = 'bk';
 
 export const PROCESS_FILLING = 'filling';
 export const PROCESS_MINE_SOURCE = 'mineSource';
@@ -38,3 +39,4 @@ export const PROCESS_MINE_MINERAL = 'mineMineral';
 export const PROCESS_LAB_REACT = 'labReact';
 export const PROCESS_TAKE_SCORE = 'takeScore';
 export const PROCESS_SEND_SCORE = 'sendScore';
+export const PROCESS_BREAK_COLLECTOR = 'breakCollector';

@@ -1,5 +1,6 @@
 import {
     PROCESS_BASE_WORK,
+    PROCESS_BREAK_COLLECTOR,
     PROCESS_CARRY,
     PROCESS_COLONIZE,
     PROCESS_DEFEND_INVADER,
@@ -17,6 +18,7 @@ import {
     PROCESS_TAKE_SCORE,
     PROCESS_TOWER,
     PROCESS_UPGRADE,
+    ROLE_BREAKER,
     ROLE_CARRIER,
     ROLE_CLAIMER,
     ROLE_COLLECTOR_GUARD,
@@ -35,6 +37,7 @@ import {
     ROLE_UPGRADER,
     ROLE_WORKER,
 } from 'declarations/constantsExport';
+import { ProcessBreakCollector } from 'process/instances/breakCollector';
 import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { ProcessDefendNuke } from 'process/instances/defendNuke';
@@ -74,3 +77,4 @@ Process.registerProcess(PROCESS_MINE_MINERAL, Bucket.level4, ProcessMineMineral,
 Process.registerProcess(PROCESS_LAB_REACT, Bucket.level4, ProcessLabReact);
 Process.registerProcess(PROCESS_TAKE_SCORE, Bucket.level3, ProcessTakeScore, 100, [ROLE_TAKE_SCORE]);
 Process.registerProcess(PROCESS_SEND_SCORE, Bucket.level3, ProcessSendScore, 50, [ROLE_SEND_SCORE, ROLE_COLLECTOR_GUARD]);
+Process.registerProcess(PROCESS_BREAK_COLLECTOR, Bucket.level3, ProcessBreakCollector, 100, [ROLE_BREAKER]);

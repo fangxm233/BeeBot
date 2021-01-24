@@ -1,6 +1,12 @@
 import {
-    ROLE_CARRIER, ROLE_CLAIMER, ROLE_DE_INVADER, ROLE_DE_INVADER_CORE, ROLE_DISMANTLER, ROLE_DRONE,
+    ROLE_BREAKER,
+    ROLE_CARRIER,
+    ROLE_CLAIMER,
     ROLE_COLLECTOR_GUARD,
+    ROLE_DE_INVADER,
+    ROLE_DE_INVADER_CORE,
+    ROLE_DISMANTLER,
+    ROLE_DRONE,
     ROLE_FILLER,
     ROLE_MANAGER,
     ROLE_MINER,
@@ -144,7 +150,7 @@ export const setups = {
 
     [ROLE_CLAIMER]: {
         default: new BeeSetup(ROLE_CLAIMER, {
-            ratio: ['m5', 'C1'],
+            ratio: ['m3', 'C1'],
             maxSize: 1,
         }),
     },
@@ -181,7 +187,7 @@ export const setups = {
         default: new BeeSetup(ROLE_TAKE_SCORE, {
             ratio: [],
             prefix: [CARRY, MOVE],
-            scaleWithBodySize: true,
+            prefixScaleWithBodySize: true,
             maxSize: Infinity,
         }),
     },
@@ -201,4 +207,14 @@ export const setups = {
             maxSize: Infinity,
         }),
     },
+
+    [ROLE_BREAKER]: {
+        default: new BeeSetup(ROLE_BREAKER, {
+            ratio: [],
+            prefix: [WORK, WORK, MOVE],
+            prefixScaleWithBodySize: true,
+            padding: [WORK, MOVE],
+            maxSize: Infinity,
+        })
+    }
 };
