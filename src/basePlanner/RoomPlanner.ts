@@ -181,7 +181,6 @@ export class RoomPlanner {
 
     public static findBasePos(roomName: string): Coord | undefined {
         const candidatePoses = this.findCandidates(roomName, 2, 38, 11);
-        log.debug(JSON.stringify(candidatePoses.map(p => ([p,this.scoreCandidate(roomName, p)]))));
 
         const pos = _.max(candidatePoses, coord => this.scoreCandidate(roomName, coord));
 
