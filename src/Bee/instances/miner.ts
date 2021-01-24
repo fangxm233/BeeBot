@@ -22,7 +22,7 @@ export class BeeMiner extends Bee {
     }
 
     public runCore() {
-        if (!this.harvestPos) {
+        if (!this.harvestPos && this.bodyCounts[CARRY]) {
             const data = RoomPlanner.getRoomData(this.process.target);
             if (!this.process.earlyOutpost && !data) RoomPlanner.planRoom(this.process.roomName, this.process.target);
             if (data) this.harvestPos = coordToRoomPosition(data.harvestPos.source[this.memory.s], this.process.target);
