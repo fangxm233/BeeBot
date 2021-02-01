@@ -1,9 +1,9 @@
-import { Bee, bees } from "Bee/Bee";
-import { BeeFactorty } from "Bee/BeeFactory";
-import { log } from "console/log";
+import { bees } from 'Bee/Bee';
+import { BeeFactorty } from 'Bee/BeeFactory';
+import { log } from 'console/log';
 import { profile } from 'profiler/decorator';
 import { Visualizer } from 'visuals/Visualizer';
-import { Process, STATE_ACTIVE, STATE_WAITING } from "./Process";
+import { Process, STATE_ACTIVE, STATE_WAITING } from './Process';
 
 @profile
 export class Processes {
@@ -42,15 +42,17 @@ export class Processes {
             Memory.processes = {};
             return;
         }
-        for (const processName in Memory.processes) {
+        for (const registration of Process.processRegistry) {
+            const processName = registration.processName;
             const processes = Memory.processes[processName];
+            if (!processes) continue;
             Process.processesByType[processName] = {};
             for (const roomName in processes) {
                 const roomProcesses = processes[roomName];
                 if (!Process.processes[roomName]) Process.processes[roomName] = {};
                 for (const id in roomProcesses) {
                     const protoProcess = roomProcesses[id];
-                    if(!protoProcess) continue;
+                    if (!protoProcess) continue;
                     try {
                         this.restoreProcess(protoProcess, processName, roomName, Number(id));
                     } catch (error) {
@@ -97,8 +99,8 @@ export class Processes {
                 if (!process) return;
                 let info: string = process.state;
                 if (info == 'sleeping') info = (process.sleepTime - Game.time).toString();
-                visual.push([process.processName, info])
-            })
+                visual.push([process.processName, info]);
+            });
             Visualizer.infoBox('Processes', visual, { x: 1, y: 8, roomName }, 7.75);
         }
     }
