@@ -103,7 +103,7 @@ export class ProcessSendScore extends Process {
         }
         this.count = Math.min(Math.floor(collector.store.getFreeCapacity(RESOURCE_SCORE) / this.power), 5);
 
-        const stored = base.storage!.store.getUsedCapacity(RESOURCE_SCORE);
+        const stored = base.storage?.store.getUsedCapacity(RESOURCE_SCORE) || 0;
         this.count = Math.min(Math.floor(stored / this.power), this.count);
     }
 
