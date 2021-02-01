@@ -83,7 +83,7 @@ export class BeeWorker extends Bee {
 
     private repairAction(repairList: Structure[]): boolean {
         if (!repairList.length) return false;
-        const target = this.creep.pos.findClosestByMultiRoomRange(repairList);
+        const target = _.min(repairList, structure => structure.hits);
         if (!target) return false;
         this.task = Tasks.repair(target);
         return true;

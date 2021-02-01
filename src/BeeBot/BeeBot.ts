@@ -189,7 +189,6 @@ export class BeeBot {
         this.colonies().forEach(room => {
             this.checkColonyEnemies(room);
             ResourcesManager.balanceResources();
-            if (this.getColonyStage(room.name) != 'early') this.detectScoreRooms(room.name);
         });
     }
 
@@ -321,7 +320,7 @@ export class BeeBot {
             && creep.owner.username != 'Invader');
         if (hostiles.length) {
             if (!BeeBot.isDefending(room.name)) BeeBot.activateDefendMode(room.name);
-        }
+        } else if (BeeBot.isDefending(room.name)) BeeBot.cancelDefendMode(room.name);
 
         const enteredHostiles = room.find(FIND_HOSTILE_CREEPS).filter(creep =>
             hasAggressiveParts(creep, true)
@@ -374,8 +373,8 @@ export class BeeBot {
         Process.getProcesses<ProcessReserving>(roomName, PROCESS_RESERVING).forEach(process => process.suspend());
         Process.getProcesses<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER).forEach(process => process.suspend());
         Process.getProcesses<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE).forEach(process => process.suspend());
-        Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL)?.suspend();
-        Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)?.suspend();
+        Process.getProcesses<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL).forEach(process => process.suspend());
+        Process.getProcesses<ProcessUpgrade>(roomName, PROCESS_UPGRADE).forEach(process => process.suspend());
         Process.getProcesses<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE).forEach(process => process.suspend());
         Process.getProcesses<ProcessSendScore>(roomName, PROCESS_SEND_SCORE).forEach(process => process.suspend());
         Memory.beebot.colonies[roomName].defending = true;
@@ -388,15 +387,15 @@ export class BeeBot {
         Process.getProcesses<ProcessReserving>(roomName, PROCESS_RESERVING).forEach(process => process.awake());
         Process.getProcesses<ProcessDefendInvader>(roomName, PROCESS_DEFEND_INVADER).forEach(process => process.awake());
         Process.getProcesses<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE).forEach(process => process.awake());
-        Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL)?.awake();
-        Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)?.awake();
+        Process.getProcesses<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL).forEach(process => process.awake());
+        Process.getProcesses<ProcessUpgrade>(roomName, PROCESS_UPGRADE).forEach(process => process.awake());
         Process.getProcesses<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE).forEach(process => process.awake());
         Process.getProcesses<ProcessSendScore>(roomName, PROCESS_SEND_SCORE).forEach(process => process.awake());
         Memory.beebot.colonies[roomName].defending = false;
     }
 
     public static isDefending(roomName: string) {
-        return Memory.beebot.colonies[roomName] || false;
+        return Memory.beebot.colonies[roomName]?.defending || false;
     }
 }
 

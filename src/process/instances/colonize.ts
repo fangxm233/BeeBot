@@ -69,8 +69,8 @@ export class ProcessColonize extends Process {
 
         const room = Game.rooms[this.roomName];
         if (!room) return;
-        if (room.spawns.filter(spawn => spawn.my).length) {
-            this.spawnCompleted();
+        if (room.spawns.filter(spawn => spawn.my).length && room.controller!.my) {
+            this.colonizeComplete();
         }
         if (room.invaderCore && !Process.getProcess
             < ProcessDefendInvaderCore > (this.from, PROCESS_DEFEND_INVADER_CORE, 'target', this.roomName)) {
@@ -96,7 +96,7 @@ export class ProcessColonize extends Process {
         }
     }
 
-    public spawnCompleted() {
+    public colonizeComplete() {
         BeeBot.initializeColony(this.roomName);
         const baseWork = Process.getProcess<ProcessBaseWork>(this.roomName, PROCESS_BASE_WORK);
         if (baseWork) this.passBees(ROLE_PIONEER, ROLE_WORKER, baseWork);

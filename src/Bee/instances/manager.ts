@@ -169,7 +169,7 @@ export class BeeManager extends Bee {
                 }
             }
 
-            if (!this.terminal) return false;
+            if (!this.terminal || !this.terminal.my) return false;
             if (this.terminal.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
             const terminalLimit = ResourcesManager.getResourceLimit(type, 'terminal');
             if (this.terminal.store.getUsedCapacity(type) > terminalLimit) {
@@ -197,7 +197,7 @@ export class BeeManager extends Bee {
             const c2Stored = c2.store.getUsedCapacity(type);
 
             if (c1Stored < c1Min) {
-                if (c1.isFull) return false;
+                if (c1.isFull || !c1.my) return false;
                 if (c2Stored > c2Min) {
                     this.setTask(c2, c1, Math.min(c1Min - c1Stored, c2Stored - c2Min), type);
                     return true;
@@ -205,7 +205,7 @@ export class BeeManager extends Bee {
             }
 
             if (c1Stored > c1Max) {
-                if (c2.isFull) return false;
+                if (c2.isFull || !c2.my) return false;
                 if (c2Stored < c2Max) {
                     this.setTask(c1, c2, Math.min(c2Max - c2Stored, c1Stored - c1Max), type);
                     return true;
@@ -223,7 +223,7 @@ export class BeeManager extends Bee {
     }
 
     private runTransport(): boolean {
-        if (!this.terminal) return false;
+        if (!this.terminal || !this.terminal.my) return false;
         const transport = TerminalManager.getTransport(this.room.name);
         if (!transport) return false;
 
@@ -308,7 +308,7 @@ export class BeeManager extends Bee {
             }
             if (sourceLabs[i].store.getUsedCapacity(components[i])! < amount) {
                 // 这里做了个假设，terminal已经在前面的程序中准备好了资源
-                if (!this.terminal.store.getUsedCapacity(components[i])) return false;
+                if (!this.terminal.my|| !this.terminal.store.getUsedCapacity(components[i])) return false;
                 this.setTask(this.terminal, sourceLabs[i], amount - stored, components[i]);
                 return true;
             }
@@ -319,6 +319,8 @@ export class BeeManager extends Bee {
     }
 
     private runTakeLab(): boolean {
+        if(!this.terminal.my) return false;
+
         const labProcess = Process.getProcess<ProcessLabReact>(this.room.name, PROCESS_LAB_REACT);
         if (!labProcess) return false;
         if (labProcess.reactState != 'take') return false;
