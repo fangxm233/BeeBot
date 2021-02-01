@@ -34,8 +34,9 @@ export class ProcessScout extends Process {
         this.scoutRequests = this.scoutRequests.filter(
             roomName => !Game.rooms[roomName] && !bees.find(bee => bee.target == roomName));
         bees = bees.filter(bee => !bee.target);
+        if(!this.scoutRequests.length) return;
 
-        if (!bees.length && this.scoutRequests.length) {
+        if (!bees.length) {
             if (this.wishManager.getCount(ROLE_SCOUT)) return;
             if (this.bees[ROLE_SCOUT].length >= MAX_SCOUT_COUNT) return;
             this.wishManager.wishBee({});
