@@ -319,7 +319,7 @@ export class BeeManager extends Bee {
     }
 
     private runTakeLab(): boolean {
-        if(!this.terminal.my) return false;
+        if(!this.terminal?.my) return false;
 
         const labProcess = Process.getProcess<ProcessLabReact>(this.room.name, PROCESS_LAB_REACT);
         if (!labProcess) return false;
