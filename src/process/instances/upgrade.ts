@@ -6,6 +6,7 @@ import { PROCESS_UPGRADE, ROLE_UPGRADER } from 'declarations/constantsExport';
 import { event } from 'event/Event';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
+import { minMax } from 'utilities/utils';
 
 const START_UPGRADE_LINE = 3e5;
 const UPGRADER_POW = 1.5;
@@ -61,26 +62,17 @@ export class ProcessUpgrade extends Process {
         if (level < 4) return false;
         const storage = room.storage;
 
+        this.count = room.controller!.ticksToDowngrade < (level < 4 ? 10000 : 2000) ? 1 : 0;
+
         if (level == 8) {
-            if (PERMANENT_UPGRADER && storage && storage.store.energy >= START_UPGRADE_LINE) {
-                this.count = 1;
-                return true;
-            }
-            if (!PERMANENT_UPGRADER && room.controller!.ticksToDowngrade < 100e3) {
-                this.count = 1;
-                return true;
-            }
-            this.count = 0;
+            if (PERMANENT_UPGRADER && storage && storage.store.energy >= START_UPGRADE_LINE) this.count = 1;
             return true;
         }
 
-        if (!storage || storage.store.energy < START_UPGRADE_LINE) {
-            this.count = 0;
-            return true;
-        }
+        if (!storage || storage.store.energy < START_UPGRADE_LINE) return true;
 
-        this.count = Math.min(Math.round(
-            Math.pow(storage.store.energy / 1e5, UPGRADER_POW)) + UPGRADER_BIAS, MAX_UPGRADER);
+        this.count = minMax(Math.round(
+            Math.pow(storage.store.energy / 1e5, UPGRADER_POW)) + UPGRADER_BIAS, MAX_UPGRADER, this.count);
 
         return true;
     }
