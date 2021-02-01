@@ -97,13 +97,8 @@ export class BeeSetup {
         const body: BodyPartConstant[] = [];
         // 添加前缀
         if (this.bodySetup.prefix) {
-<<<<<<< Updated upstream
-            for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
-                body.concat(this.bodySetup.prefix);
-=======
             for (let i = 0; i < (this.bodySetup.prefixScaleWithBodySize ? multiple : 1); i++) {
                 body.push(...this.bodySetup.prefix);
->>>>>>> Stashed changes
             }
         }
 
@@ -136,13 +131,8 @@ export class BeeSetup {
 
         // 添加后缀
         if (this.bodySetup.suffix) {
-<<<<<<< Updated upstream
-            for (let i = 0; i < (this.bodySetup.scaleWithBodySize ? multiple : 1); i++) {
-                body.concat(this.bodySetup.suffix);
-=======
             for (let i = 0; i < (this.bodySetup.suffixScaleWithBodySize ? multiple : 1); i++) {
                 body.push(...this.bodySetup.suffix);
->>>>>>> Stashed changes
             }
         }
 
