@@ -107,7 +107,7 @@ export const STORAGE_FULL_LINE = 950e3;
 export class ResourcesManager {
 
     public static balanceResources() {
-        const rooms = BeeBot.colonies().filter(room => !!room.terminal
+        const rooms = BeeBot.colonies().filter(room => !!room.terminal && room.terminal.my
             && !TerminalManager.hasOutgoingTransport(room.name) && !TerminalManager.hasIncomingTransport(room.name));
         if (rooms.length < 2) return;
 
