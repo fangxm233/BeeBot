@@ -17,6 +17,7 @@ import {
     PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
     PROCESS_RESERVING,
+    PROCESS_SEND_SCORE,
     PROCESS_TAKE_SCORE,
     PROCESS_TOWER,
     PROCESS_UPGRADE,
@@ -35,6 +36,7 @@ import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessMineSource } from 'process/instances/mineSource';
 import { ProcessRepair } from 'process/instances/repair';
 import { ProcessReserving } from 'process/instances/reserving';
+import { ProcessSendScore } from 'process/instances/sendScore';
 import { ProcessTakeScore } from 'process/instances/takeScore';
 import { ProcessTower } from 'process/instances/tower';
 import { ProcessUpgrade } from 'process/instances/upgrade';
@@ -275,7 +277,7 @@ export class BeeBot {
     }
 
     public static getScoreDetectRooms(roomName: string) {
-        const rooms = Cartographer.findRoomsInRange(roomName, 3)
+        const rooms = Cartographer.findRoomsInRange(roomName, 4)
             .filter(room => Cartographer.roomType(room) == ROOMTYPE_CONTROLLER);
         rooms.push(...Cartographer.findRoomsInRange(roomName, 7)
             .filter(room => Cartographer.roomType(room) == ROOMTYPE_HIGHEAY));
@@ -374,6 +376,8 @@ export class BeeBot {
         Process.getProcesses<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE).forEach(process => process.suspend());
         Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL)?.suspend();
         Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)?.suspend();
+        Process.getProcesses<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE).forEach(process => process.suspend());
+        Process.getProcesses<ProcessSendScore>(roomName, PROCESS_SEND_SCORE).forEach(process => process.suspend());
         Memory.beebot.colonies[roomName].defending = true;
     }
 
@@ -386,6 +390,8 @@ export class BeeBot {
         Process.getProcesses<ProcessDefendInvaderCore>(roomName, PROCESS_DEFEND_INVADER_CORE).forEach(process => process.awake());
         Process.getProcess<ProcessMineMineral>(roomName, PROCESS_MINE_MINERAL)?.awake();
         Process.getProcess<ProcessUpgrade>(roomName, PROCESS_UPGRADE)?.awake();
+        Process.getProcesses<ProcessTakeScore>(roomName, PROCESS_TAKE_SCORE).forEach(process => process.awake());
+        Process.getProcesses<ProcessSendScore>(roomName, PROCESS_SEND_SCORE).forEach(process => process.awake());
         Memory.beebot.colonies[roomName].defending = false;
     }
 
