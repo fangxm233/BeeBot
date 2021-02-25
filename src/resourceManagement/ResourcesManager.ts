@@ -106,20 +106,32 @@ export const STORAGE_FULL_LINE = 950e3;
 @profile
 export class ResourcesManager {
 
+    private static resourceCursor = 0;
+    private static readonly countPerTick = 4;
+    private static extraResources: {resource: ResourceConstant, time: number}[] = [];
+    private static readonly extraDuration = 100;
+
     public static balanceResources() {
         const rooms = BeeBot.colonies().filter(room => !!room.terminal && room.terminal.my
             && !TerminalManager.hasOutgoingTransport(room.name) && !TerminalManager.hasIncomingTransport(room.name));
         if (rooms.length < 2) return;
 
-        RESOURCES_ALL.forEach(resourceType => {
+        const resourceToDeal = this.extraResources.map(r => r.resource);
+        for (let i = 0; i < this.countPerTick; i++) {
+            if(this.resourceCursor >= RESOURCES_ALL.length) this.resourceCursor = 0;
+            resourceToDeal.push(RESOURCES_ALL[this.resourceCursor]);
+            this.resourceCursor++;
+        }
+
+        resourceToDeal.forEach(resourceType => {
             if (rooms.length < 2) return;
             const min = this.getResourceMinimum(resourceType, 'all');
             const max = this.getResourceLimit(resourceType, 'all');
             const lacks = rooms.filter(room => this.getStock(room.name, resourceType) < min);
             const extra = rooms.filter(room => this.getStock(room.name, resourceType) > max);
-            const normal = rooms.filter(room => !lacks.find(r => r.name == room.name) && !extra.find(r => r.name == room.name));
+            const normal = rooms.filter(room => this.getStock(room.name, resourceType) >= min && this.getStock(room.name, resourceType) <= max);
 
-            if (lacks.length) {
+            if (lacks.length && normal.length && extra.length) {
                 lacks.forEach(room => {
                     if (!normal.length && !extra.length) return;
                     const remain = min - this.getStock(room.name, resourceType);
@@ -127,12 +139,13 @@ export class ResourcesManager {
                     const amount = Math.min(remain, this.getStock(source.name, resourceType) - min);
                     if (amount <= 0) return;
                     TerminalManager.setTransport(source.name, room.name, resourceType, amount);
+                    this.addExtraResource(resourceType);
                     _.remove(normal, room => TerminalManager.hasOutgoingTransport(room.name));
                     _.remove(extra, room => TerminalManager.hasOutgoingTransport(room.name));
                 });
             }
 
-            if (extra.length) {
+            if (extra.length && normal.length) {
                 extra.forEach(room => {
                     if (!normal.length) return;
                     const remain = this.getStock(room.name, resourceType) - max;
@@ -140,6 +153,7 @@ export class ResourcesManager {
                     const amount = Math.min(remain, max - this.getStock(to.name, resourceType));
                     if (amount <= 0) return;
                     TerminalManager.setTransport(room.name, to.name, resourceType, amount);
+                    this.addExtraResource(resourceType);
                     _.remove(normal, room => TerminalManager.hasOutgoingTransport(room.name));
                 });
             }
@@ -147,6 +161,17 @@ export class ResourcesManager {
             _.remove(rooms, room => TerminalManager.hasOutgoingTransport(room.name)
                 || TerminalManager.hasIncomingTransport(room.name));
         });
+
+        _.remove(this.extraResources, r => Game.time - r.time >= this.extraDuration);
+    }
+
+    public static addExtraResource(resource: ResourceConstant) {
+        const exists = this.extraResources.find(r => r.resource == resource);
+        if(exists) {
+            exists.time = Game.time;
+            return;
+        }
+        this.extraResources.push({resource, time: Game.time});
     }
 
     public static getStock(roomName: string, resource: ResourceConstant, factory: boolean = false): number {
