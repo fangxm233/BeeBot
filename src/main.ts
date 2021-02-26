@@ -55,7 +55,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
     Intel.handleRequests();
     SegmentManager.applySegments();
 
-    Command.runFlag();
+    Command.executeFlags();
 
     stats.commit();
     if (USE_ACTION_COUNTER) actionsCounter.save(3000);
@@ -75,7 +75,6 @@ function globalReset() {
     Intel.deserializeData();
     BeeManager.deserializeBeeConfig();
     Processes.restoreProcesses();
-    Command.commandReset();
     clock.addAction(10, () => {
         if(!Intel.checkDirty()) return;
         Intel.serializeData();
