@@ -162,9 +162,3 @@ interface TypeToStructure {
     powerBank: StructurePowerBank;
     portal: StructurePortal;
 }
-
-declare namespace NodeJS {
-    interface Global {
-        resourceStat: ( resourceType?:ResourceConstant, split:boolean) => void;
-    }
-}

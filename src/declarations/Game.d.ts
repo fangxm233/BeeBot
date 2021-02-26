@@ -23,5 +23,6 @@ declare namespace NodeJS {
 		lastMemoryTick: number;
 		LastMemory: any;
 		Memory: any;
+		resourceStat: ( resourceType?:ResourceConstant, split:boolean) => void;
 	}
 }
