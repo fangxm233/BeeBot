@@ -5,7 +5,7 @@ import { ProcessDismantle } from 'process/instances/dismantle';
 import { Process } from 'process/Process';
 
 export class Command {
-    public static run() {
+    public static runFlag() {
         for (const name in Game.flags) {
             const flag = Game.flags[name];
             const snips = name.split('_');
@@ -55,6 +55,66 @@ export class Command {
                 flag.remove();
                 continue;
             }
+        }
+    }
+
+    /**
+     * 挂载全局函数,See Game.d.ts for the declarations
+     */
+    public static commandReset() {
+        /**
+         * command func resourceStat(),用于检测全房特定/全部resource的数量,方便管控全局
+         * @param resourceType 指定resource种类
+         * @param split 是否分房间输出
+         */
+        global.resourceStat=(resourceType?:ResourceConstant, split:boolean = false)=>{
+            if(resourceType)//单resource种类输出
+            {
+                let num=0
+                Object.values(Game.rooms).forEach(room=>{
+                    let singleRoom=0
+                    if(room.storage)
+                    {
+                        num+=room.storage.store[resourceType]
+                        singleRoom+=room.storage.store[resourceType]
+                    }
+                    if(room.terminal)
+                    {
+                        num+=room.terminal.store[resourceType]
+                        singleRoom+=room.terminal.store[resourceType]
+                    }
+                    if(split && singleRoom != 0)
+                    {
+                        console.log(`[resourceStat]房间${room.name}有${singleRoom}个${resourceType}`)
+                    }
+                })
+                console.log(`[resourceStat]全房总共有${num}个${resourceType}`)
+            }
+            else//全部resource输出
+            {
+                const result=[]
+                Object.values(Game.rooms).forEach(room => {
+                    
+                    if(room.storage)
+                    {
+                        Object.keys(room.storage.store).forEach(resourceType=>{
+                            if(result[resourceType]==undefined)result[resourceType]=0
+                            result[resourceType]=result[resourceType]+(room.storage?.store[resourceType]||0)
+                        })
+                    }
+                    if(room.terminal)
+                    {
+                        Object.keys(room.terminal.store).forEach(resourceType=>{
+                            if(result[resourceType]==undefined)result[resourceType]=0
+                            result[resourceType]=result[resourceType]+(room.terminal?.store[resourceType]||0)
+                        })
+                    }
+                });
+                for(const resourceType in result){
+                    console.log(`[resourceStat]全房共有${result[resourceType]}个${resourceType}`)
+                }
+            }
+            
         }
     }
 }
