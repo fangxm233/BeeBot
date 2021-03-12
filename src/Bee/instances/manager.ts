@@ -152,9 +152,14 @@ export class BeeManager extends Bee {
     }
 
     private runConsumeExtra(): boolean {
-        if (Game.time % 20 == 0 && !this.nowFunc) return false;
         if (this.storage.store.getUsedCapacity() < STORAGE_FULL_LINE
-            && this.terminal?.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
+            && this.terminal?.store.getUsedCapacity() < TERMINAL_FULL_LINE) {
+            if (this.store.getUsedCapacity()) {
+                this.dropAll();
+                return true;
+            }
+            return false;
+        }
         return RESOURCE_IMPORTANCE.some(type => {
             if (this.store.getUsedCapacity(type)) {
                 this.drop(type);
@@ -308,7 +313,7 @@ export class BeeManager extends Bee {
             }
             if (sourceLabs[i].store.getUsedCapacity(components[i])! < amount) {
                 // 这里做了个假设，terminal已经在前面的程序中准备好了资源
-                if (!this.terminal.my|| !this.terminal.store.getUsedCapacity(components[i])) return false;
+                if (!this.terminal.my || !this.terminal.store.getUsedCapacity(components[i])) return false;
                 this.setTask(this.terminal, sourceLabs[i], amount - stored, components[i]);
                 return true;
             }
@@ -319,7 +324,7 @@ export class BeeManager extends Bee {
     }
 
     private runTakeLab(): boolean {
-        if(!this.terminal?.my) return false;
+        if (!this.terminal?.my) return false;
 
         const labProcess = Process.getProcess<ProcessLabReact>(this.room.name, PROCESS_LAB_REACT);
         if (!labProcess) return false;
