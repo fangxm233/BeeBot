@@ -164,7 +164,7 @@ export class BeeManager extends Bee {
             if (this.storage.store.getUsedCapacity() > STORAGE_FULL_LINE) {
                 const storageLimit = ResourcesManager.getResourceLimit(type, 'storage');
                 if (this.storage.store.getUsedCapacity(type) > storageLimit) {
-                    this.get(this.storage, type, storageLimit - this.storage.store.getUsedCapacity(type));
+                    this.get(this.storage, type, this.storage.store.getUsedCapacity(type) - storageLimit);
                     return true;
                 }
             }
@@ -173,7 +173,7 @@ export class BeeManager extends Bee {
             if (this.terminal.store.getUsedCapacity() < TERMINAL_FULL_LINE) return false;
             const terminalLimit = ResourcesManager.getResourceLimit(type, 'terminal');
             if (this.terminal.store.getUsedCapacity(type) > terminalLimit) {
-                this.get(this.terminal, type, terminalLimit - this.terminal.store.getUsedCapacity(type));
+                this.get(this.terminal, type, this.storage.store.getUsedCapacity(type) - terminalLimit);
                 return true;
             }
 
