@@ -221,6 +221,15 @@ export class Bee {
         return this.creep.drop(resourceType, amount);
     }
 
+    public dropAll() {
+        for (const resourceType in this.store) {
+            if(this.store.getUsedCapacity(resourceType as ResourceConstant)) {
+                return this.drop(resourceType as ResourceConstant);
+            }
+        }
+        return ERR_NOT_ENOUGH_RESOURCES;
+    }
+
     public generateSafeMode(controller: StructureController) {
         return this.creep.generateSafeMode(controller);
     }
