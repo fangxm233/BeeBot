@@ -1,4 +1,4 @@
-export const MemoryVersion = 4;
+export const MemoryVersion = 5;
 
 export class Mem {
     public static checkAndInit() {
@@ -46,6 +46,12 @@ export class Mem {
         }
         if(from == 3) {
             Memory.transport = {};
+        }
+        if(from == 4) { // TODO: feat.resource room apart from main room
+            _.forEach(Game.rooms, room => {
+                if(Memory.beebot.colonies[room.name])
+                    Memory.beebot.colonies[room.name].type = 'main';
+            });
         }
         Memory.MemVer++;
     }

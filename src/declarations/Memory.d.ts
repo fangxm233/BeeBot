@@ -8,6 +8,7 @@ interface Memory {
             [roomName: string]: {
                 stage: ColonyStage,
                 defending: boolean,
+                type: RoomType // 房间种类
             }
         }
     }
@@ -31,6 +32,8 @@ interface Memory {
         }
     }
 }
+
+type RoomType = 'main' | 'gcl' | 'resource'
 
 interface RoomMemory {
     avoid: number;
