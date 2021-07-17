@@ -28,12 +28,20 @@ export class ProcessRepair extends Process {
         if (!room) return;
 
         const planner = BarrierPlanner.get(this.roomName);
-        const ramparts = room.ramparts.filter(rampart => rampart.hits < planner.getBarrierHitsTarget(rampart.pos));
-        if (!ramparts.length) {
+        const repairAmount = _.sum(room.ramparts,
+                rampart => Math.max(0, planner.getBarrierHitsTarget(rampart.pos) - rampart.hits));
+
+        const bodies = setups[ROLE_WORKER].default.generateCreepBody(room.energyCapacityAvailable);
+
+        let workerNum = repairAmount / 100 / (bodies.length / 3) / CREEP_LIFE_TIME;
+        if(workerNum > 1) workerNum = Math.min(3, Math.floor(workerNum));
+        else workerNum = Math.floor(workerNum + 0.1);
+
+        if (!workerNum) {
             this.sleep(timeAfterTick(100));
             return;
         }
 
-        this.wishManager.wishBee({});
+        this.wishManager.wishBee({count: workerNum});
     }
 }
