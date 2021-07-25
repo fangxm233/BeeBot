@@ -15,6 +15,7 @@ import {
     PROCESS_SCOUT,
     PROCESS_TOWER,
     PROCESS_UPGRADE,
+    PROCESS_POWER_BASE_WORK,
     ROLE_CARRIER,
     ROLE_CLAIMER,
     ROLE_DE_INVADER,
@@ -29,6 +30,7 @@ import {
     ROLE_SCOUT,
     ROLE_UPGRADER,
     ROLE_WORKER,
+    ROLE_POWER_PEACE,
 } from 'declarations/constantsExport';
 import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
@@ -47,6 +49,8 @@ import { ProcessTower } from './instances/tower';
 import { ProcessUpgrade } from './instances/upgrade';
 import { Process } from './Process';
 import { ProcessLabReact } from 'process/instances/labReact';
+import { ProcessPowerBaseWork } from './instances/powerBaseWork';
+
 
 // 注册的顺序将决定优先级
 Process.registerProcess(PROCESS_FILLING, Bucket.bottom, ProcessFilling, 100, [ROLE_FILLER]);
@@ -65,3 +69,4 @@ Process.registerProcess(PROCESS_DISMANTLE, Bucket.level4, ProcessDismantle, 100,
 Process.registerProcess(PROCESS_DEFEND_NUKE, Bucket.level2, ProcessDefendNuke, 100, [ROLE_WORKER]);
 Process.registerProcess(PROCESS_MINE_MINERAL, Bucket.level4, ProcessMineMineral, 100, [ROLE_DRONE, ROLE_CARRIER]);
 Process.registerProcess(PROCESS_LAB_REACT, Bucket.level4, ProcessLabReact);
+Process.registerProcess(PROCESS_POWER_BASE_WORK,Bucket.level1,ProcessPowerBaseWork,-1,[ROLE_POWER_PEACE]);

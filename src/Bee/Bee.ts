@@ -5,16 +5,15 @@ import { isStoreStructure } from 'declarations/typeGuards';
 import { event } from 'event/Event';
 import { timer } from 'event/Timer';
 import { Traveler } from 'movement/Traveler';
-import { PowerBee } from 'powerBee/powerBee';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { ITask } from 'tasks';
 import { initializeTask } from 'tasks/initializer';
 import { getFreeCapacity, timeAfterTick } from 'utilities/helpers';
 
-export const bees: { [beeName: string]: Bee | PowerBee } = {};
+export const bees: { [beeName: string]: Bee } = {};
 
-export function toBee(creep: Creep | string): Bee | PowerBee | undefined {
+export function toBee(creep: Creep | string): Bee | undefined {
     if (typeof creep == 'string') return bees[creep];
     return bees[creep.name];
 }

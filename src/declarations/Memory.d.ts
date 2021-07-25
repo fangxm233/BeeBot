@@ -82,7 +82,7 @@ type BeeManagerMemory = CreepMemory & {
 }
 
 interface PowerCreepMemory {
-    _trav: TravelData;
+    _path: string;
     task: protoTask | null;
 }
 

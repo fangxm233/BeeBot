@@ -35,3 +35,4 @@ export const PROCESS_DISMANTLE = 'dismantle';
 export const PROCESS_DEFEND_NUKE = 'defendNuke';
 export const PROCESS_MINE_MINERAL = 'mineMineral';
 export const PROCESS_LAB_REACT = 'labReact';
+export const PROCESS_POWER_BASE_WORK = 'powerBaseWork';

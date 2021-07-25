@@ -4,6 +4,7 @@ import { BeeManager } from 'beeSpawning/BeeManager';
 import { WishManager } from 'beeSpawning/WishManager';
 import { log } from 'console/log';
 import { timer } from 'event/Timer';
+import { PowerBee } from 'powerBee/powerBee';
 import { getFreeKey } from 'utilities/utils';
 import { profile } from '../profiler/decorator';
 
@@ -46,6 +47,7 @@ export class Process {
     public parent: string;
     public subProcesses: string[];
     public bees: { [role: string]: Bee[] };
+    public powerBees: { [role: string]: PowerBee[] };
     public id: number;
     public closed: boolean;
     public wishManager: WishManager;
@@ -187,8 +189,9 @@ export class Process {
         log.debug(process.roomName, 'process', process.processName, process.id, 'added');
     }
 
-    public registerBee(bee: Bee, role: string) {
-        this.bees[role].push(bee);
+    public registerBee(bee: Bee | PowerBee, role: string) {
+        if(bee instanceof PowerBee) this.powerBees[role].push(bee);
+        else this.bees[role].push(bee);
         this.memory.bees[role].push(bee.name);
         log.debug(this.roomName, this.processName, this.id, 'register', bee.name);
     }

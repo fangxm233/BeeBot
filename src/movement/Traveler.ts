@@ -30,7 +30,7 @@ export class Traveler {
             return ERR_INVALID_ARGS;
         }
 
-        if (bee.fatigue > 0) {
+        if (bee instanceof Bee && bee.fatigue > 0) {
             Traveler.circle(bee.pos, 'aqua', .3);
             return ERR_TIRED;
         }
@@ -112,7 +112,7 @@ export class Traveler {
         let newPath = false;
         if (!memory._path) {
             newPath = true;
-            if (bee.spawning) {
+            if (bee instanceof Bee && bee.spawning) {
                 return ERR_BUSY;
             }
 
