@@ -1,8 +1,5 @@
 import { TargetCache } from 'caching/caching';
-import { USER_NAME } from 'config';
-import { Intel } from 'dataManagement/Intel';
 import { isStoreStructure } from 'declarations/typeGuards';
-import { event } from 'event/Event';
 import { timer } from 'event/Timer';
 import { Traveler } from 'movement/Traveler';
 import { Process } from 'process/Process';
@@ -13,7 +10,7 @@ import { getFreeCapacity, timeAfterTick } from 'utilities/helpers';
 
 export const powerBees: { [beeName: string]: PowerBee } = {};
 
-export function toBee(creep: PowerCreep | string): PowerBee | undefined {
+export function toPowerBee(creep: PowerCreep | string): PowerBee | undefined {
     if (typeof creep == 'string') return powerBees[creep];
     return powerBees[creep.name];
 }
@@ -33,7 +30,7 @@ export class PowerBee {
     public slept: boolean = false;
     public cyclingCallbackId: string;
 
-    private settedNotify: boolean = true;
+    private setNotify: boolean = true;
 
     constructor(role: ALL_ROLES, process: Process, creep?: PowerCreep, notify: boolean = true) {
         this.role = role;
@@ -93,11 +90,11 @@ export class PowerBee {
     }
 
 
-
     private _lifeTime: number;
     public get lifeTime(): number {
-        return POWER_CREEP_LIFE_TIME
+        return POWER_CREEP_LIFE_TIME;
     }
+
     private _task: ITask | null;
     public get task(): ITask | null {
         if (!this._task) {
@@ -160,7 +157,7 @@ export class PowerBee {
 
     public dropAll() {
         for (const resourceType in this.store) {
-            if(this.store.getUsedCapacity(resourceType as ResourceConstant)) {
+            if (this.store.getUsedCapacity(resourceType as ResourceConstant)) {
                 return this.drop(resourceType as ResourceConstant);
             }
         }
@@ -183,9 +180,9 @@ export class PowerBee {
     }
 
     public notifyWhenAttacked(enabled: boolean) {
-        if (this.settedNotify === enabled) return OK;
+        if (this.setNotify === enabled) return OK;
         const code = this.creep.notifyWhenAttacked(enabled);
-        if (code === OK) this.settedNotify = enabled;
+        if (code === OK) this.setNotify = enabled;
         return code;
     }
 
@@ -196,24 +193,23 @@ export class PowerBee {
     public say(message: string, toPublic?: boolean) {
         return this.creep.say(message, toPublic);
     }
+
     public suicide() {
         return this.creep.suicide();
     }
 
-    public enableRoom(controller:StructureController){
-        return this.creep.enableRoom(controller)
+    public enableRoom(controller: StructureController) {
+        return this.creep.enableRoom(controller);
     }
 
-    public usePower(power:PowerConstant,target = undefined)
-    {
-        return this.creep.usePower(power,target)
+    public usePower(power: PowerConstant, target = undefined) {
+        return this.creep.usePower(power, target);
     }
 
-    public isAvailable(power:PowerConstant)
-    {
-        if(!this.creep.powers[power])   return ERR_INVALID_ARGS
-        else if(this.creep.powers[power].cooldown==undefined)   return OK
-        return ERR_TIRED
+    public isAvailable(power: PowerConstant) {
+        if (!this.creep.powers[power]) return ERR_INVALID_ARGS;
+        else if (this.creep.powers[power].cooldown == undefined) return OK;
+        return ERR_TIRED;
     }
 
     public transfer(target: AnyCreep | Structure, resourceType: ResourceConstant, amount?: number) {
@@ -275,23 +271,20 @@ export class PowerBee {
         if (this.task) return this.task.run();
     }
 
-    public spawn(powerSpawn:StructurePowerSpawn)
-    {
+    public spawn(powerSpawn: StructurePowerSpawn) {
         return this.creep.spawn(powerSpawn);
     }
 
-    public renewCreep(structure:StructurePowerSpawn | StructurePowerBank)
-    {
-        return this.creep.renew(structure)
+    public renewCreep(structure: StructurePowerSpawn | StructurePowerBank) {
+        return this.creep.renew(structure);
     }
 
-    get spawnCooldownTime()
-    {
-        return this.creep.spawnCooldownTime
+    get spawnCooldownTime() {
+        return this.creep.spawnCooldownTime;
     }
 
-    protected keepAlive(){
-        
+    protected keepAlive() {
+
     }
 }
 

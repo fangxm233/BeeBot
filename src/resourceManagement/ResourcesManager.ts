@@ -103,6 +103,8 @@ export const TERMINAL_DEPOSIT = 10e3;
 export const TERMINAL_FULL_LINE = 295e3;
 export const STORAGE_FULL_LINE = 950e3;
 
+export const MAX_OPS = 50000;
+
 @profile
 export class ResourcesManager {
 

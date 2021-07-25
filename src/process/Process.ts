@@ -1,10 +1,10 @@
 import { Bee, bees } from 'Bee/Bee';
 import { BeeFactory } from 'Bee/BeeFactory';
+import { PowerBee } from 'Bee/PowerBee';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { WishManager } from 'beeSpawning/WishManager';
 import { log } from 'console/log';
 import { timer } from 'event/Timer';
-import { PowerBee } from 'powerBee/powerBee';
 import { getFreeKey } from 'utilities/utils';
 import { profile } from '../profiler/decorator';
 
@@ -19,6 +19,7 @@ interface ProcessRegistration {
     suspendBucket: number,
     wishListInterval: number,
     requiredRoles: string[],
+    requiredPowerRoles: string[],
     constructor: typeof Process,
 }
 
@@ -59,11 +60,13 @@ export class Process {
         this.bees = {};
         this.powerBees = {};
         const registration = Process.getProcessRegistration(processName);
-        if (registration && registration.requiredRoles.length) {
-            for (const role of registration.requiredRoles) {
+        if (registration) {
+            registration.requiredRoles.forEach(role => {
                 this.bees[role] = [];
+            });
+            registration.requiredPowerRoles.forEach(role => {
                 this.powerBees[role] = [];
-            }
+            })
         }
         this._state = STATE_ACTIVE;
     }
@@ -103,7 +106,7 @@ export class Process {
             p: this.parent,
             sp: this.subProcesses.length ? this.subProcesses : undefined,
             bees: Object.keys(bees).length ? bees : undefined,
-            powerBees: Object.keys(powerBees).length ? powerBees : undefined
+            powerBees: Object.keys(powerBees).length ? powerBees : undefined,
         }, this.getProto());
     }
 
@@ -111,7 +114,8 @@ export class Process {
                                   suspendBucket: number,
                                   constructor: typeof Process,
                                   wishListInterval: number = -1,
-                                  requiredRoles: string[] = []) {
+                                  requiredRoles: string[] = [],
+                                  requiredPowerRoles: string[] = []) {
         this.processRegistry.push({
             processName,
             priority: this.processRegistry.length,
@@ -119,6 +123,7 @@ export class Process {
             constructor,
             wishListInterval,
             requiredRoles,
+            requiredPowerRoles
         });
     }
 
@@ -194,12 +199,10 @@ export class Process {
     }
 
     public registerBee(bee: Bee | PowerBee, role: string) {
-        if(bee instanceof PowerBee){
+        if (bee instanceof PowerBee) {
             this.powerBees[role].push(bee);
             this.memory.powerBees[role].push(bee.name);
-        } 
-        else
-        {
+        } else {
             this.bees[role].push(bee);
             this.memory.bees[role].push(bee.name);
         }

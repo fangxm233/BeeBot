@@ -1,4 +1,4 @@
-import { PowerBee } from "powerBee/powerBee";
+import { PowerBee } from "Bee/PowerBee";
 import { Bee } from "../Bee/Bee";
 
 interface ITask extends protoTask {

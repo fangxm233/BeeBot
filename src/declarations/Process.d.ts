@@ -28,13 +28,13 @@ type ProcessTypes = 'filling'
     | 'powerBaseWork';
 
 interface protoProcess {
-    powerBees: { [role: string]: string[] };
     st: ShortProcessState;
     slt?: number;
     slpId?: string;
     p: string;
     sp: string[];
     bees: { [role: string]: string[] };
+    powerBees: { [role: string]: string[] };
 }
 
 type protoProcessFilling = protoProcess & {};

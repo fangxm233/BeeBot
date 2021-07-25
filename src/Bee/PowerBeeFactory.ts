@@ -1,7 +1,7 @@
-import { PriorityManager } from "beeSpawning/PriorityManager";
-import { Process } from "process/Process";
-import { profile } from "profiler/decorator";
-import { PowerBee } from "./powerBee";
+import { PowerBee } from 'Bee/PowerBee';
+import { PriorityManager } from 'beeSpawning/PriorityManager';
+import { Process } from 'process/Process';
+import { profile } from 'profiler/decorator';
 
 @profile
 export class PowerBeeFactory {
@@ -26,4 +26,5 @@ export class PowerBeeFactory {
         throw new Error(`The role ${role} haven't been registered.`);
     }
 }
+
 (global as any).PowerBeeFactory = PowerBeeFactory;

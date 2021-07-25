@@ -1,5 +1,5 @@
 import './Bee/BeeInitializer';
-import './powerBee/powerBeeInitializer'
+import 'Bee/PowerBeeInitializer';
 import './process/ProcessInitializer';
 import './prototypes/ConstructionSite';
 import './prototypes/Creep';
@@ -36,14 +36,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
     stats.reset();
     if (USE_ACTION_COUNTER) actionsCounter.init(true);
-    if(BeeBot.checkSpawned()) BeeBot.InitializeBeeBot();
+    if (BeeBot.checkSpawned()) BeeBot.InitializeBeeBot();
     Mem.tryInitSameMemory();
     Mem.checkAndInit();
     if (reset) globalReset();
 
     BeeManager.clearDiedBees();
     BeeManager.refreshBees();
-    
+
     BeeBot.run();
 
     Processes.runAllProcesses();
@@ -77,7 +77,7 @@ function globalReset() {
     BeeManager.deserializeBeeConfig();
     Processes.restoreProcesses();
     clock.addAction(10, () => {
-        if(!Intel.checkDirty()) return;
+        if (!Intel.checkDirty()) return;
         Intel.serializeData();
         Intel.resetDirty();
     });

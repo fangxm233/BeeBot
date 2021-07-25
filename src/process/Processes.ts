@@ -1,8 +1,8 @@
 import { bees } from 'Bee/Bee';
 import { BeeFactory } from 'Bee/BeeFactory';
 import { log } from 'console/log';
-import { powerBees } from 'powerBee/powerBee';
-import { PowerBeeFactory } from 'powerBee/powerBeeFactory';
+import { powerBees } from 'Bee/PowerBee';
+import { PowerBeeFactory } from 'Bee/PowerBeeFactory';
 import { profile } from 'profiler/decorator';
 import { Visualizer } from 'visuals/Visualizer';
 import { Process, STATE_ACTIVE, STATE_WAITING } from './Process';

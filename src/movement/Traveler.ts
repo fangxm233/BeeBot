@@ -1,5 +1,5 @@
 import { Bee, bees } from 'Bee/Bee';
-import { PowerBee } from 'powerBee/powerBee';
+import { PowerBee } from 'Bee/PowerBee';
 import { profile } from '../profiler/decorator';
 
 @profile
