@@ -83,4 +83,13 @@ type BeeManagerMemory = CreepMemory & {
 
 interface PowerCreepMemory {
     _trav: TravelData;
+    task: protoTask | null;
+}
+
+type PowerBeePeaceMemory = PowerCreepMemory & {
+    
+}
+
+type PowerBeeWarMemory = PowerCreepMemory & {
+    
 }

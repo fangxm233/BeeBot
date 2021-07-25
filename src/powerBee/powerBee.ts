@@ -5,16 +5,15 @@ import { isStoreStructure } from 'declarations/typeGuards';
 import { event } from 'event/Event';
 import { timer } from 'event/Timer';
 import { Traveler } from 'movement/Traveler';
-import { PowerBee } from 'powerBee/powerBee';
 import { Process } from 'process/Process';
 import { profile } from 'profiler/decorator';
 import { ITask } from 'tasks';
 import { initializeTask } from 'tasks/initializer';
 import { getFreeCapacity, timeAfterTick } from 'utilities/helpers';
 
-export const bees: { [beeName: string]: Bee | PowerBee } = {};
+export const bees: { [beeName: string]: PowerBee } = {};
 
-export function toBee(creep: Creep | string): Bee | PowerBee | undefined {
+export function toBee(creep: Creep | string): PowerBee | undefined {
     if (typeof creep == 'string') return bees[creep];
     return bees[creep.name];
 }
@@ -23,10 +22,10 @@ export function toBee(creep: Creep | string): Bee | PowerBee | undefined {
  * Bee是一个creep的包装，负责creep的任务生成和执行，封装了creep的所有动作和属性。是其他职能Bee的父类。
  */
 @profile
-export class Bee {
+export class PowerBee {
     public role: ALL_ROLES; // bee的角色
     public process: Process; // 管理他的process
-    public creep: Creep; // 管理的creep
+    public creep: PowerCreep; // 管理的creep
 
     public notify: boolean;
 
@@ -36,9 +35,9 @@ export class Bee {
 
     private settedNotify: boolean = true;
 
-    constructor(role: ALL_ROLES, process: Process, creep?: Creep, notify: boolean = true) {
+    constructor(role: ALL_ROLES, process: Process, creep?: PowerCreep, notify: boolean = true) {
         this.role = role;
-        this.creep = creep as Creep;
+        this.creep = creep as PowerCreep;
         this.process = process;
         this.notify = notify;
     }
@@ -53,16 +52,8 @@ export class Bee {
         return this.creep.pos;
     }
 
-    public get room(): Room {
+    public get room(): Room | undefined {
         return this.creep.room;
-    }
-
-    public get body(): BodyPartDefinition[] {
-        return this.creep.body;
-    }
-
-    public get fatigue(): number {
-        return this.creep.fatigue;
     }
 
     public get hits(): number {
@@ -73,11 +64,7 @@ export class Bee {
         return this.creep.hitsMax;
     }
 
-    public get id(): Id<Creep> {
-        return this.creep.id;
-    }
-
-    public get memory(): CreepMemory {
+    public get memory(): PowerCreepMemory {
         return this.creep.memory;
     }
 
@@ -97,10 +84,6 @@ export class Bee {
         return this.creep.saying;
     }
 
-    public get spawning(): boolean {
-        return this.creep.spawning;
-    }
-
     public get store(): StoreDefinition {
         return this.creep.store;
     }
@@ -109,28 +92,12 @@ export class Bee {
         return this.creep.ticksToLive || this.lifeTime;
     }
 
-    // 另外添加的属性
 
-    public get arriveTick(): number {
-        return this.memory.AT || 0;
-    }
-
-    public set arriveTick(tick: number) {
-        this.memory.AT = tick;
-    }
 
     private _lifeTime: number;
     public get lifeTime(): number {
-        if (this._lifeTime) return this._lifeTime;
-        return this._lifeTime = this.bodyCounts[CLAIM] ? CREEP_CLAIM_LIFE_TIME : CREEP_LIFE_TIME;
+        return POWER_CREEP_LIFE_TIME
     }
-
-    private _bodyCounts: { [bodyType: string]: number };
-    public get bodyCounts(): { [bodyType: string]: number } {
-        if (this._bodyCounts) return this._bodyCounts;
-        return this._bodyCounts = _.countBy(this.body, bodyPart => bodyPart.type);
-    }
-
     private _task: ITask | null;
     public get task(): ITask | null {
         if (!this._task) {
@@ -182,41 +149,10 @@ export class Bee {
         return this.hitsMax - this.hits;
     }
 
-    // creep的动作
-
-    public attack(target: AnyCreep | Structure) {
-        // 如果不是邻近则替换成远程
-        if (this.creep.pos.isNearTo(target)) return this.creep.attack(target);
-        else if (this.bodyCounts[RANGED_ATTACK]) return this.rangedAttack(target);
-        return ERR_NOT_IN_RANGE;
-    }
-
-    public attackController(target: StructureController) {
-        return this.creep.attackController(target);
-    }
-
-    public build(target: ConstructionSite) {
-        if ((target as any)._arrangedCallback) return this.creep.build(target);
-        (target as any)._arrangedCallback = true;
-        timer.callBackAtTick(timeAfterTick(1), () => {
-            if (Game.getObjectById(target.id)) return;
-            if (!target.pos.lookForStructure(target.structureType)) return;
-            event.invokeEvent('onBuildComplete', { pos: target.pos, type: target.structureType });
-        });
-        return this.creep.build(target);
-    }
-
     public cancelOrder(methodName: string) {
         return this.creep.cancelOrder(methodName);
     }
 
-    public claimController(target: StructureController) {
-        return this.creep.claimController(target);
-    }
-
-    public dismantle(target: Structure) {
-        return this.creep.dismantle(target);
-    }
 
     public drop(resourceType: ResourceConstant, amount?: number) {
         return this.creep.drop(resourceType, amount);
@@ -231,24 +167,6 @@ export class Bee {
         return ERR_NOT_ENOUGH_RESOURCES;
     }
 
-    public generateSafeMode(controller: StructureController) {
-        return this.creep.generateSafeMode(controller);
-    }
-
-    public getActiveBodyparts(type: BodyPartConstant) {
-        return this.creep.getActiveBodyparts(type);
-    }
-
-    public harvest(target: Source | Mineral | Deposit) {
-        return this.creep.harvest(target);
-    }
-
-    public heal(target: AnyCreep) {
-        // 如果不是邻近则替换成远程
-        if (this.creep.pos.isNearTo(target))
-            return this.creep.heal(target);
-        else return this.rangedHeal(target);
-    }
 
     public move(dirOrPos: DirectionConstant | RoomPosition) {
         if (typeof dirOrPos == 'number')
@@ -275,48 +193,27 @@ export class Bee {
         return this.creep.pickup(target);
     }
 
-    public pull(target: Creep) {
-        return this.creep.pull(target);
-    }
-
-    public rangedAttack(target: AnyCreep | Structure) {
-        return this.creep.rangedAttack(target);
-    }
-
-    public rangedHeal(target: AnyCreep) {
-        return this.creep.rangedHeal(target);
-    }
-
-    public rangedMassAttack() {
-        return this.creep.rangedMassAttack();
-    }
-
-    public repair(target: Structure) {
-        return this.creep.repair(target);
-    }
-
-    public reserveController(target: StructureController) {
-        return this.creep.reserveController(target);
-    }
-
     public say(message: string, toPublic?: boolean) {
         return this.creep.say(message, toPublic);
     }
-
-    public signController(target: StructureController, text: string) {
-        // 忽略无用sign
-        if (!target.sign) return this.creep.signController(target, text);
-        if (target.sign.username !== USER_NAME) return this.creep.signController(target, text);
-        if (target.sign.text !== text) return this.creep.signController(target, text);
-        return OK;
+    public suicide() {
+        return this.creep.suicide();
     }
 
-    public suicide() {
-        if (this.spawning) {
-            timer.callBackAtTick(timeAfterTick(10), () => this.suicide());
-            return ERR_BUSY;
-        }
-        return this.creep.suicide();
+    public enableRoom(controller:StructureController){
+        return this.creep.enableRoom(controller)
+    }
+
+    public usePower(power:PowerConstant,target = undefined)
+    {
+        return this.creep.usePower(power,target)
+    }
+
+    public isAvailable(power:PowerConstant)
+    {
+        if(!this.creep.powers[power])   return ERR_INVALID_ARGS
+        else if(this.creep.powers[power].cooldown==undefined)   return OK
+        return ERR_TIRED
     }
 
     public transfer(target: AnyCreep | Structure, resourceType: ResourceConstant, amount?: number) {
@@ -328,18 +225,6 @@ export class Bee {
             if (amount <= 0) return ERR_INVALID_ARGS;
         }
         return this.creep.transfer(target, resourceType, amount);
-    }
-
-    public upgradeController(target: StructureController) {
-        if ((target as any)._arrangedCallback) return this.creep.upgradeController(target);
-        (target as any)._arrangedCallback = true;
-        timer.callBackAtTick(timeAfterTick(1), () => {
-            if (Game.getObjectById(target.id)!.level > target.level) {
-                Intel.refreshRoomIntel(target.room.name);
-                event.invokeEvent('onRclUpgrade');
-            }
-        });
-        return this.creep.upgradeController(target);
     }
 
     public withdraw(target: Structure | Tombstone | Ruin, resourceType: ResourceConstant, amount?: number) {
@@ -388,6 +273,25 @@ export class Bee {
 
     protected runCore(): number | void {
         if (this.task) return this.task.run();
+    }
+
+    public spawn(powerSpawn:StructurePowerSpawn)
+    {
+        return this.creep.spawn(powerSpawn);
+    }
+
+    public renewCreep(structure:StructurePowerSpawn | StructurePowerBank)
+    {
+        return this.creep.renew(structure)
+    }
+
+    get spawnCooldownTime()
+    {
+        return this.creep.spawnCooldownTime
+    }
+
+    protected keepAlive(){
+        
     }
 }
 

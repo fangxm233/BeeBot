@@ -1,9 +1,10 @@
+import { PowerBee } from "powerBee/powerBee";
 import { Bee } from "../Bee/Bee";
 
 interface ITask extends protoTask {
 	settings: TaskSettings;
 	proto: protoTask;
-	bee: Bee;
+	bee: Bee | PowerBee;
 	target: RoomObject | null;
 	targetPos: RoomPosition;
 	parent: ITask | null;

@@ -7,3 +7,5 @@ export const USER_NAME = getUsername();
 
 // 设置是否到rcl8后任然常驻升级工
 export const PERMANENT_UPGRADER = false;
+
+export const MAX_OPS = 50000;
