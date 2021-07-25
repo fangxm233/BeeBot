@@ -12,7 +12,6 @@ export class PowerBeePeace extends PowerBee {
     }
 
     public runCore() {
-        console.log('runCore')
         if(!this.room)
         {
             const room = Game.rooms[this.name.split("Operator")[0]]
@@ -39,14 +38,20 @@ export class PowerBeePeace extends PowerBee {
 
     public keepAlive(){
         const powerSpawn = this.room?.powerSpawn
-        if(powerSpawn && this.renewCreep(powerSpawn)==ERR_NOT_IN_RANGE)
+        if(powerSpawn)
         {
-            this.travelTo(powerSpawn)
+            const ret = this.renewCreep(powerSpawn)//Weird bug,not written in this way will cause renew failure
+            if(ret == ERR_NOT_IN_RANGE)
+                this.travelTo(powerSpawn)
         }
     }
 
     private enablePower(){
-        if(this.room?.controller && this.enableRoom(this.room.controller)==ERR_NOT_IN_RANGE)
-            this.travelTo(this.room?.controller)
+        if(this.room?.controller)
+        {
+            const ret = this.enableRoom(this.room.controller);
+            if(ret==ERR_NOT_IN_RANGE)
+                this.travelTo(this.room?.controller);
+        }
     }
 }

@@ -96,12 +96,14 @@ export class Process {
 
     public get protoProcess(): protoProcess {
         const bees = _.mapValues(this.bees, bees => bees.map(bee => bee.name));
+        const powerBees = _.mapValues(this.powerBees, powerBees => powerBees.map(powerBee => powerBee.name));
         return _.extend({
             st: this.state,
             slt: this.sleepTime ? this.sleepTime : undefined,
             p: this.parent,
             sp: this.subProcesses.length ? this.subProcesses : undefined,
             bees: Object.keys(bees).length ? bees : undefined,
+            powerBees: Object.keys(powerBees).length ? powerBees : undefined
         }, this.getProto());
     }
 
@@ -192,9 +194,15 @@ export class Process {
     }
 
     public registerBee(bee: Bee | PowerBee, role: string) {
-        if(bee instanceof PowerBee) this.powerBees[role].push(bee);
-        else this.bees[role].push(bee);
-        this.memory.bees[role].push(bee.name);
+        if(bee instanceof PowerBee){
+            this.powerBees[role].push(bee);
+            this.memory.powerBees[role].push(bee.name);
+        } 
+        else
+        {
+            this.bees[role].push(bee);
+            this.memory.bees[role].push(bee.name);
+        }
         log.debug(this.roomName, this.processName, this.id, 'register', bee.name);
     }
 
@@ -317,7 +325,7 @@ export class Process {
     }
 
     public foreachPowerBee(role: string, callbackFn: (bee: PowerBee) => void) {
-        _.forEach(this.bees[role], callbackFn);
+        _.forEach(this.powerBees[role], callbackFn);
     }
 
     public boostedCreep(creepName: string, compoundTypes: ResourceConstant[], succeed: boolean) {
