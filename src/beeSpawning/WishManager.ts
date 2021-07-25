@@ -1,5 +1,5 @@
 import { Bee } from "Bee/Bee";
-import { BeeFactorty } from "Bee/BeeFactory";
+import { BeeFactory } from "Bee/BeeFactory";
 import { timer } from "event/Timer";
 import { Process } from "process/Process";
 import { profile } from "profiler/decorator";
@@ -40,7 +40,7 @@ export class WishManager {
         if (config.role) {
             const { count, role } = config;
             for (let i = 0; i < (count || 1); i++) {
-                const bee = BeeFactorty.getInstance(role, this.process);
+                const bee = BeeFactory.getInstance(role, this.process);
                 const wish = new BeeWish(bee, setup!, budget!, this.room, this.spawnRoom, this.process.fullId, extraMemory, emergency, name);
                 this._wishes.push(wish);
                 BeeManager.wishBee(wish);
@@ -63,7 +63,7 @@ export class WishManager {
                 bee.cyclingCallbackId = timer.callBackAtTick(
                     timeAfterTick(bee.ticksToLive - bee.arriveTick - bee.body.length * 3), // TODO: 处理spawn被加速的情况
                     () => this.wishBee({
-                        bee: BeeFactorty.getInstance(role, this.process),
+                        bee: BeeFactory.getInstance(role, this.process),
                         setup,
                         budget,
                         extraMemory: memory

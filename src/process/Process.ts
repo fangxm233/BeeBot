@@ -1,5 +1,5 @@
 import { Bee, bees } from 'Bee/Bee';
-import { BeeFactorty } from 'Bee/BeeFactory';
+import { BeeFactory } from 'Bee/BeeFactory';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { WishManager } from 'beeSpawning/WishManager';
 import { log } from 'console/log';
@@ -223,7 +223,7 @@ export class Process {
         if (!process) return;
         if (!_.find(this.bees, bees => bees.find(bee => bee.name == beeName))) return;
         this.removeBee(beeName);
-        bees[beeName] = BeeFactorty.getInstance(newRole, process, beeName);
+        bees[beeName] = BeeFactory.getInstance(newRole, process, beeName);
         process.registerBee(bees[beeName], newRole);
     }
 

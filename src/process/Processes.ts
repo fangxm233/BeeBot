@@ -1,5 +1,5 @@
 import { bees } from 'Bee/Bee';
-import { BeeFactorty } from 'Bee/BeeFactory';
+import { BeeFactory } from 'Bee/BeeFactory';
 import { log } from 'console/log';
 import { powerBees } from 'powerBee/powerBee';
 import { PowerBeeFactory } from 'powerBee/powerBeeFactory';
@@ -26,7 +26,7 @@ export class Processes {
                 if (!Game.creeps[creepName]) return undefined!;
                 // 防止有多个process注册了同一个creep造成的bee引用在bees里面丢失而无法刷新creep
                 if (bees[creepName]) return bees[creepName];
-                const bee = BeeFactorty.getInstance(role as any, process, creepName);
+                const bee = BeeFactory.getInstance(role as any, process, creepName);
                 bees[creepName] = bee;
                 return bee;
             }));

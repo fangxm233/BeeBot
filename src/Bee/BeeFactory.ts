@@ -4,7 +4,7 @@ import { profile } from "profiler/decorator";
 import { Bee } from "./Bee";
 
 @profile
-export class BeeFactorty {
+export class BeeFactory {
     private static beeRegistry: {
         role: ALL_ROLES,
         constructor: typeof Bee,
