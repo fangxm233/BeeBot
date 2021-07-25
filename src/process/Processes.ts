@@ -1,6 +1,8 @@
 import { bees } from 'Bee/Bee';
 import { BeeFactorty } from 'Bee/BeeFactory';
 import { log } from 'console/log';
+import { powerBees } from 'powerBee/powerBee';
+import { PowerBeeFactory } from 'powerBee/powerBeeFactory';
 import { profile } from 'profiler/decorator';
 import { Visualizer } from 'visuals/Visualizer';
 import { Process, STATE_ACTIVE, STATE_WAITING } from './Process';
@@ -26,6 +28,18 @@ export class Processes {
                 if (bees[creepName]) return bees[creepName];
                 const bee = BeeFactorty.getInstance(role as any, process, creepName);
                 bees[creepName] = bee;
+                return bee;
+            }));
+        });
+        process.powerBees = !proto.powerBees ? {} : _.mapValues(proto.powerBees, (creepNames, role) => {
+            if (!role) return [];
+            return _.compact(creepNames.map(creepName => {
+                // 防止在reset的那个tick刚刚好有bee死亡
+                if (!Game.powerCreeps[creepName]) return undefined!;
+                // 防止有多个process注册了同一个creep造成的bee引用在bees里面丢失而无法刷新creep
+                if (powerBees[creepName]) return powerBees[creepName];
+                const bee = PowerBeeFactory.getInstance(role as any, process, creepName);
+                powerBees[creepName] = bee;
                 return bee;
             }));
         });

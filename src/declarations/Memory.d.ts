@@ -1,4 +1,5 @@
 interface Memory {
+    temp: boolean
     MemVer: number;
     beebot: {
         outposts: {

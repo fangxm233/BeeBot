@@ -1,4 +1,5 @@
 import './Bee/BeeInitializer';
+import './powerBee/powerBeeInitializer'
 import './process/ProcessInitializer';
 import './prototypes/ConstructionSite';
 import './prototypes/Creep';

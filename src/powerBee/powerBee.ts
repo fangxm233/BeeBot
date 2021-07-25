@@ -11,11 +11,11 @@ import { ITask } from 'tasks';
 import { initializeTask } from 'tasks/initializer';
 import { getFreeCapacity, timeAfterTick } from 'utilities/helpers';
 
-export const bees: { [beeName: string]: PowerBee } = {};
+export const powerBees: { [beeName: string]: PowerBee } = {};
 
-export function toBee(creep: Creep | string): PowerBee | undefined {
-    if (typeof creep == 'string') return bees[creep];
-    return bees[creep.name];
+export function toBee(creep: PowerCreep | string): PowerBee | undefined {
+    if (typeof creep == 'string') return powerBees[creep];
+    return powerBees[creep.name];
 }
 
 /**
@@ -295,4 +295,4 @@ export class PowerBee {
     }
 }
 
-(global as any).bees = bees;
+(global as any).powerBees = powerBees;

@@ -12,6 +12,7 @@ export class PowerBeePeace extends PowerBee {
     }
 
     public runCore() {
+        console.log('runCore')
         if(!this.room)
         {
             const room = Game.rooms[this.name.split("Operator")[0]]
@@ -19,7 +20,7 @@ export class PowerBeePeace extends PowerBee {
             if(powerSpawn && !this.spawnCooldownTime)
                 this.spawn(powerSpawn)
         }
-        if(this.ticksToLive<=500)
+        if(this.ticksToLive<=4900)//DEBUGGING
         {
             this.keepAlive();
             return;

@@ -28,6 +28,7 @@ type ProcessTypes = 'filling'
     | 'powerBaseWork';
 
 interface protoProcess {
+    powerBees: { [role: string]: string[] };
     st: ShortProcessState;
     slt?: number;
     slpId?: string;

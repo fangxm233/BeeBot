@@ -57,10 +57,12 @@ export class Process {
         this.processName = processName;
         this.subProcesses = [];
         this.bees = {};
+        this.powerBees = {};
         const registration = Process.getProcessRegistration(processName);
         if (registration && registration.requiredRoles.length) {
             for (const role of registration.requiredRoles) {
                 this.bees[role] = [];
+                this.powerBees[role] = [];
             }
         }
         this._state = STATE_ACTIVE;
@@ -311,6 +313,10 @@ export class Process {
     }
 
     public foreachBee(role: string, callbackFn: (bee: Bee) => void) {
+        _.forEach(this.bees[role], callbackFn);
+    }
+
+    public foreachPowerBee(role: string, callbackFn: (bee: PowerBee) => void) {
         _.forEach(this.bees[role], callbackFn);
     }
 

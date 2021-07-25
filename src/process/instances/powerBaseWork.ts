@@ -4,13 +4,15 @@ import { profile } from 'profiler/decorator';
 
 @profile
 export class ProcessPowerBaseWork extends Process {
-    public tasks:PowerConstant[];
-    constructor(roomName: string, tasks: PowerConstant[]) {
-        super(roomName, PROCESS_POWER_BASE_WORK);
+    public tasks:PowerConstant[]=[];
+    constructor(roomName: string) {
+        super(roomName, PROCESS_POWER_BASE_WORK)
     }
 
     public static getInstance(proto: protoProcessPowerBaseWork,roomName: string) {
-        return new ProcessPowerBaseWork(roomName,proto.tasks);
+        const process = new ProcessPowerBaseWork(roomName);
+        process.tasks = proto.tasks
+        return process
     }
 
     public getProto() {
@@ -19,6 +21,6 @@ export class ProcessPowerBaseWork extends Process {
     
 
     public run() {
-        this.foreachBee(ROLE_POWER_PEACE, bee => bee.run());
+        this.foreachPowerBee(ROLE_POWER_PEACE, bee => bee.run());
     }
 }
