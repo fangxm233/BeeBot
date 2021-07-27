@@ -62,7 +62,7 @@ export class ProcessUpgrade extends Process {
         if (level < 4) return false;
         const storage = room.storage;
 
-        this.count = room.controller!.ticksToDowngrade < (level < 4 ? 10000 : 2000) ? 1 : 0;
+        this.count = room.controller!.ticksToDowngrade < (level < 4 ? 10000 : 20000) ? 1 : 0;
 
         if (level == 8) {
             if (PERMANENT_UPGRADER && storage && storage.store.energy >= START_UPGRADE_LINE) this.count = 1;
