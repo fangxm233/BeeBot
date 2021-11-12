@@ -1,4 +1,4 @@
-import { getUsername } from "utilities/utils";
+import { getUsername } from 'utilities/utils';
 
 export const USE_PROFILE = false;
 export const USE_ACTION_COUNTER = true;

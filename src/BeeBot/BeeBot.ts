@@ -266,7 +266,7 @@ export class BeeBot {
     }
 
     public static setColonyStage(roomName: string, stage: ColonyStage) {
-        if (!Memory.beebot.colonies[roomName]) Memory.beebot.colonies[roomName] = { stage, defending: false };
+        if (!Memory.beebot.colonies[roomName]) Memory.beebot.colonies[roomName] = { stage, defending: false, type: 'main' };//FIXME:DEBUGGER CODE,DANGEROUS
         else Memory.beebot.colonies[roomName].stage = stage;
     }
 

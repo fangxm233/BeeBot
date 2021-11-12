@@ -1,4 +1,5 @@
 import { Bee, bees } from 'Bee/Bee';
+import { PowerBee } from 'Bee/PowerBee';
 import { profile } from '../profiler/decorator';
 
 @profile
@@ -20,7 +21,7 @@ export class Traveler {
      * @returns {number}
      */
 
-    public static travelTo(bee: Bee, destination: HasPos | RoomPosition, options: TravelToOptions = {}): number {
+    public static travelTo(bee: Bee | PowerBee, destination: HasPos | RoomPosition, options: TravelToOptions = {}): number {
 
         // uncomment if you would like to register hostile rooms entered
         // this.updateRoomStatus(creep.room);
@@ -29,7 +30,7 @@ export class Traveler {
             return ERR_INVALID_ARGS;
         }
 
-        if (bee.fatigue > 0) {
+        if (bee instanceof Bee && bee.fatigue > 0) {
             Traveler.circle(bee.pos, 'aqua', .3);
             return ERR_TIRED;
         }
@@ -111,7 +112,7 @@ export class Traveler {
         let newPath = false;
         if (!memory._path) {
             newPath = true;
-            if (bee.spawning) {
+            if (bee instanceof Bee && bee.spawning) {
                 return ERR_BUSY;
             }
 
@@ -177,20 +178,20 @@ export class Traveler {
         return this.move(bee, nextDirection as DirectionConstant);
     }
 
-    public static travelToRoom(bee: Bee, roomName: string, options: TravelToOptions = {}): number {
+    public static travelToRoom(bee: Bee | PowerBee, roomName: string, options: TravelToOptions = {}): number {
         options = _.clone(options);
         options.range = 23;
         return this.travelTo(bee, new RoomPosition(25, 25, roomName), options);
     }
 
-    public static moveOffExit(bee: Bee): ScreepsReturnCode {
+    public static moveOffExit(bee: Bee | PowerBee): ScreepsReturnCode {
         if (bee.pos.isEdge) {
             return Traveler.move(bee, bee.pos.getDirectionTo(bee.pos.availableNeighbors().filter(pos => !pos.isEdge)[0]));
         }
         return OK;
     }
 
-    private static pushCreeps(bee: Bee, nextDir: number) {
+    private static pushCreeps(bee: Bee | PowerBee, nextDir: number) {
         // if(creep.memory.role == 'manager') console.log('pushing')
         const obstructingCreep = this.findBlockingCreep(bee, nextDir);
         if (obstructingCreep) {
@@ -216,7 +217,7 @@ export class Traveler {
         }
     }
 
-    private static findBlockingCreep(bee: Bee, nextDir: number): Creep | PowerCreep | undefined {
+    private static findBlockingCreep(bee: Bee | PowerBee, nextDir: number): Creep | PowerCreep | undefined {
         if (nextDir == undefined) return;
 
         const nextPos = Traveler.positionAtDirection(bee.pos, nextDir);
@@ -232,7 +233,7 @@ export class Traveler {
         return;
     }
 
-    private static getPushDirection(bee: Bee, pushee: Creep | PowerCreep) {
+    private static getPushDirection(bee: Bee | PowerBee, pushee: Creep | PowerCreep) {
         const possiblePositions = pushee.pos.availableNeighbors();
         const dir = bee.pos.getDirectionTo(pushee.pos);
 
@@ -738,7 +739,7 @@ export class Traveler {
         return pos1.getMultiRoomRangeTo(pos2);
     }
 
-    private static isStuck(bee: Bee, state: TravelState): boolean {
+    private static isStuck(bee: Bee | PowerBee, state: TravelState): boolean {
         let stuck = false;
         if (state.lastCoord !== undefined) {
             if (this.sameCoord(bee.pos, state.lastCoord)) {
@@ -753,7 +754,7 @@ export class Traveler {
         return stuck;
     }
 
-    private static move(bee: Bee, dir: DirectionConstant): ScreepsReturnCode {
+    private static move(bee: Bee | PowerBee, dir: DirectionConstant): ScreepsReturnCode {
         const code = bee.move(dir);
         if (code == OK) this.moveRecord[bee.name] = Game.time;
         return code;

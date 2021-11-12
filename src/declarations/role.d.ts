@@ -12,4 +12,7 @@ declare type ALL_ROLES =
     | 'deInvader'
     | 'deInvaderCore'
     | 'dismantler'
-    | 'drone';
+    | 'drone'
+
+    | 'baseBooster'
+    | 'warPusher';

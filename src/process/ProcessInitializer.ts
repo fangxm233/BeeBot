@@ -10,11 +10,13 @@ import {
     PROCESS_LAB_REACT,
     PROCESS_MINE_MINERAL,
     PROCESS_MINE_SOURCE,
+    PROCESS_POWER_BASE_WORK,
     PROCESS_REPAIR,
     PROCESS_RESERVING,
     PROCESS_SCOUT,
     PROCESS_TOWER,
     PROCESS_UPGRADE,
+    ROLE_BASE_BOOSTER,
     ROLE_CARRIER,
     ROLE_CLAIMER,
     ROLE_DE_INVADER,
@@ -34,6 +36,7 @@ import { ProcessDefendInvader } from 'process/instances/defendInvader';
 import { ProcessDefendInvaderCore } from 'process/instances/defendInvaderCore';
 import { ProcessDefendNuke } from 'process/instances/defendNuke';
 import { ProcessDismantle } from 'process/instances/dismantle';
+import { ProcessLabReact } from 'process/instances/labReact';
 import { ProcessMineMineral } from 'process/instances/mineMineral';
 import { ProcessRepair } from 'process/instances/repair';
 import { ProcessBaseWork } from './instances/baseWork';
@@ -41,12 +44,13 @@ import { ProcessCarry } from './instances/carry';
 import { ProcessColonize } from './instances/colonize';
 import { ProcessFilling } from './instances/filling';
 import { ProcessMineSource } from './instances/mineSource';
+import { ProcessPowerBaseWork } from './instances/powerBaseWork';
 import { ProcessReserving } from './instances/reserving';
 import { ProcessScout } from './instances/scout';
 import { ProcessTower } from './instances/tower';
 import { ProcessUpgrade } from './instances/upgrade';
 import { Process } from './Process';
-import { ProcessLabReact } from 'process/instances/labReact';
+
 
 // 注册的顺序将决定优先级
 Process.registerProcess(PROCESS_FILLING, Bucket.bottom, ProcessFilling, 100, [ROLE_FILLER]);
@@ -65,3 +69,4 @@ Process.registerProcess(PROCESS_DISMANTLE, Bucket.level4, ProcessDismantle, 100,
 Process.registerProcess(PROCESS_DEFEND_NUKE, Bucket.level2, ProcessDefendNuke, 100, [ROLE_WORKER]);
 Process.registerProcess(PROCESS_MINE_MINERAL, Bucket.level4, ProcessMineMineral, 100, [ROLE_DRONE, ROLE_CARRIER]);
 Process.registerProcess(PROCESS_LAB_REACT, Bucket.level4, ProcessLabReact);
+Process.registerProcess(PROCESS_POWER_BASE_WORK, Bucket.level1, ProcessPowerBaseWork, -1, [], [ROLE_BASE_BOOSTER]);

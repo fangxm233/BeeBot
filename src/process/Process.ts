@@ -1,5 +1,6 @@
 import { Bee, bees } from 'Bee/Bee';
-import { BeeFactorty } from 'Bee/BeeFactory';
+import { BeeFactory } from 'Bee/BeeFactory';
+import { PowerBee } from 'Bee/PowerBee';
 import { BeeManager } from 'beeSpawning/BeeManager';
 import { WishManager } from 'beeSpawning/WishManager';
 import { log } from 'console/log';
@@ -18,6 +19,7 @@ interface ProcessRegistration {
     suspendBucket: number,
     wishListInterval: number,
     requiredRoles: string[],
+    requiredPowerRoles: string[],
     constructor: typeof Process,
 }
 
@@ -46,6 +48,7 @@ export class Process {
     public parent: string;
     public subProcesses: string[];
     public bees: { [role: string]: Bee[] };
+    public powerBees: { [role: string]: PowerBee[] };
     public id: number;
     public closed: boolean;
     public wishManager: WishManager;
@@ -55,11 +58,15 @@ export class Process {
         this.processName = processName;
         this.subProcesses = [];
         this.bees = {};
+        this.powerBees = {};
         const registration = Process.getProcessRegistration(processName);
-        if (registration && registration.requiredRoles.length) {
-            for (const role of registration.requiredRoles) {
+        if (registration) {
+            registration.requiredRoles.forEach(role => {
                 this.bees[role] = [];
-            }
+            });
+            registration.requiredPowerRoles.forEach(role => {
+                this.powerBees[role] = [];
+            })
         }
         this._state = STATE_ACTIVE;
     }
@@ -92,12 +99,14 @@ export class Process {
 
     public get protoProcess(): protoProcess {
         const bees = _.mapValues(this.bees, bees => bees.map(bee => bee.name));
+        const powerBees = _.mapValues(this.powerBees, powerBees => powerBees.map(powerBee => powerBee.name));
         return _.extend({
             st: this.state,
             slt: this.sleepTime ? this.sleepTime : undefined,
             p: this.parent,
             sp: this.subProcesses.length ? this.subProcesses : undefined,
             bees: Object.keys(bees).length ? bees : undefined,
+            powerBees: Object.keys(powerBees).length ? powerBees : undefined,
         }, this.getProto());
     }
 
@@ -105,7 +114,8 @@ export class Process {
                                   suspendBucket: number,
                                   constructor: typeof Process,
                                   wishListInterval: number = -1,
-                                  requiredRoles: string[] = []) {
+                                  requiredRoles: string[] = [],
+                                  requiredPowerRoles: string[] = []) {
         this.processRegistry.push({
             processName,
             priority: this.processRegistry.length,
@@ -113,6 +123,7 @@ export class Process {
             constructor,
             wishListInterval,
             requiredRoles,
+            requiredPowerRoles
         });
     }
 
@@ -187,9 +198,14 @@ export class Process {
         log.debug(process.roomName, 'process', process.processName, process.id, 'added');
     }
 
-    public registerBee(bee: Bee, role: string) {
-        this.bees[role].push(bee);
-        this.memory.bees[role].push(bee.name);
+    public registerBee(bee: Bee | PowerBee, role: string) {
+        if (bee instanceof PowerBee) {
+            this.powerBees[role].push(bee);
+            this.memory.powerBees[role].push(bee.name);
+        } else {
+            this.bees[role].push(bee);
+            this.memory.bees[role].push(bee.name);
+        }
         log.debug(this.roomName, this.processName, this.id, 'register', bee.name);
     }
 
@@ -210,7 +226,7 @@ export class Process {
         if (!process) return;
         if (!_.find(this.bees, bees => bees.find(bee => bee.name == beeName))) return;
         this.removeBee(beeName);
-        bees[beeName] = BeeFactorty.getInstance(newRole, process, beeName);
+        bees[beeName] = BeeFactory.getInstance(newRole, process, beeName);
         process.registerBee(bees[beeName], newRole);
     }
 
@@ -309,6 +325,10 @@ export class Process {
 
     public foreachBee(role: string, callbackFn: (bee: Bee) => void) {
         _.forEach(this.bees[role], callbackFn);
+    }
+
+    public foreachPowerBee(role: string, callbackFn: (bee: PowerBee) => void) {
+        _.forEach(this.powerBees[role], callbackFn);
     }
 
     public boostedCreep(creepName: string, compoundTypes: ResourceConstant[], succeed: boolean) {

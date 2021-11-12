@@ -24,7 +24,8 @@ type ProcessTypes = 'filling'
     | 'dismantle'
     | 'defendNuke'
     | 'mineMineral'
-    | 'labReact';
+    | 'labReact'
+    | 'powerBaseWork';
 
 interface protoProcess {
     st: ShortProcessState;
@@ -33,6 +34,7 @@ interface protoProcess {
     p: string;
     sp: string[];
     bees: { [role: string]: string[] };
+    powerBees: { [role: string]: string[] };
 }
 
 type protoProcessFilling = protoProcess & {};
@@ -86,4 +88,8 @@ type protoProcessLabReact = protoProcess & {
     locked?: Id<StructureLab>[];
     type?: MineralCompoundConstant;
     amount?: number;
+};
+
+type protoProcessPowerBaseWork = protoProcess & {
+    tasks: PowerConstant[];
 };

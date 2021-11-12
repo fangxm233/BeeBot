@@ -60,9 +60,6 @@ interface TravelToOptions {
     pushCreep?: boolean;
 }
 
-interface TravelData {
-    path: string;
-}
 
 interface TravelState {
     stuckCount: number;
